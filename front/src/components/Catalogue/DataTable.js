@@ -4,10 +4,10 @@ import {
   useSortBy,
   useGlobalFilter,
   usePagination,
+  useFilters,
 } from "react-table";
 import DATA from "./dataUpdated.json";
-// import getProducts from '../../apis/products';
-import { COLUMNS } from "./columnsUpdated";
+import { COLUMNS } from "./columns";
 import { GoArrowSmallDown, GoArrowSmallUp, GoQuestion } from "react-icons/go";
 import { FaCartArrowDown } from "react-icons/fa";
 import { GlobalFilter } from "./GlobalFilter";
@@ -35,7 +35,6 @@ export const DataTable = () => {
       },
     ]);
   };
-
   const {
     getTableProps,
     getTableBodyProps,
@@ -51,19 +50,21 @@ export const DataTable = () => {
     prepareRow,
     state,
     setGlobalFilter,
-    visibleColumns,
+    allColumns,
   } = useTable(
     {
       columns,
       data,
-      initialState: { pageIndex: 0, pageSize: 100, hiddenColumns: ['brand', 'category', 'active_substance'] },
+      initialState: { pageIndex: 0, pageSize: 10 },
     },
+    useFilters,
     useGlobalFilter,
     useSortBy,
     usePagination,
     tableHooks
   );
 
+  console.log(page, "page");
   const { globalFilter, pageIndex } = state;
 
   let start = Math.max(0, pageIndex - 5);
@@ -80,7 +81,7 @@ export const DataTable = () => {
       </div>
       <div className="flex pb-4 gap-x-4 items-center">
         <span>Προβολή Στηλών: </span>
-        {visibleColumns.map((column) => (
+        {allColumns.map((column) => (
           <div key={column.id}>
             <label>
               <input type="checkbox" {...column.getToggleHiddenProps()} />
@@ -100,21 +101,17 @@ export const DataTable = () => {
                 >
                   <div className="flex items-center justify-between px-2">
                     {column.render("Header")}
-                    {column.canSort ? (
-                      column.isSorted ? (
-                        column.isSortedDesc ? (
-                          <GoArrowSmallDown />
-                        ) : (
-                          <GoArrowSmallUp />
-                        )
+                    {column.isSorted ? (
+                      column.isSortedDesc ? (
+                        <GoArrowSmallDown />
                       ) : (
-                        <div>
-                          <GoArrowSmallUp />
-                          <GoArrowSmallDown />
-                        </div>
+                        <GoArrowSmallUp />
                       )
                     ) : (
-                      ""
+                      <div>
+                        <GoArrowSmallUp />
+                        <GoArrowSmallDown />
+                      </div>
                     )}
                   </div>
                 </th>

@@ -3,41 +3,26 @@ import { format } from "date-fns";
 export const COLUMNS = [
     {
         Header: 'Κωδικός',
-        accessor: 'code',
+        accessor: 'PARTNAME',
     },
     {
         Header: "Περιγραφή",
-        accessor: 'description'
-    },
-    {
-        Header: "Απόθεμα",
-        accessor: 'availableQuantity',
-        disableGlobalFilter: true
+        accessor: 'PARTDES'
     },
     {
         Header: "Ημ.Λήξης",
-        accessor: 'expiry_date',
+        accessor: 'DEXT_UDATE',
         Cell: ({value}) => { return format(new Date(value), 'dd/MM/yyyy')},
         disableGlobalFilter: true
     },
     {
-        Header: "Brand",
-        accessor: 'brand',
+        Header: "ΧΤ",
+        accessor: 'WSPLPRICE',
         disableGlobalFilter: true
     },
     {
-        Header: "Κατηγορία",
-        accessor: 'category',
-        disableGlobalFilter: true
-    },
-    {
-        Header: "Δραστ. Ουσία",
-        accessor: 'active_substance',
-        disableGlobalFilter: true
-    },
-    {
-        Header: "Κωδ. Φ/Υ",
-        accessor: 'pharmacy_service_code',
+        Header: "ΛΤ",
+        accessor: 'VATPRICE',
         disableGlobalFilter: true
     },
 ];
