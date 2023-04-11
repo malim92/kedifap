@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 import { useMemo } from "react";
+=======
+import { useMemo, useState  } from "react";
+>>>>>>> kedifap/main
 import {
   useTable,
   useSortBy,
   useGlobalFilter,
   usePagination,
+<<<<<<< HEAD
 } from "react-table";
 import DATA from "./dataUpdated.json";
 // import getProducts from '../../apis/products';
@@ -15,6 +20,54 @@ import { GlobalFilter } from "./GlobalFilter";
 export const DataTable = () => {
   const columns = useMemo(() => COLUMNS, []);
   const data = useMemo(() => DATA, []);
+=======
+  useFilters,
+} from "react-table";
+import DATA from "./data.json";
+import { COLUMNS } from "./columns";
+import { GoArrowSmallDown, GoArrowSmallUp, GoQuestion } from "react-icons/go";
+import { FaCartArrowDown } from "react-icons/fa";
+import { GlobalFilter } from "./GlobalFilter";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import { ColumnFilter } from './columnFilters'
+
+export const DataTable = () => {
+
+  const columns = useMemo(() => COLUMNS, []);
+  const data = useMemo(() => DATA, []);
+  const [show, setShow] = useState(false);
+  const [popupModalData, setPopupModalData] = useState({});
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+
+
+  const popup = (id) => {
+    const rowSearch = data.find(result => result.code == id.value);
+    setShow(!show)
+
+    setPopupModalData({
+      code: rowSearch.code,
+      stock:rowSearch.availableQuantity,
+      price:rowSearch.wholeSalePrice,
+      vat:rowSearch.vatPercent,
+      distributer:rowSearch.importerDescription,
+      barcode:rowSearch.barcode,
+      // pharmaCode:rowSearch.availableQuantity,
+      // stockAnalysis:rowSearch.availableQuantity,
+      // discount:rowSearch.availableQuantity,
+    })
+  }
+
+  const defaultColumn = useMemo(
+    () => ({
+      Filter: ColumnFilter
+    }),
+    []
+  )
+>>>>>>> kedifap/main
 
   const tableHooks = (hooks) => {
     hooks.visibleColumns.push((columns) => [
@@ -51,13 +104,24 @@ export const DataTable = () => {
     prepareRow,
     state,
     setGlobalFilter,
+<<<<<<< HEAD
     visibleColumns,
+=======
+    allColumns,
+>>>>>>> kedifap/main
   } = useTable(
     {
       columns,
       data,
+<<<<<<< HEAD
       initialState: { pageIndex: 0, pageSize: 100, hiddenColumns: ['brand', 'category', 'active_substance'] },
     },
+=======
+      defaultColumn,
+      //initialState: { pageIndex: 0, pageSize: 10 },
+    },
+    useFilters,
+>>>>>>> kedifap/main
     useGlobalFilter,
     useSortBy,
     usePagination,
@@ -72,15 +136,26 @@ export const DataTable = () => {
     { length: end - start },
     (_, i) => i + start + 1
   );
+<<<<<<< HEAD
 
   return (
     <>
+=======
+console.log(popupModalData.code,'test');
+  return (
+    <>
+
+>>>>>>> kedifap/main
       <div className="pt-2 pb-6">
         <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
       </div>
       <div className="flex pb-4 gap-x-4 items-center">
         <span>Προβολή Στηλών: </span>
+<<<<<<< HEAD
         {visibleColumns.map((column) => (
+=======
+        {allColumns.map((column) => (
+>>>>>>> kedifap/main
           <div key={column.id}>
             <label>
               <input type="checkbox" {...column.getToggleHiddenProps()} />
@@ -89,6 +164,26 @@ export const DataTable = () => {
           </div>
         ))}
       </div>
+<<<<<<< HEAD
+=======
+      
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Product Info</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Part Code: {popupModalData.code} </Modal.Body>
+        <Modal.Body>Current Stock: {popupModalData.stock} </Modal.Body>
+        <Modal.Body>Retail Price: {popupModalData.price} </Modal.Body>
+        <Modal.Body>VAT Percentage: {popupModalData.vat} </Modal.Body>
+        <Modal.Body>Distributer/Importer: {popupModalData.distributer} </Modal.Body>
+        <Modal.Body>Package Barcode: {popupModalData.barcode} </Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" style={{color: 'red'}}  onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+>>>>>>> kedifap/main
       <table {...getTableProps()} className="table-auto w-full shadow-xl">
         <thead>
           {headerGroups.map((headerGroup) => (
@@ -98,6 +193,7 @@ export const DataTable = () => {
                   {...column.getHeaderProps(column.getSortByToggleProps())}
                   className="cursor-pointer hover:bg-grey-100"
                 >
+<<<<<<< HEAD
                   <div className="flex items-center justify-between px-2">
                     {column.render("Header")}
                     {column.canSort ? (
@@ -115,6 +211,23 @@ export const DataTable = () => {
                       )
                     ) : (
                       ""
+=======
+                  <div>{column.canFilter ? column.render('Filter') : null}</div>
+                  <div className="flex items-center justify-between px-2">
+                    {column.render("Header")}
+                    
+                    {column.isSorted ? (
+                      column.isSortedDesc ? (
+                        <GoArrowSmallDown />
+                      ) : (
+                        <GoArrowSmallUp />
+                      )
+                    ) : (
+                      <div>
+                        <GoArrowSmallUp />
+                        <GoArrowSmallDown />
+                      </div>
+>>>>>>> kedifap/main
                     )}
                   </div>
                 </th>
@@ -128,10 +241,24 @@ export const DataTable = () => {
             return (
               <tr {...row.getRowProps()}>
                 {row.cells.map((cell) => {
+<<<<<<< HEAD
                   return (
                     <td {...cell.getCellProps()} className="p-3 border">
                       {cell.render("Cell")}
                     </td>
+=======
+                  //console.log('cell', cell.column.Header)
+                  return (
+                    cell.column.Header == 'Κωδικός' && (
+                    <td {...cell.getCellProps()} className="p-3 border" onClick={() => popup(cell)}>
+                      {cell.render("Cell")}
+                    </td>) || (
+                    <td {...cell.getCellProps()} className="p-3 border">
+                      {cell.render("Cell")}
+                    </td>
+                    )
+
+>>>>>>> kedifap/main
                   );
                 })}
               </tr>

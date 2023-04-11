@@ -3,6 +3,7 @@ import { format } from "date-fns";
 export const COLUMNS = [
     {
         Header: 'Κωδικός',
+<<<<<<< HEAD
         accessor: 'code',
     },
     {
@@ -17,10 +18,22 @@ export const COLUMNS = [
     {
         Header: "Ημ.Λήξης",
         accessor: 'expiry_date',
+=======
+        accessor: 'PARTNAME',
+    },
+    {
+        Header: "Περιγραφή",
+        accessor: 'PARTDES'
+    },
+    {
+        Header: "Ημ.Λήξης",
+        accessor: 'DEXT_UDATE',
+>>>>>>> kedifap/main
         Cell: ({value}) => { return format(new Date(value), 'dd/MM/yyyy')},
         disableGlobalFilter: true
     },
     {
+<<<<<<< HEAD
         Header: "Brand",
         accessor: 'brand',
         disableGlobalFilter: true
@@ -38,6 +51,15 @@ export const COLUMNS = [
     {
         Header: "Κωδ. Φ/Υ",
         accessor: 'pharmacy_service_code',
+=======
+        Header: "ΧΤ",
+        accessor: 'WSPLPRICE',
+        disableGlobalFilter: true
+    },
+    {
+        Header: "ΛΤ",
+        accessor: 'VATPRICE',
+>>>>>>> kedifap/main
         disableGlobalFilter: true
     },
 ];

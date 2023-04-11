@@ -1,5 +1,9 @@
 import { format } from "date-fns";
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> kedifap/main
 export const COLUMNS = [
     {
         Header: 'Κωδικός',

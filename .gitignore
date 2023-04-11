@@ -1,0 +1,4 @@
+slim-php-api-auth/.env
+slim-php-api-auth/vendor
+front/node_modules
+front/front.zip
