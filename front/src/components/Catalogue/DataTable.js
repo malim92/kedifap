@@ -1,4 +1,4 @@
-import { useMemo, useState  } from "react";
+import { useMemo, useState } from "react";
 import {
   useTable,
   useSortBy,
@@ -11,11 +11,32 @@ import { COLUMNS } from "./columns";
 import { GoArrowSmallDown, GoArrowSmallUp, GoQuestion } from "react-icons/go";
 import { FaCartArrowDown } from "react-icons/fa";
 import { GlobalFilter } from "./GlobalFilter";
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import { ColumnFilter } from './columnFilters'
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import { ColumnFilter } from "./columnFilters";
+import "./Cart.css";
+import Cart from "./Cart";
+
 
 export const DataTable = () => {
+  const [showCart, setShowCart] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+
+  const handleAddToCart = (product) => {
+    setCartItems([...cartItems, product]);
+  };
+
+  const handleCartClick = () => {
+    setShowCart(!showCart);
+  };
+
+  const handleCartOpen = () => {
+    setShowCart(true);
+  };
+
+  const handleCartClose = () => {
+    setShowCart(false);
+  };
 
   const columns = useMemo(() => COLUMNS, []);
   const data = useMemo(() => DATA, []);
@@ -25,31 +46,29 @@ export const DataTable = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-
-
   const popup = (id) => {
-    const rowSearch = data.find(result => result.code == id.value);
-    setShow(!show)
+    const rowSearch = data.find((result) => result.code == id.value);
+    setShow(!show);
 
     setPopupModalData({
       code: rowSearch.code,
-      stock:rowSearch.availableQuantity,
-      price:rowSearch.wholeSalePrice,
-      vat:rowSearch.vatPercent,
-      distributer:rowSearch.importerDescription,
-      barcode:rowSearch.barcode,
+      stock: rowSearch.availableQuantity,
+      price: rowSearch.wholeSalePrice,
+      vat: rowSearch.vatPercent,
+      distributer: rowSearch.importerDescription,
+      barcode: rowSearch.barcode,
       // pharmaCode:rowSearch.availableQuantity,
       // stockAnalysis:rowSearch.availableQuantity,
       // discount:rowSearch.availableQuantity,
-    })
-  }
+    });
+  };
 
   const defaultColumn = useMemo(
     () => ({
-      Filter: ColumnFilter
+      Filter: ColumnFilter,
     }),
     []
-  )
+  );
 
   const tableHooks = (hooks) => {
     hooks.visibleColumns.push((columns) => [
@@ -62,7 +81,10 @@ export const DataTable = () => {
         Cell: ({ row }) => (
           <button
             className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-            onClick={() => console.log(row.values)}
+            onClick={() => {
+              console.log(row.values);
+              handleAddToCart({ name: row.values.code });
+            }}
           >
             <FaCartArrowDown />
           </button>
@@ -109,10 +131,118 @@ export const DataTable = () => {
     { length: end - start },
     (_, i) => i + start + 1
   );
-console.log(popupModalData.code,'test');
+
+  const removeItem = (id) => {
+    const updatedCart = cartItems.filter((item) => item.id !== id);
+    setCartItems(updatedCart);
+  };
+  
+  const total = () => {
+    const total = cartItems.reduce((acc, item) => acc + item.price, 0);
+    return total.toFixed(2);
+  };
+  
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
   return (
     <>
-
+      {/* add to cart */}
+      <div>
+        <button className="basket" onClick={handleCartClick}>
+          Cart
+        </button>
+        
+        {showCart && (
+          <div
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            width: "300px",
+            height: "100%",
+            background: "#fff",
+            zIndex: 999,
+            padding: "20px",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            overflowY: "scroll"
+          }}
+        >
+          <div className="row">
+            <div className="col">
+          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Cart</h2></div>
+          <div className="col"><button className="close-icon" onClick={handleCartClose}>Close</button></div></div>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {cartItems.map((item, index) => (
+              <li
+                key={index}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderBottom: "1px solid #ccc",
+                  paddingBottom: "10px",
+                  marginBottom: "10px"
+                }}
+              >
+                <div style={{ marginRight: "10px" }}>
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>
+                    {item.name}
+                  </p>
+                  <p style={{ fontSize: "1rem", margin: 0 }}>{item.price}</p>
+                </div>
+                <div>
+                  <button
+                    onClick={() => removeItem(index)}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "red",
+                      cursor: "pointer",
+                      fontSize: "1.5rem"
+                    }}
+                  >
+                    &times;
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: "bold",
+              marginTop: "20px",
+              textAlign: "right"
+            }}
+          >
+            Total: {total}
+          </p>
+          <button
+            onClick={() => clearCart()}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "red",
+              cursor: "pointer",
+              fontSize: "1rem",
+              marginTop: "20px"
+            }}
+          >
+            Clear Cart
+          </button>
+        </div>
+        
+        )}
+      </div>
       <div className="pt-2 pb-6">
         <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
       </div>
@@ -127,7 +257,7 @@ console.log(popupModalData.code,'test');
           </div>
         ))}
       </div>
-      
+
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Product Info</Modal.Title>
@@ -136,10 +266,16 @@ console.log(popupModalData.code,'test');
         <Modal.Body>Current Stock: {popupModalData.stock} </Modal.Body>
         <Modal.Body>Retail Price: {popupModalData.price} </Modal.Body>
         <Modal.Body>VAT Percentage: {popupModalData.vat} </Modal.Body>
-        <Modal.Body>Distributer/Importer: {popupModalData.distributer} </Modal.Body>
+        <Modal.Body>
+          Distributer/Importer: {popupModalData.distributer}{" "}
+        </Modal.Body>
         <Modal.Body>Package Barcode: {popupModalData.barcode} </Modal.Body>
         <Modal.Footer>
-          <Button variant="danger" style={{color: 'red'}}  onClick={handleClose}>
+          <Button
+            variant="danger"
+            style={{ color: "red" }}
+            onClick={handleClose}
+          >
             Close
           </Button>
         </Modal.Footer>
@@ -153,10 +289,10 @@ console.log(popupModalData.code,'test');
                   {...column.getHeaderProps(column.getSortByToggleProps())}
                   className="cursor-pointer hover:bg-grey-100"
                 >
-                  <div>{column.canFilter ? column.render('Filter') : null}</div>
+                  <div>{column.canFilter ? column.render("Filter") : null}</div>
                   <div className="flex items-center justify-between px-2">
                     {column.render("Header")}
-                    
+
                     {column.isSorted ? (
                       column.isSortedDesc ? (
                         <GoArrowSmallDown />
@@ -183,15 +319,19 @@ console.log(popupModalData.code,'test');
                 {row.cells.map((cell) => {
                   //console.log('cell', cell.column.Header)
                   return (
-                    cell.column.Header == 'Κωδικός' && (
-                    <td {...cell.getCellProps()} className="p-3 border" onClick={() => popup(cell)}>
-                      {cell.render("Cell")}
-                    </td>) || (
-                    <td {...cell.getCellProps()} className="p-3 border">
-                      {cell.render("Cell")}
-                    </td>
+                    (cell.column.Header == "Κωδικός" && (
+                      <td
+                        {...cell.getCellProps()}
+                        className="p-3 border"
+                        onClick={() => popup(cell)}
+                      >
+                        {cell.render("Cell")}
+                      </td>
+                    )) || (
+                      <td {...cell.getCellProps()} className="p-3 border">
+                        {cell.render("Cell")}
+                      </td>
                     )
-
                   );
                 })}
               </tr>
