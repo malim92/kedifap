@@ -14,10 +14,18 @@ import { GlobalFilter } from "./GlobalFilter";
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { ColumnFilter } from './columnFilters'
+import './style/dataTable.css';
 
 export const DataTable = () => {
 
-  const columns = useMemo(() => COLUMNS, []);
+  const columns = useMemo(
+    () =>
+      // Filter the columns array to only include the columns you want to display
+      COLUMNS.filter(
+        (col) => col.Header === "Κωδικός" || col.Header === "Περιγραφή" || col.Header === "Απόθεμα" || col.Header === "ΧΤ"  || col.Header === "ΛΤ" 
+      ),
+    []
+  );
   const data = useMemo(() => DATA, []);
   const [show, setShow] = useState(false);
   const [popupModalData, setPopupModalData] = useState({});
@@ -27,18 +35,21 @@ export const DataTable = () => {
 
 
 
-  const popup = (id) => {
-    const rowSearch = data.find(result => result.code == id.value);
+  const productPopup = (id) => {
+    const rowSearch = data.find(result => result.PARTNAME == id.value);
     setShow(!show)
-
+    //console.log(rowSearch,'rowSearch');
     setPopupModalData({
-      code: rowSearch.code,
+      code: rowSearch.PARTNAME,
+      description: rowSearch.PARTDES,
       stock:rowSearch.availableQuantity,
-      price:rowSearch.wholeSalePrice,
-      vat:rowSearch.vatPercent,
+      price:rowSearch.WSPLPRICE,
+      vat:rowSearch.VATPRICE,
       distributer:rowSearch.importerDescription,
-      barcode:rowSearch.barcode,
-      // pharmaCode:rowSearch.availableQuantity,
+      barcode:rowSearch.BARCODE,
+      pharmaCode:rowSearch.SPEC14,
+      supplier:rowSearch.SUPNAME,
+      
       // stockAnalysis:rowSearch.availableQuantity,
       // discount:rowSearch.availableQuantity,
     })
@@ -133,11 +144,15 @@ console.log(popupModalData.code,'test');
           <Modal.Title>Product Info</Modal.Title>
         </Modal.Header>
         <Modal.Body>Part Code: {popupModalData.code} </Modal.Body>
+        <Modal.Body>Part Description: {popupModalData.description} </Modal.Body>
         <Modal.Body>Current Stock: {popupModalData.stock} </Modal.Body>
         <Modal.Body>Retail Price: {popupModalData.price} </Modal.Body>
         <Modal.Body>VAT Percentage: {popupModalData.vat} </Modal.Body>
         <Modal.Body>Distributer/Importer: {popupModalData.distributer} </Modal.Body>
         <Modal.Body>Package Barcode: {popupModalData.barcode} </Modal.Body>
+        <Modal.Body>Pharma Service Code: {popupModalData.pharmaCode} </Modal.Body>
+        <Modal.Body>Supplier: {popupModalData.supplier} </Modal.Body>
+
         <Modal.Footer>
           <Button variant="danger" style={{color: 'red'}}  onClick={handleClose}>
             Close
@@ -184,8 +199,8 @@ console.log(popupModalData.code,'test');
                   //console.log('cell', cell.column.Header)
                   return (
                     cell.column.Header == 'Κωδικός' && (
-                    <td {...cell.getCellProps()} className="p-3 border" onClick={() => popup(cell)}>
-                      {cell.render("Cell")}
+                    <td {...cell.getCellProps()} className="p-3 border" onClick={() => productPopup(cell)}>
+                      <div className="sm-containter click-box">{cell.render("Cell")} </div>
                     </td>) || (
                     <td {...cell.getCellProps()} className="p-3 border">
                       {cell.render("Cell")}
@@ -248,6 +263,7 @@ console.log(popupModalData.code,'test');
           </button>
         </div>
       </div>
+      
     </>
   );
 };

@@ -1,0 +1,8 @@
+.click-box{
+    background: #429342;
+    border-radius: 7px;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px;
+    text-align: center;
+}
