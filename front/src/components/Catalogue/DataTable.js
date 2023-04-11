@@ -42,8 +42,6 @@ export const DataTable = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-
-
   const popup = (id) => {
     const rowSearch = data.find(result => result.code == id.value);
     setShow(!show)
