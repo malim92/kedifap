@@ -17,13 +17,19 @@ import { ColumnFilter } from "./columnFilters";
 import "./Cart.css";
 import Cart from "./Cart";
 
-
 export const DataTable = () => {
   const [showCart, setShowCart] = useState(false);
   const [cartItems, setCartItems] = useState([]);
 
   const handleAddToCart = (product) => {
+    console.log(product,'product');
+    const found = cartItems.find(element => element.name == product.name);
+    if (found) {
+      alert('Product is already in the cart!');
+    }
+    else{
     setCartItems([...cartItems, product]);
+    setShowCart(true);}
   };
 
   const handleCartClick = () => {
@@ -38,7 +44,14 @@ export const DataTable = () => {
     setShowCart(false);
   };
 
-  const columns = useMemo(() => COLUMNS, []);
+  const columns = useMemo(
+    () =>
+      // Filter the columns array to only include the columns you want to display
+      COLUMNS.filter(
+        (col) => col.Header === "Κωδικός" || col.Header === "Περιγραφή" || col.Header === "Απόθεμα" || col.Header === "ΧΤ"  || col.Header === "ΛΤ" || col.Header === "Add to cart" 
+      ),
+    []
+  );
   const data = useMemo(() => DATA, []);
   const [show, setShow] = useState(false);
   const [popupModalData, setPopupModalData] = useState({});
@@ -46,18 +59,36 @@ export const DataTable = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const popup = (id) => {
-    const rowSearch = data.find((result) => result.code == id.value);
+  const removeItem = (id) => {
+    const updatedCart = cartItems.filter((item) => item.name !== id);
+    setCartItems(updatedCart);
+  };
+
+  const total = () => {
+    const total = cartItems.reduce((acc, item) => acc + item.price, 0);
+    console.log(cartItems,'cartItems');
+    return total.toFixed(2);
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const productPopup = (id) => {
+    const rowSearch = data.find((result) => result.PARTNAME  == id.value);
+    
     setShow(!show);
 
     setPopupModalData({
-      code: rowSearch.code,
-      stock: rowSearch.availableQuantity,
-      price: rowSearch.wholeSalePrice,
-      vat: rowSearch.vatPercent,
-      distributer: rowSearch.importerDescription,
-      barcode: rowSearch.barcode,
-      // pharmaCode:rowSearch.availableQuantity,
+      code: rowSearch.PARTNAME,
+      description: rowSearch.PARTDES,
+      stock:rowSearch.availableQuantity,
+      price:rowSearch.WSPLPRICE,
+      vat:rowSearch.VATPRICE,
+      distributer:rowSearch.SUPNAME,
+      barcode:rowSearch.BARCODE,
+      pharmaCode:rowSearch.SPEC14,
+      supplier:rowSearch.SUPNAME,
       // stockAnalysis:rowSearch.availableQuantity,
       // discount:rowSearch.availableQuantity,
     });
@@ -69,29 +100,6 @@ export const DataTable = () => {
     }),
     []
   );
-
-  const tableHooks = (hooks) => {
-    hooks.visibleColumns.push((columns) => [
-      ...columns,
-      {
-        id: "addToCart",
-        Header: "",
-        disableGlobalFilter: true,
-        disableSortBy: true,
-        Cell: ({ row }) => (
-          <button
-            className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-            onClick={() => {
-              console.log(row.values);
-              handleAddToCart({ name: row.values.code });
-            }}
-          >
-            <FaCartArrowDown />
-          </button>
-        ),
-      },
-    ]);
-  };
 
   const {
     getTableProps,
@@ -119,8 +127,7 @@ export const DataTable = () => {
     useFilters,
     useGlobalFilter,
     useSortBy,
-    usePagination,
-    tableHooks
+    usePagination
   );
 
   const { globalFilter, pageIndex } = state;
@@ -132,19 +139,7 @@ export const DataTable = () => {
     (_, i) => i + start + 1
   );
 
-  const removeItem = (id) => {
-    const updatedCart = cartItems.filter((item) => item.id !== id);
-    setCartItems(updatedCart);
-  };
   
-  const total = () => {
-    const total = cartItems.reduce((acc, item) => acc + item.price, 0);
-    return total.toFixed(2);
-  };
-  
-  const clearCart = () => {
-    setCartItems([]);
-  };
 
   return (
     <>
@@ -153,94 +148,112 @@ export const DataTable = () => {
         <button className="basket" onClick={handleCartClick}>
           Cart
         </button>
-        
+
         {showCart && (
           <div
-          style={{
-            position: "fixed",
-            top: 0,
-            right: 0,
-            width: "300px",
-            height: "100%",
-            background: "#fff",
-            zIndex: 999,
-            padding: "20px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            overflowY: "scroll"
-          }}
-        >
-          <div className="row">
-            <div className="col">
-          <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Cart</h2></div>
-          <div className="col"><button className="close-icon" onClick={handleCartClose}>Close</button></div></div>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {cartItems.map((item, index) => (
-              <li
-                key={index}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom: "1px solid #ccc",
-                  paddingBottom: "10px",
-                  marginBottom: "10px"
-                }}
-              >
-                <div style={{ marginRight: "10px" }}>
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{ width: "50px", height: "50px", objectFit: "cover" }}
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: "1.2rem", fontWeight: "bold", margin: 0 }}>
-                    {item.name}
-                  </p>
-                  <p style={{ fontSize: "1rem", margin: 0 }}>{item.price}</p>
-                </div>
-                <div>
-                  <button
-                    onClick={() => removeItem(index)}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "red",
-                      cursor: "pointer",
-                      fontSize: "1.5rem"
-                    }}
-                  >
-                    &times;
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <p
             style={{
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-              marginTop: "20px",
-              textAlign: "right"
+              position: "fixed",
+              top: 0,
+              right: 0,
+              width: "300px",
+              height: "100%",
+              background: "#fff",
+              zIndex: 999,
+              padding: "20px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              overflowY: "scroll",
             }}
           >
-            Total: {total}
-          </p>
-          <button
-            onClick={() => clearCart()}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "red",
-              cursor: "pointer",
-              fontSize: "1rem",
-              marginTop: "20px"
-            }}
-          >
-            Clear Cart
-          </button>
-        </div>
-        
+            <div className="row">
+              <div className="col">
+                <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Cart</h2>
+              </div>
+              <div className="col" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <button className="close-icon" onClick={handleCartClose}>
+                  
+                </button>
+              </div>
+            </div>
+            <ul style={{ listStyle: "none", padding: 0 }}>
+              {cartItems.map((item, index) => (
+                <li
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderBottom: "1px solid #ccc",
+                    paddingBottom: "10px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <div style={{ marginRight: "10px" }}>
+                    {/* <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        objectFit: "cover",
+                      }}
+                    /> */}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p
+                      style={{
+                        fontSize: "1.2rem",
+                        fontWeight: "bold",
+                        margin: 0,
+                      }}
+                    >
+                      {item.name}
+                    </p>
+                    <p style={{ fontSize: "1rem", margin: 0 }}>{item.price}</p>
+                  </div>
+                  <div>
+                    <button
+                      onClick={() => 
+                        removeItem(item.name)
+                        //console.log(item.name,'item')
+                      }
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: "red",
+                        cursor: "pointer",
+                        fontSize: "1.5rem",
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p
+              style={{
+                fontSize: "1.2rem",
+                fontWeight: "bold",
+                marginTop: "20px",
+                textAlign: "right",
+              }}
+            >
+              Total: {total}
+            </p>
+            <button
+              onClick={() => clearCart()}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "red",
+                cursor: "pointer",
+                fontSize: "1rem",
+                marginTop: "20px",
+              }}
+            >
+              Clear Cart
+            </button>
+          </div>
         )}
       </div>
       <div className="pt-2 pb-6">
@@ -263,11 +276,12 @@ export const DataTable = () => {
           <Modal.Title>Product Info</Modal.Title>
         </Modal.Header>
         <Modal.Body>Part Code: {popupModalData.code} </Modal.Body>
+        <Modal.Body>Part Description: {popupModalData.description} </Modal.Body>
         <Modal.Body>Current Stock: {popupModalData.stock} </Modal.Body>
         <Modal.Body>Retail Price: {popupModalData.price} </Modal.Body>
         <Modal.Body>VAT Percentage: {popupModalData.vat} </Modal.Body>
         <Modal.Body>
-          Distributer/Importer: {popupModalData.distributer}{" "}
+          Distributer/Importer: {popupModalData.distributer}
         </Modal.Body>
         <Modal.Body>Package Barcode: {popupModalData.barcode} </Modal.Body>
         <Modal.Footer>
@@ -317,16 +331,26 @@ export const DataTable = () => {
             return (
               <tr {...row.getRowProps()}>
                 {row.cells.map((cell) => {
-                  //console.log('cell', cell.column.Header)
                   return (
                     (cell.column.Header == "Κωδικός" && (
                       <td
                         {...cell.getCellProps()}
                         className="p-3 border"
-                        onClick={() => popup(cell)}
+                        onClick={() => productPopup(cell)}
                       >
                         {cell.render("Cell")}
                       </td>
+                    )) ||
+                    (cell.column.Header == "Add to cart" && (
+                      <td {...cell.getCellProps()} className="p-3 border">
+                      <button
+                        className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                        onClick={() => {
+                          handleAddToCart({ name: row.values.PARTNAME });
+                        }}
+                      >
+                        <FaCartArrowDown />
+                      </button></td>
                     )) || (
                       <td {...cell.getCellProps()} className="p-3 border">
                         {cell.render("Cell")}

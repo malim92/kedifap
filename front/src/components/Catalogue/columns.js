@@ -1,13 +1,11 @@
-import { format } from "date-fns";
-
 export const COLUMNS = [
     {
         Header: 'Κωδικός',
-        accessor: 'code',
+        accessor: 'PARTNAME',
     },
     {
         Header: "Περιγραφή",
-        accessor: 'description'
+        accessor: 'PARTDES'
     },
     {
         Header: "Απόθεμα",
@@ -15,19 +13,34 @@ export const COLUMNS = [
         disableGlobalFilter: true
     },
     {
-        Header: "Ημ.Λήξης",
-        accessor: 'expiryDate',
-        Cell: ({value}) => { return format(new Date(value), 'dd/MM/yyyy')},
+        Header: "Bar Code",
+        accessor: 'BARCODE',
         disableGlobalFilter: true
     },
+    // {
+    //     Header: "Ημ.Λήξης",
+    //     accessor: 'expiryDate',
+    //     Cell: ({value}) => { return format(new Date(value), 'dd/MM/yyyy')},
+    //     disableGlobalFilter: true
+    // },
     {
         Header: "ΧΤ",
-        accessor: 'wholeSalePrice',
-        disableGlobalFilter: true
+        accessor: 'WSPLPRICE',
+        //disableGlobalFilter: true
     },
     {
         Header: "ΛΤ",
-        accessor: 'retailPrice',
+        accessor: 'VATPRICE',
+        disableGlobalFilter: true
+    },
+    {
+        Header: "supplier",
+        accessor: 'SUPNAME',
+        disableGlobalFilter: true
+    },
+    {
+        Header: "Add to cart",
+        accessor: 'addToCart',
         disableGlobalFilter: true
     },
 ];
