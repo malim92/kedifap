@@ -107,7 +107,7 @@ $app->post('/register', function (Request $request, Response $response) {
 $app->post('/authenticate', function (Request $request, Response $response) {
     session_start();
 
-    $dotenv_file = dirname(__DIR__, 1) . '\.env';
+    $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
 
@@ -168,7 +168,7 @@ $app->post('/validate-token', function ($request, $response, $args) {
     // $data = array('message' => 'Hello from the backend!');
     // return $response->withJson($data);
 
-    $dotenv_file = dirname(__DIR__, 1) . '\.env';
+    $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
 
