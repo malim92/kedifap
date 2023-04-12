@@ -22,13 +22,15 @@ export const DataTable = () => {
   const [cartItems, setCartItems] = useState([]);
 
   const handleAddToCart = (product) => {
-    console.log(product.name, "name");
-    console.log(product.name.WSPLPRICE, "price");
-    const found = cartItems.find((element) => element.PARTNAME == product.name.PARTNAME);
+    product.name.quantity = 1;
+    const found = cartItems.find(
+      (element) => element.PARTNAME == product.name.PARTNAME
+    );
     if (found) {
       alert("Product is already in the cart!");
     } else {
       total(product.name.WSPLPRICE);
+      
       setCartItems([...cartItems, product.name]);
       setShowCart(true);
     }
@@ -73,9 +75,8 @@ export const DataTable = () => {
   };
 
   const total = (price) => {
-    console.log(price, "price");
     const total = cartItems.reduce((acc, item) => acc + item.WSPLPRICE, price);
-    console.log(total, "total");
+    console.log(total, "total here");
     return total;
   };
 
@@ -148,139 +149,90 @@ export const DataTable = () => {
     (_, i) => i + start + 1
   );
 
+  const decrementQuantity = (item) => {
+    if (item.quantity === 1) {
+      removeItem(item);
+    } else {
+      const updatedItem = { ...item, quantity: item.quantity - 1 };
+      const updatedCart = [
+        ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
+        updatedItem,
+      ];
+      setCartItems(updatedCart);
+    }
+  };
+
+  const incrementQuantity = (item) => {
+    const updatedItem = { ...item, quantity: item.quantity + 1 };
+    const updatedCart = [
+      ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
+      updatedItem,
+    ];
+    setCartItems(updatedCart);
+  };
+
   return (
     <>
       {/* add to cart */}
       <div>
-        <button className="basket" onClick={handleCartClick}>
+        <button class="basket" onClick={handleCartClick}>
           Cart
         </button>
-
         {showCart && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              right: 0,
-              width: "300px",
-              height: "100%",
-              background: "#fff",
-              zIndex: 999,
-              padding: "20px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-              overflowY: "scroll",
-            }}
-          >
-            <div className="row">
-              <div className="col">
-                <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Cart</h2>
+          <div class="cart-container">
+            <div class="row">
+              <div class="col">
+                <h2 class="cart-title">Cart</h2>
               </div>
-              <div
-                className="col"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <button
-                  className="close-icon"
-                  onClick={handleCartClose}
-                ></button>
+              <div class="col">
+                <button class="close-icon" onClick={handleCartClose}></button>
               </div>
             </div>
-            <ul style={{ listStyle: "none", padding: 0 }}>
+            <ul class="cart-list">
               {cartItems.map((item, index) => (
-                <li
-                  key={index}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    borderBottom: "1px solid #ccc",
-                    paddingBottom: "10px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <div style={{ marginRight: "10px" }}>
-                    {/* <img
-                      src={item.image}
-                      alt={item.name}
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        objectFit: "cover",
-                      }}
-                    /> */}
+                <li class="cart-item" key={index}>
+                  <div class="cart-item-details">
+                    <p class="cart-item-name">Code:{item.PARTNAME}</p>
+                    <p class="cart-item-price">Price:{item.WSPLPRICE}</p>
+                    <p class="cart-item-quantity">Quantity: {item.quantity}</p>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        fontSize: "1.2rem",
-                        fontWeight: "bold",
-                        margin: 0,
-                      }}
-                    >
-                      {item.PARTNAME}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "1.2rem",
-                        fontWeight: "bold",
-                        margin: 0,
-                      }}
-                    >
-                      {item.WSPLPRICE}
-                    </p>
-                    <p style={{ fontSize: "1rem", margin: 0 }}>{item.price}</p>
-                  </div>
-                  <div>
+                  <div class="cart-item-controls">
                     <button
-                      onClick={
-                        () => removeItem(item.name)
-                        //console.log(item.name,'item')
-                      }
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        color: "red",
-                        cursor: "pointer",
-                        fontSize: "1.5rem",
-                      }}
+                      class="cart-item-control-btn"
+                      onClick={() => decrementQuantity(item)}
+                    >
+                      -
+                    </button>
+                    <button
+                      class="cart-item-control-btn"
+                      onClick={() => incrementQuantity(item)}
+                    >
+                      +
+                    </button>
+                    <button
+                      class="cart-item-remove-btn"
+                      onClick={() => removeItem(item.name)}
                     >
                       &times;
                     </button>
                   </div>
                 </li>
-              )
-              )}
+              ))}
             </ul>
-            <p
-              style={{
-                fontSize: "1.2rem",
-                fontWeight: "bold",
-                marginTop: "20px",
-                textAlign: "right",
-              }}
-            >
-              Total: {total}
-            </p>
+            
+            <div className="total-container">
+              <p className="total-text">Total: {total}</p>
+            </div>
             <button
               onClick={() => clearCart()}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: "red",
-                cursor: "pointer",
-                fontSize: "1rem",
-                marginTop: "20px",
-              }}
+              class="btn btn-danger cart-clear-btn"
             >
               Clear Cart
             </button>
           </div>
         )}
       </div>
+
       <div className="pt-2 pb-6">
         <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
       </div>
@@ -360,20 +312,24 @@ export const DataTable = () => {
                     (cell.column.Header == "Κωδικός" && (
                       <td
                         {...cell.getCellProps()}
-                        className="p-3 border"
+                        className="p-3 border "
                         onClick={() => productPopup(cell)}
                       >
-                        {cell.render("Cell")}
+                        <div className="green-box">{cell.render("Cell")}</div>
                       </td>
                     )) ||
                     (cell.column.Header == "Add to cart" && (
-                      <td {...cell.getCellProps()} className="p-3 border">
+                      <td
+                        {...cell.getCellProps()}
+                        className="p-3 border align-center"
+                      >
                         <button
                           className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                           onClick={() => {
-                            handleAddToCart({ name: row.values }
+                            handleAddToCart(
+                              { name: row.values }
                               //{ price: row.values.WSPLPRICE }
-                              );
+                            );
                           }}
                         >
                           <FaCartArrowDown />
