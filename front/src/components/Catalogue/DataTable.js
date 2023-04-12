@@ -22,14 +22,16 @@ export const DataTable = () => {
   const [cartItems, setCartItems] = useState([]);
 
   const handleAddToCart = (product) => {
-    console.log(product,'product');
-    const found = cartItems.find(element => element.name == product.name);
+    console.log(product.name, "name");
+    console.log(product.name.WSPLPRICE, "price");
+    const found = cartItems.find((element) => element.PARTNAME == product.name.PARTNAME);
     if (found) {
-      alert('Product is already in the cart!');
+      alert("Product is already in the cart!");
+    } else {
+      total(product.name.WSPLPRICE);
+      setCartItems([...cartItems, product.name]);
+      setShowCart(true);
     }
-    else{
-    setCartItems([...cartItems, product]);
-    setShowCart(true);}
   };
 
   const handleCartClick = () => {
@@ -48,7 +50,13 @@ export const DataTable = () => {
     () =>
       // Filter the columns array to only include the columns you want to display
       COLUMNS.filter(
-        (col) => col.Header === "Κωδικός" || col.Header === "Περιγραφή" || col.Header === "Απόθεμα" || col.Header === "ΧΤ"  || col.Header === "ΛΤ" || col.Header === "Add to cart" 
+        (col) =>
+          col.Header === "Κωδικός" ||
+          col.Header === "Περιγραφή" ||
+          col.Header === "Απόθεμα" ||
+          col.Header === "ΧΤ" ||
+          col.Header === "ΛΤ" ||
+          col.Header === "Add to cart"
       ),
     []
   );
@@ -64,10 +72,11 @@ export const DataTable = () => {
     setCartItems(updatedCart);
   };
 
-  const total = () => {
-    const total = cartItems.reduce((acc, item) => acc + item.price, 0);
-    console.log(cartItems,'cartItems');
-    return total.toFixed(2);
+  const total = (price) => {
+    console.log(price, "price");
+    const total = cartItems.reduce((acc, item) => acc + item.WSPLPRICE, price);
+    console.log(total, "total");
+    return total;
   };
 
   const clearCart = () => {
@@ -75,20 +84,20 @@ export const DataTable = () => {
   };
 
   const productPopup = (id) => {
-    const rowSearch = data.find((result) => result.PARTNAME  == id.value);
-    
+    const rowSearch = data.find((result) => result.PARTNAME == id.value);
+
     setShow(!show);
 
     setPopupModalData({
       code: rowSearch.PARTNAME,
       description: rowSearch.PARTDES,
-      stock:rowSearch.availableQuantity,
-      price:rowSearch.WSPLPRICE,
-      vat:rowSearch.VATPRICE,
-      distributer:rowSearch.SUPNAME,
-      barcode:rowSearch.BARCODE,
-      pharmaCode:rowSearch.SPEC14,
-      supplier:rowSearch.SUPNAME,
+      stock: rowSearch.availableQuantity,
+      price: rowSearch.WSPLPRICE,
+      vat: rowSearch.VATPRICE,
+      distributer: rowSearch.SUPNAME,
+      barcode: rowSearch.BARCODE,
+      pharmaCode: rowSearch.SPEC14,
+      supplier: rowSearch.SUPNAME,
       // stockAnalysis:rowSearch.availableQuantity,
       // discount:rowSearch.availableQuantity,
     });
@@ -139,8 +148,6 @@ export const DataTable = () => {
     (_, i) => i + start + 1
   );
 
-  
-
   return (
     <>
       {/* add to cart */}
@@ -168,10 +175,18 @@ export const DataTable = () => {
               <div className="col">
                 <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>Cart</h2>
               </div>
-              <div className="col" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <button className="close-icon" onClick={handleCartClose}>
-                  
-                </button>
+              <div
+                className="col"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <button
+                  className="close-icon"
+                  onClick={handleCartClose}
+                ></button>
               </div>
             </div>
             <ul style={{ listStyle: "none", padding: 0 }}>
@@ -206,14 +221,23 @@ export const DataTable = () => {
                         margin: 0,
                       }}
                     >
-                      {item.name}
+                      {item.PARTNAME}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "1.2rem",
+                        fontWeight: "bold",
+                        margin: 0,
+                      }}
+                    >
+                      {item.WSPLPRICE}
                     </p>
                     <p style={{ fontSize: "1rem", margin: 0 }}>{item.price}</p>
                   </div>
                   <div>
                     <button
-                      onClick={() => 
-                        removeItem(item.name)
+                      onClick={
+                        () => removeItem(item.name)
                         //console.log(item.name,'item')
                       }
                       style={{
@@ -228,7 +252,8 @@ export const DataTable = () => {
                     </button>
                   </div>
                 </li>
-              ))}
+              )
+              )}
             </ul>
             <p
               style={{
@@ -343,14 +368,17 @@ export const DataTable = () => {
                     )) ||
                     (cell.column.Header == "Add to cart" && (
                       <td {...cell.getCellProps()} className="p-3 border">
-                      <button
-                        className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                        onClick={() => {
-                          handleAddToCart({ name: row.values.PARTNAME });
-                        }}
-                      >
-                        <FaCartArrowDown />
-                      </button></td>
+                        <button
+                          className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                          onClick={() => {
+                            handleAddToCart({ name: row.values }
+                              //{ price: row.values.WSPLPRICE }
+                              );
+                          }}
+                        >
+                          <FaCartArrowDown />
+                        </button>
+                      </td>
                     )) || (
                       <td {...cell.getCellProps()} className="p-3 border">
                         {cell.render("Cell")}
