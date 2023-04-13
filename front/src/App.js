@@ -1,4 +1,13 @@
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+  useNavigate,
+} from "react-router-dom";
+import { useEffect } from "react";
+import Cookies from "js-cookie";
+
 import ProductsTable from "./pages/ProductsTable";
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
@@ -22,11 +31,17 @@ const router = createBrowserRouter(
 
 
 function App() {
-  return (
-    <div className="App">    
-        <RouterProvider router={router} />
-    </div>
-  );
+  const token = Cookies.get("jwt_token");
+
+    if (!token) {
+        window.location.href = "http://localhost:8000/?error=noToken";
+    } else {
+      return (
+        <div className="App">    
+            <RouterProvider router={router} />
+        </div>
+      );
+    }
 }
 
 export default App;

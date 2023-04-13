@@ -32,8 +32,13 @@ $container["jwt"] = function ($container) {
 
 
 // Display the login page
-$app->get('/login', function (Request $request, Response $response, $args) {
+$app->get('/', function (Request $request, Response $response, $args) {
     session_start();
+    $errorParam = $request->getParam('error');
+    if (isset($errorParam)) {
+        $flash = $this->get('flash');
+        $flash->addMessage('error', 'Please login first.');
+    }
     $flash = $this->get('flash');
     $messages = $flash->getMessages();
     if (isset($messages['error'])) {
@@ -45,31 +50,6 @@ $app->get('/login', function (Request $request, Response $response, $args) {
     return $response;
 });
 
-// $app->get('/JWTToken', function ($req, $res) {
-
-//     $dotenv_file = dirname(__DIR__, 1) . '\.env';
-//     $dotenv_contents = file_get_contents($dotenv_file);
-//     $dotenv_vars = parse_ini_string($dotenv_contents);
-
-//     $MyJWT = $this->JWT;
-//     $now = new DateTime();
-//     $future = new DateTime("now +1 minutes");
-//     // $server = $request->getServerParams();
-//     $payload = [
-//         "iat" => $now->getTimeStamp(),
-//         "exp" => $future->getTimeStamp(),
-//         "sub" => "test for JWT",
-//     ];
-//     $secret = $dotenv_vars['SECRET'];
-//     $token = $MyJWT->encode($payload, $secret, "HS512");
-//     $data["status"] = "ok";
-//     $data["token"] = $token;
-//     $res->withStatus(201)
-//         ->withHeader("Content-Type", "application/json")
-//         ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-
-//     return $res;
-// });
 // Register
 $app->post('/register', function (Request $request, Response $response) {
     $first_name = $request->getParam('name');
@@ -172,16 +152,16 @@ $app->post('/validate-token', function ($request, $response, $args) {
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
 
-    //$token = $request->getHeader('Authorization')[0];
-    $token = json_decode($request->getBody())->token;
+    $token = $request->getHeader('Authorization')[0];
+    //$token = json_decode($request->getBody())->token;
     $token_parts = explode(' ', $token);
-    
+
+
     if ($token_parts[0] === 'Bearer') {
         $token = $token_parts[1];
     }
-
     $permissions = 'admin';
-    
+
     if (!$token) {
         //return $response->withStatus(202)->withJson(['error' => 'Unauthorized']);
         return $response->withStatus(200)->withJson(['isTokenValid' => false]);
@@ -190,7 +170,6 @@ $app->post('/validate-token', function ($request, $response, $args) {
         $decoded = JWT::decode($token, $dotenv_vars['SECRET'], array('HS512'));
         //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
         return $response->withStatus(200)->withJson(['isTokenValid' => true]);
-
     } catch (\Throwable $th) {
 
         return $response->withStatus(404)->withJson(['error' => 'Unauthorized']);

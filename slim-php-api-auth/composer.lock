@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e947c7c91fdb3c847d6456daae8fbec9",
+    "content-hash": "c1316a54443951bd1ffce5e0a8132dcd",
     "packages": [
         {
             "name": "fig/http-message-util",
@@ -56,6 +56,10 @@
                 "request",
                 "response"
             ],
+            "support": {
+                "issues": "https://github.com/php-fig/http-message-util/issues",
+                "source": "https://github.com/php-fig/http-message-util/tree/1.1.5"
+            },
             "time": "2020-11-24T22:02:12+00:00"
         },
         {
@@ -109,6 +113,10 @@
                 "jwt",
                 "php"
             ],
+            "support": {
+                "issues": "https://github.com/firebase/php-jwt/issues",
+                "source": "https://github.com/firebase/php-jwt/tree/v5.5.1"
+            },
             "time": "2021-11-08T20:18:51+00:00"
         },
         {
@@ -157,6 +165,10 @@
                 "Result-Type",
                 "result"
             ],
+            "support": {
+                "issues": "https://github.com/GrahamCampbell/Result-Type/issues",
+                "source": "https://github.com/GrahamCampbell/Result-Type/tree/v1.1.1"
+            },
             "funding": [
                 {
                     "url": "https://github.com/GrahamCampbell",
@@ -170,29 +182,148 @@
             "time": "2023-02-25T20:23:15+00:00"
         },
         {
-            "name": "neomerx/cors-psr7",
-            "version": "3.0.2",
+            "name": "http-interop/http-factory",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/neomerx/cors-psr7.git",
-                "reference": "515d7fdb60b9d475da70029d4e5662beaae1875f"
+                "url": "https://github.com/http-interop/http-factory.git",
+                "reference": "c2587cc0a6f74987fefb5b8074acfd32c69a4b0f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/neomerx/cors-psr7/zipball/515d7fdb60b9d475da70029d4e5662beaae1875f",
-                "reference": "515d7fdb60b9d475da70029d4e5662beaae1875f",
+                "url": "https://api.github.com/repos/http-interop/http-factory/zipball/c2587cc0a6f74987fefb5b8074acfd32c69a4b0f",
+                "reference": "c2587cc0a6f74987fefb5b8074acfd32c69a4b0f",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.0.0",
+                "php": ">=5.3.0",
+                "psr/http-message": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Interop\\Http\\Factory\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP message factories",
+            "keywords": [
+                "factory",
+                "http",
+                "message",
+                "psr",
+                "psr-17",
+                "psr-7",
+                "request",
+                "response"
+            ],
+            "support": {
+                "issues": "https://github.com/http-interop/http-factory/issues",
+                "source": "https://github.com/http-interop/http-factory/tree/master"
+            },
+            "abandoned": "psr/http-factory",
+            "time": "2017-03-24T14:48:51+00:00"
+        },
+        {
+            "name": "http-interop/http-server-middleware",
+            "version": "1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/http-interop/http-server-middleware.git",
+                "reference": "1ed99649e5f0d785c16d53cc021d7187ec350f28"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/http-interop/http-server-middleware/zipball/1ed99649e5f0d785c16d53cc021d7187ec350f28",
+                "reference": "1ed99649e5f0d785c16d53cc021d7187ec350f28",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0",
                 "psr/http-message": "^1.0",
-                "psr/log": "^3.0"
+                "psr/http-server-middleware": "^1.0"
+            },
+            "replace": {
+                "http-interop/http-middleware": ">=0.5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Interop\\Http\\Server\\": "src/"
+                },
+                "files": [
+                    "src/alias.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP server-side middleware",
+            "keywords": [
+                "http",
+                "middleware",
+                "psr",
+                "psr-15",
+                "psr-7",
+                "request",
+                "response"
+            ],
+            "support": {
+                "issues": "https://github.com/http-interop/http-server-middleware/issues",
+                "source": "https://github.com/http-interop/http-server-middleware/tree/master"
+            },
+            "abandoned": "psr/http-server-middleware",
+            "time": "2018-01-23T14:34:55+00:00"
+        },
+        {
+            "name": "neomerx/cors-psr7",
+            "version": "v1.0.13",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/neomerx/cors-psr7.git",
+                "reference": "2556e2013f16a55532c95928455257d5b6bbc6e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/neomerx/cors-psr7/zipball/2556e2013f16a55532c95928455257d5b6bbc6e2",
+                "reference": "2556e2013f16a55532c95928455257d5b6bbc6e2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0",
+                "psr/http-message": "^1.0",
+                "psr/log": "^1.0"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.11",
                 "mockery/mockery": "^1.0",
-                "phpunit/phpunit": "^9.2",
-                "scrutinizer/ocular": "^1.4",
+                "phpunit/phpunit": "^5.7",
+                "scrutinizer/ocular": "^1.1",
                 "squizlabs/php_codesniffer": "^3.0"
             },
             "type": "library",
@@ -223,7 +354,11 @@
                 "w3.org",
                 "www.w3.org"
             ],
-            "time": "2022-11-28T03:29:06+00:00"
+            "support": {
+                "issues": "https://github.com/neomerx/cors-psr7/issues",
+                "source": "https://github.com/neomerx/cors-psr7/tree/develop"
+            },
+            "time": "2018-05-23T16:10:11+00:00"
         },
         {
             "name": "nikic/fast-route",
@@ -269,6 +404,10 @@
                 "router",
                 "routing"
             ],
+            "support": {
+                "issues": "https://github.com/nikic/FastRoute/issues",
+                "source": "https://github.com/nikic/FastRoute/tree/master"
+            },
             "time": "2018-02-13T20:26:39+00:00"
         },
         {
@@ -330,6 +469,10 @@
                 "php",
                 "type"
             ],
+            "support": {
+                "issues": "https://github.com/schmittjoh/php-option/issues",
+                "source": "https://github.com/schmittjoh/php-option/tree/1.9.1"
+            },
             "funding": [
                 {
                     "url": "https://github.com/GrahamCampbell",
@@ -390,6 +533,9 @@
                 "container",
                 "dependency injection"
             ],
+            "support": {
+                "source": "https://github.com/silexphp/Pimple/tree/v3.5.0"
+            },
             "time": "2021-10-28T11:13:42+00:00"
         },
         {
@@ -434,25 +580,29 @@
                 "container-interop",
                 "psr"
             ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/1.1.2"
+            },
             "time": "2021-11-05T16:50:12+00:00"
         },
         {
             "name": "psr/http-factory",
-            "version": "1.0.2",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-factory.git",
-                "reference": "e616d01114759c4c489f93b099585439f795fe35"
+                "reference": "12ac7fcd07e5b077433f5f2bee95b3a771bf61be"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-factory/zipball/e616d01114759c4c489f93b099585439f795fe35",
-                "reference": "e616d01114759c4c489f93b099585439f795fe35",
+                "url": "https://api.github.com/repos/php-fig/http-factory/zipball/12ac7fcd07e5b077433f5f2bee95b3a771bf61be",
+                "reference": "12ac7fcd07e5b077433f5f2bee95b3a771bf61be",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0.0",
-                "psr/http-message": "^1.0 || ^2.0"
+                "psr/http-message": "^1.0"
             },
             "type": "library",
             "extra": {
@@ -472,7 +622,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "https://www.php-fig.org/"
+                    "homepage": "http://www.php-fig.org/"
                 }
             ],
             "description": "Common interfaces for PSR-7 HTTP message factories",
@@ -486,7 +636,10 @@
                 "request",
                 "response"
             ],
-            "time": "2023-04-10T20:10:41+00:00"
+            "support": {
+                "source": "https://github.com/php-fig/http-factory/tree/master"
+            },
+            "time": "2019-04-30T12:38:16+00:00"
         },
         {
             "name": "psr/http-message",
@@ -536,25 +689,28 @@
                 "request",
                 "response"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/http-message/tree/1.1"
+            },
             "time": "2023-04-04T09:50:52+00:00"
         },
         {
             "name": "psr/http-server-handler",
-            "version": "1.0.2",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-server-handler.git",
-                "reference": "84c4fb66179be4caaf8e97bd239203245302e7d4"
+                "reference": "aff2f80e33b7f026ec96bb42f63242dc50ffcae7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-server-handler/zipball/84c4fb66179be4caaf8e97bd239203245302e7d4",
-                "reference": "84c4fb66179be4caaf8e97bd239203245302e7d4",
+                "url": "https://api.github.com/repos/php-fig/http-server-handler/zipball/aff2f80e33b7f026ec96bb42f63242dc50ffcae7",
+                "reference": "aff2f80e33b7f026ec96bb42f63242dc50ffcae7",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0",
-                "psr/http-message": "^1.0 || ^2.0"
+                "psr/http-message": "^1.0"
             },
             "type": "library",
             "extra": {
@@ -574,7 +730,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "https://www.php-fig.org/"
+                    "homepage": "http://www.php-fig.org/"
                 }
             ],
             "description": "Common interface for HTTP server-side request handler",
@@ -589,25 +745,29 @@
                 "response",
                 "server"
             ],
-            "time": "2023-04-10T20:06:20+00:00"
+            "support": {
+                "issues": "https://github.com/php-fig/http-server-handler/issues",
+                "source": "https://github.com/php-fig/http-server-handler/tree/master"
+            },
+            "time": "2018-10-30T16:46:14+00:00"
         },
         {
             "name": "psr/http-server-middleware",
-            "version": "1.0.2",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-server-middleware.git",
-                "reference": "c1481f747daaa6a0782775cd6a8c26a1bf4a3829"
+                "reference": "2296f45510945530b9dceb8bcedb5cb84d40c5f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-server-middleware/zipball/c1481f747daaa6a0782775cd6a8c26a1bf4a3829",
-                "reference": "c1481f747daaa6a0782775cd6a8c26a1bf4a3829",
+                "url": "https://api.github.com/repos/php-fig/http-server-middleware/zipball/2296f45510945530b9dceb8bcedb5cb84d40c5f5",
+                "reference": "2296f45510945530b9dceb8bcedb5cb84d40c5f5",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0",
-                "psr/http-message": "^1.0 || ^2.0",
+                "psr/http-message": "^1.0",
                 "psr/http-server-handler": "^1.0"
             },
             "type": "library",
@@ -628,7 +788,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "https://www.php-fig.org/"
+                    "homepage": "http://www.php-fig.org/"
                 }
             ],
             "description": "Common interface for HTTP server-side middleware",
@@ -642,34 +802,38 @@
                 "request",
                 "response"
             ],
-            "time": "2023-04-11T06:14:47+00:00"
+            "support": {
+                "issues": "https://github.com/php-fig/http-server-middleware/issues",
+                "source": "https://github.com/php-fig/http-server-middleware/tree/master"
+            },
+            "time": "2018-10-30T17:12:04+00:00"
         },
         {
             "name": "psr/log",
-            "version": "3.0.0",
+            "version": "1.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001"
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/fe5ea303b0887d5caefd3d431c3e61ad47037001",
-                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/d49695b909c3b7628b6289db5479a1c204601f11",
+                "reference": "d49695b909c3b7628b6289db5479a1c204601f11",
                 "shasum": ""
             },
             "require": {
-                "php": ">=8.0.0"
+                "php": ">=5.3.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Psr\\Log\\": "src"
+                    "Psr\\Log\\": "Psr/Log/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -689,7 +853,10 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2021-07-14T16:46:02+00:00"
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/1.1.4"
+            },
+            "time": "2021-05-03T11:20:27+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -729,6 +896,10 @@
                 }
             ],
             "description": "A polyfill for getallheaders.",
+            "support": {
+                "issues": "https://github.com/ralouphie/getallheaders/issues",
+                "source": "https://github.com/ralouphie/getallheaders/tree/develop"
+            },
             "time": "2019-03-08T08:55:37+00:00"
         },
         {
@@ -777,6 +948,10 @@
                 "provider",
                 "slim"
             ],
+            "support": {
+                "issues": "https://github.com/slimphp/Slim-Flash/issues",
+                "source": "https://github.com/slimphp/Slim-Flash/tree/master"
+            },
             "time": "2017-10-22T10:35:05+00:00"
         },
         {
@@ -855,6 +1030,10 @@
                 "psr-7",
                 "psr7"
             ],
+            "support": {
+                "issues": "https://github.com/slimphp/Slim-Psr7/issues",
+                "source": "https://github.com/slimphp/Slim-Psr7/tree/1.6"
+            },
             "time": "2022-11-05T18:50:24+00:00"
         },
         {
@@ -928,6 +1107,10 @@
                 "micro",
                 "router"
             ],
+            "support": {
+                "issues": "https://github.com/slimphp/Slim/issues",
+                "source": "https://github.com/slimphp/Slim/tree/3.12.4"
+            },
             "funding": [
                 {
                     "url": "https://opencollective.com/slimphp",
@@ -1003,6 +1186,9 @@
                 "polyfill",
                 "portable"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.27.0"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1083,6 +1269,9 @@
                 "portable",
                 "shim"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.27.0"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1163,6 +1352,9 @@
                 "portable",
                 "shim"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.27.0"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1181,28 +1373,26 @@
         },
         {
             "name": "tuupola/callable-handler",
-            "version": "1.1.0",
+            "version": "0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tuupola/callable-handler.git",
-                "reference": "0bc7b88630ca753de9aba8f411046856f5ca6f8c"
+                "reference": "6f2632468ca4a4d912e507dd4bcbde6c1de62cad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/callable-handler/zipball/0bc7b88630ca753de9aba8f411046856f5ca6f8c",
-                "reference": "0bc7b88630ca753de9aba8f411046856f5ca6f8c",
+                "url": "https://api.github.com/repos/tuupola/callable-handler/zipball/6f2632468ca4a4d912e507dd4bcbde6c1de62cad",
+                "reference": "6f2632468ca4a4d912e507dd4bcbde6c1de62cad",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1|^8.0",
-                "psr/http-server-middleware": "^1.0"
+                "http-interop/http-server-middleware": "^1.0",
+                "php": "^7.0"
             },
             "require-dev": {
                 "overtrue/phplint": "^1.0",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0",
-                "squizlabs/php_codesniffer": "^3.2",
-                "tuupola/http-factory": "^0.4.0|^1.0",
-                "zendframework/zend-diactoros": "^1.6.0|^2.0"
+                "phpunit/phpunit": "^6.5",
+                "squizlabs/php_codesniffer": "^3.2"
             },
             "type": "library",
             "autoload": {
@@ -1229,45 +1419,40 @@
                 "psr-15",
                 "psr-7"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/tuupola",
-                    "type": "github"
-                }
-            ],
-            "time": "2020-09-09T08:31:54+00:00"
+            "support": {
+                "issues": "https://github.com/tuupola/callable-handler/issues",
+                "source": "https://github.com/tuupola/callable-handler/tree/master"
+            },
+            "time": "2017-12-25T12:14:00+00:00"
         },
         {
             "name": "tuupola/cors-middleware",
-            "version": "1.4.3",
+            "version": "0.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tuupola/cors-middleware.git",
-                "reference": "8fd7674f4c1910203685765f2e26ecdde57a25ab"
+                "reference": "5a79d213e139390535e501b92266ffc0a99ba3e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/cors-middleware/zipball/8fd7674f4c1910203685765f2e26ecdde57a25ab",
-                "reference": "8fd7674f4c1910203685765f2e26ecdde57a25ab",
+                "url": "https://api.github.com/repos/tuupola/cors-middleware/zipball/5a79d213e139390535e501b92266ffc0a99ba3e4",
+                "reference": "5a79d213e139390535e501b92266ffc0a99ba3e4",
                 "shasum": ""
             },
             "require": {
-                "neomerx/cors-psr7": "^2.0|^3.0",
-                "php": "^7.2|^8.0",
-                "psr/http-message": "^1.0.1",
-                "psr/http-server-middleware": "^1.0",
-                "tuupola/callable-handler": "^1.0",
-                "tuupola/http-factory": "^1.0.2"
+                "http-interop/http-server-middleware": "^1.0",
+                "neomerx/cors-psr7": "^1.0",
+                "php": "^7.1",
+                "tuupola/callable-handler": "^0.2.0",
+                "tuupola/http-factory": "^0.3.0"
             },
             "require-dev": {
-                "equip/dispatch": "^2.0",
-                "nyholm/psr7": "^1.5",
-                "overtrue/phplint": "^3.0",
-                "phpstan/phpstan": "^1.8",
-                "phpstan/phpstan-strict-rules": "^1.4",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0",
-                "rector/rector": "^0.14.0",
-                "symplify/easy-coding-standard": "^11.1"
+                "codedungeon/phpunit-result-printer": "^0.4.4",
+                "equip/dispatch": "^1.0",
+                "overtrue/phplint": "^0.2.4",
+                "phpunit/phpunit": "^6.5",
+                "squizlabs/php_codesniffer": "^2.5",
+                "zendframework/zend-diactoros": "^1.3"
             },
             "type": "library",
             "autoload": {
@@ -1283,7 +1468,7 @@
                 {
                     "name": "Mika Tuupola",
                     "email": "tuupola@appelsiini.net",
-                    "homepage": "https://appelsiini.net/",
+                    "homepage": "http://www.appelsiini.net/",
                     "role": "Developer"
                 }
             ],
@@ -1295,42 +1480,33 @@
                 "psr-15",
                 "psr-7"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/tuupola",
-                    "type": "github"
-                }
-            ],
-            "time": "2022-10-11T11:29:25+00:00"
+            "support": {
+                "issues": "https://github.com/tuupola/cors-middleware/issues",
+                "source": "https://github.com/tuupola/cors-middleware/tree/master"
+            },
+            "time": "2017-12-25T13:11:35+00:00"
         },
         {
             "name": "tuupola/http-factory",
-            "version": "1.4.0",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tuupola/http-factory.git",
-                "reference": "ae3f8fbdd31cf2f1bbe920b38963c5e4d1e9c454"
+                "reference": "57b2e19ff3f4af0bbee4e31fd282689be351f1ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/http-factory/zipball/ae3f8fbdd31cf2f1bbe920b38963c5e4d1e9c454",
-                "reference": "ae3f8fbdd31cf2f1bbe920b38963c5e4d1e9c454",
+                "url": "https://api.github.com/repos/tuupola/http-factory/zipball/57b2e19ff3f4af0bbee4e31fd282689be351f1ad",
+                "reference": "57b2e19ff3f4af0bbee4e31fd282689be351f1ad",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1|^8.0",
-                "psr/http-factory": "^1.0"
-            },
-            "conflict": {
-                "nyholm/psr7": "<1.0"
-            },
-            "provide": {
-                "psr/http-factory-implementation": "^1.0"
+                "http-interop/http-factory": "^0.3.0"
             },
             "require-dev": {
-                "http-interop/http-factory-tests": "^0.9.0",
-                "overtrue/phplint": "^3.0",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0",
+                "http-interop/http-factory-tests": "^0.3.0",
+                "overtrue/phplint": "^0.2.1",
+                "phpunit/phpunit": "^5.7",
                 "squizlabs/php_codesniffer": "^3.0"
             },
             "type": "library",
@@ -1347,7 +1523,7 @@
                 {
                     "name": "Mika Tuupola",
                     "email": "tuupola@appelsiini.net",
-                    "homepage": "https://appelsiini.net/",
+                    "homepage": "http://www.appelsiini.net/",
                     "role": "Developer"
                 }
             ],
@@ -1358,48 +1534,40 @@
                 "psr-17",
                 "psr-7"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/tuupola",
-                    "type": "github"
-                }
-            ],
-            "time": "2021-09-14T12:46:25+00:00"
+            "support": {
+                "issues": "https://github.com/tuupola/http-factory/issues",
+                "source": "https://github.com/tuupola/http-factory/tree/master"
+            },
+            "time": "2017-07-15T22:03:15+00:00"
         },
         {
             "name": "tuupola/slim-basic-auth",
-            "version": "3.3.1",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tuupola/slim-basic-auth.git",
-                "reference": "18e49c18f5648b05bb6169d166ccb6f797f0fbc4"
+                "reference": "0015eb872edf4796c71feaa127b3886884bb7ca6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/slim-basic-auth/zipball/18e49c18f5648b05bb6169d166ccb6f797f0fbc4",
-                "reference": "18e49c18f5648b05bb6169d166ccb6f797f0fbc4",
+                "url": "https://api.github.com/repos/tuupola/slim-basic-auth/zipball/0015eb872edf4796c71feaa127b3886884bb7ca6",
+                "reference": "0015eb872edf4796c71feaa127b3886884bb7ca6",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1|^8.0",
-                "psr/http-message": "^1.0.1",
-                "psr/http-server-middleware": "^1.0",
-                "tuupola/callable-handler": "^0.3.0|^0.4.0|^1.0",
-                "tuupola/http-factory": "^0.4.0|^1.0.2"
+                "php": "^5.5 || ^7.0",
+                "psr/http-message": "^1.0"
             },
             "require-dev": {
-                "equip/dispatch": "^2.0",
-                "overtrue/phplint": "^2.0.2",
-                "phpstan/phpstan": "^0.12.43",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0",
-                "squizlabs/php_codesniffer": "^3.3.2",
-                "symfony/process": "^3.3",
-                "zendframework/zend-diactoros": "^1.3|^2.0"
+                "overtrue/phplint": "^0.2.4",
+                "phpunit/phpunit": "^4.3",
+                "squizlabs/php_codesniffer": "^2.3",
+                "zendframework/zend-diactoros": "^1.3"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Tuupola\\Middleware\\": "src"
+                    "Slim\\Middleware\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1410,65 +1578,52 @@
                 {
                     "name": "Mika Tuupola",
                     "email": "tuupola@appelsiini.net",
-                    "homepage": "https://appelsiini.net/"
+                    "homepage": "http://www.appelsiini.net/"
                 }
             ],
-            "description": "PSR-7 and PSR-15 HTTP Basic Authentication Middleware",
-            "homepage": "https://appelsiini.net/projects/slim-basic-auth",
+            "description": "PSR-7 HTTP Basic Authentication Middleware",
+            "homepage": "http://www.appelsiini.net/projects/slim-basic-auth",
             "keywords": [
                 "auth",
                 "middleware",
-                "psr-15",
                 "psr-7"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/tuupola",
-                    "type": "github"
-                }
-            ],
-            "time": "2020-10-28T15:22:12+00:00"
+            "support": {
+                "issues": "https://github.com/tuupola/slim-basic-auth/issues",
+                "source": "https://github.com/tuupola/slim-basic-auth/tree/2.x"
+            },
+            "time": "2017-09-19T12:46:08+00:00"
         },
         {
             "name": "tuupola/slim-jwt-auth",
-            "version": "3.7.0",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tuupola/slim-jwt-auth.git",
-                "reference": "ef05b93d4dac7307ef6ef3b62feaff30c32e82c1"
+                "reference": "bca54de41a8207d4d67faf3601a06a96cb7ed48f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tuupola/slim-jwt-auth/zipball/ef05b93d4dac7307ef6ef3b62feaff30c32e82c1",
-                "reference": "ef05b93d4dac7307ef6ef3b62feaff30c32e82c1",
+                "url": "https://api.github.com/repos/tuupola/slim-jwt-auth/zipball/bca54de41a8207d4d67faf3601a06a96cb7ed48f",
+                "reference": "bca54de41a8207d4d67faf3601a06a96cb7ed48f",
                 "shasum": ""
             },
             "require": {
-                "firebase/php-jwt": "^3.0|^4.0|^5.0",
-                "php": "^7.2|^8.0",
+                "firebase/php-jwt": "^3.0 || ^4.0 || ^5.0",
+                "php": "^5.5 || ^7.0",
                 "psr/http-message": "^1.0",
-                "psr/http-server-middleware": "^1.0",
-                "psr/log": "^1.0|^2.0|^3.0",
-                "tuupola/callable-handler": "^1.0",
-                "tuupola/http-factory": "^1.3"
+                "psr/log": "^1.0"
             },
             "require-dev": {
-                "equip/dispatch": "^2.0",
-                "laminas/laminas-diactoros": "^2.0",
-                "overtrue/phplint": "^1.0",
-                "phpstan/phpstan": "^1.8",
-                "phpunit/phpunit": "^7.0|^8.5.30|^9.0",
-                "squizlabs/php_codesniffer": "^3.7"
+                "overtrue/phplint": "^0.2.4",
+                "phpunit/phpunit": "^4.6",
+                "squizlabs/php_codesniffer": "^2.3",
+                "zendframework/zend-diactoros": "^1.3"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-3.x": "3.0.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
-                    "Tuupola\\Middleware\\": "src"
+                    "Slim\\Middleware\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1479,27 +1634,24 @@
                 {
                     "name": "Mika Tuupola",
                     "email": "tuupola@appelsiini.net",
-                    "homepage": "https://appelsiini.net/",
+                    "homepage": "http://www.appelsiini.net/",
                     "role": "Developer"
                 }
             ],
-            "description": "PSR-7 and PSR-15 JWT Authentication Middleware",
+            "description": "PSR-7 JWT Authentication Middleware",
             "homepage": "https://github.com/tuupola/slim-jwt-auth",
             "keywords": [
                 "auth",
                 "json",
                 "jwt",
                 "middleware",
-                "psr-15",
                 "psr-7"
             ],
-            "funding": [
-                {
-                    "url": "https://github.com/tuupola",
-                    "type": "github"
-                }
-            ],
-            "time": "2022-12-23T11:23:05+00:00"
+            "support": {
+                "issues": "https://github.com/tuupola/slim-jwt-auth/issues",
+                "source": "https://github.com/tuupola/slim-jwt-auth/tree/2.x"
+            },
+            "time": "2018-04-03T06:12:18+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -1569,6 +1721,10 @@
                 "env",
                 "environment"
             ],
+            "support": {
+                "issues": "https://github.com/vlucas/phpdotenv/issues",
+                "source": "https://github.com/vlucas/phpdotenv/tree/v5.5.0"
+            },
             "funding": [
                 {
                     "url": "https://github.com/GrahamCampbell",
@@ -1590,5 +1746,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.3.0"
 }
