@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useTable,
   useSortBy,
@@ -6,7 +6,9 @@ import {
   usePagination,
   useFilters,
 } from "react-table";
-import DATA from "./data.json";
+import axios from "axios";
+
+  import DATA from "./data.json";
 import { COLUMNS } from "./columns";
 import { GoArrowSmallDown, GoArrowSmallUp, GoQuestion } from "react-icons/go";
 import { FaCartArrowDown } from "react-icons/fa";
@@ -16,6 +18,7 @@ import Modal from "react-bootstrap/Modal";
 import { ColumnFilter } from "./columnFilters";
 import "./Cart.css";
 import Cart from "./Cart";
+import ProductModal from "./Modal";
 
 export const DataTable = () => {
   const [showCart, setShowCart] = useState(false);
@@ -30,7 +33,7 @@ export const DataTable = () => {
       alert("Product is already in the cart!");
     } else {
       total(product.name.WSPLPRICE);
-      
+
       setCartItems([...cartItems, product.name]);
       setShowCart(true);
     }
@@ -111,6 +114,9 @@ export const DataTable = () => {
     []
   );
 
+
+
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -132,7 +138,7 @@ export const DataTable = () => {
       columns,
       data,
       defaultColumn,
-      //initialState: { pageIndex: 0, pageSize: 10 },
+      initialState: { pageIndex: 0, pageSize: 100 },
     },
     useFilters,
     useGlobalFilter,
@@ -144,11 +150,29 @@ export const DataTable = () => {
 
   let start = Math.max(0, pageIndex - 5);
   let end = Math.min(pageCount, start + 6);
+
   let pageNumbers = Array.from(
     { length: end - start },
     (_, i) => i + start + 1
   );
 
+  const fetchData = () => {
+    fetch('http://localhost:8000/parts/0')
+    .then(response => response.json())
+    .then(data => {
+      // Do something with the data
+      console.log(data,'data');
+    })
+    .catch(error => {
+      // Handle the error
+      console.log(error,'error');
+    });
+  }
+  
+  useEffect(() => {
+    fetchData({ pageIndex });
+  }, [fetchData, pageIndex]);
+  
   const decrementQuantity = (item) => {
     if (item.quantity === 1) {
       removeItem(item);
@@ -219,7 +243,7 @@ export const DataTable = () => {
                 </li>
               ))}
             </ul>
-            
+
             <div className="total-container">
               <p className="total-text">Total: {total}</p>
             </div>
@@ -247,30 +271,13 @@ export const DataTable = () => {
           </div>
         ))}
       </div>
+      {/* product pop info */}
+      <ProductModal
+        show={show}
+        handleClose={handleClose}
+        popupModalData={popupModalData}
+      />
 
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Product Info</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Part Code: {popupModalData.code} </Modal.Body>
-        <Modal.Body>Part Description: {popupModalData.description} </Modal.Body>
-        <Modal.Body>Current Stock: {popupModalData.stock} </Modal.Body>
-        <Modal.Body>Retail Price: {popupModalData.price} </Modal.Body>
-        <Modal.Body>VAT Percentage: {popupModalData.vat} </Modal.Body>
-        <Modal.Body>
-          Distributer/Importer: {popupModalData.distributer}
-        </Modal.Body>
-        <Modal.Body>Package Barcode: {popupModalData.barcode} </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="danger"
-            style={{ color: "red" }}
-            onClick={handleClose}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
       <table {...getTableProps()} className="table-auto w-full shadow-xl">
         <thead>
           {headerGroups.map((headerGroup) => (

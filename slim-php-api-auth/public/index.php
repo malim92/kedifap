@@ -176,11 +176,37 @@ $app->post('/validate-token', function ($request, $response, $args) {
     }
 });
 
-
-
 $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
     $name = $args['name'];
     $response->getBody()->write("Hello, $name");
+
+    return $response;
+});
+
+$app->get('/parts/{page}', function (Request $request, Response $response, array $args) {
+    $page = $args['page'];
+    $page *= 100;
+    $dotenv_file = dirname(__DIR__, 1) . '..\.env';
+    $dotenv_contents = file_get_contents($dotenv_file);
+    $dotenv_vars = parse_ini_string($dotenv_contents);
+
+    //$name = $request->getParam('name');
+    //echo $name;die;
+    $sql = "SELECT * FROM parts LIMIT 100 OFFSET $page";
+
+    try {
+        // Get DB Object
+        $db = new db();
+        // Connect
+        $db = $db->connect();
+
+        $stmt = $db->query($sql);
+        $parts= $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $response->withStatus(200)->withJson($parts);
+        
+    } catch (PDOException $e) {
+        echo '{"error": {"text": ' . $e->getMessage() . '}';
+    }
 
     return $response;
 });

@@ -32,7 +32,11 @@ const router = createBrowserRouter(
 
 function App() {
   const token = Cookies.get("jwt_token");
-
+  return (
+    <div className="App">    
+        <RouterProvider router={router} />
+    </div>
+  );
     if (!token) {
         window.location.href = "http://localhost:8000/?error=noToken";
     } else {
