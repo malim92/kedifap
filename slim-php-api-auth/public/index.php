@@ -182,9 +182,12 @@ $app->get('/hello/{name}', function (Request $request, Response $response, array
 
     return $response;
 });
-
-$app->get('/parts/{page}', function (Request $request, Response $response, array $args) {
-    $page = $args['page'];
+//http://localhost:8000/?page=0
+$app->get('/parts/', function (Request $request, Response $response, array $args) {
+    $partsObject = [];
+    $page = $request->getQueryParams('page');
+    $page = $page['page'];
+    //print_r($page) ; die;
     $page *= 100;
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
@@ -193,7 +196,7 @@ $app->get('/parts/{page}', function (Request $request, Response $response, array
     //$name = $request->getParam('name');
     //echo $name;die;
     $sql = "SELECT * FROM parts LIMIT 100 OFFSET $page";
-
+    $toalRows = "SELECT COUNT(PARTNAME) FROM parts";
     try {
         // Get DB Object
         $db = new db();
@@ -202,7 +205,10 @@ $app->get('/parts/{page}', function (Request $request, Response $response, array
 
         $stmt = $db->query($sql);
         $parts= $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $response->withStatus(200)->withJson($parts);
+        //$toalRows= $stmt->fetch(PDO::FETCH_ASSOC);
+        $toalRows = current($db->query($toalRows)->fetch());
+        $partsObject = ["totalRows" => $toalRows , "data" => $parts];
+        return $response->withStatus(200)->withJson($partsObject);
         
     } catch (PDOException $e) {
         echo '{"error": {"text": ' . $e->getMessage() . '}';
