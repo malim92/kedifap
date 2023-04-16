@@ -5,6 +5,7 @@ import {
   useGlobalFilter,
   usePagination,
   useFilters,
+  onFetchData
 } from "react-table";
 import axios from "axios";
 
@@ -23,6 +24,7 @@ import ProductModal from "./Modal";
 export const DataTable = () => {
   const [showCart, setShowCart] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [tableData, setTableData] = useState([]);
 
   const handleAddToCart = (product) => {
     product.name.quantity = 1;
@@ -65,7 +67,7 @@ export const DataTable = () => {
       ),
     []
   );
-  const data = useMemo(() => DATA, []);
+  const data = useMemo(() => tableData, [tableData]);
   const [show, setShow] = useState(false);
   const [popupModalData, setPopupModalData] = useState({});
 
@@ -114,7 +116,25 @@ export const DataTable = () => {
     []
   );
 
+  const fetchData = () => {
+    fetch('http://localhost:8000/parts/0')
+    .then(response => response.json())
+    .then(data => {
+      // Do something with the data
+      setTableData(data)
+      console.log('tableData', tableData)
+      console.log('data', data)
 
+    })
+    .catch(error => {
+      // Handle the error
+      console.log(error,'error');
+    });
+  }
+  
+  useEffect(() => {
+    fetchData({ pageIndex });
+  }, []);
 
 
   const {
@@ -155,24 +175,7 @@ export const DataTable = () => {
     { length: end - start },
     (_, i) => i + start + 1
   );
-
-  const fetchData = () => {
-    fetch('http://localhost:8000/parts/0')
-    .then(response => response.json())
-    .then(data => {
-      // Do something with the data
-      console.log(data,'data');
-    })
-    .catch(error => {
-      // Handle the error
-      console.log(error,'error');
-    });
-  }
-  
-  useEffect(() => {
-    fetchData({ pageIndex });
-  }, [fetchData, pageIndex]);
-  
+  console.log('data',data)
   const decrementQuantity = (item) => {
     if (item.quantity === 1) {
       removeItem(item);
