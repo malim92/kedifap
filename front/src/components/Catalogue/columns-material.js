@@ -1,8 +1,5 @@
 export const COLUMNS = [
-    {
-        Header: 'Κωδικός',
-        accessorKey: 'PARTNAME',
-    },
+    
     {
         Header: "Περιγραφή",
         accessorKey: 'PARTDES'

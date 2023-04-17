@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
 import {
   Box,
@@ -13,8 +13,7 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
-
+import ProductModal from "./Modal";
 import { FaCartArrowDown } from "react-icons/fa";
 import { COLUMNS } from "./columns-material";
 import "./Cart.css";
@@ -35,6 +34,8 @@ const MaterialTable = () => {
     pageIndex: 0,
     pageSize: 10,
   });
+
+  const [cartItems, setCartItems] = useState([]);
 
   //if you want to avoid useEffect, look at the React Query example instead
   useEffect(() => {
@@ -83,8 +84,31 @@ const MaterialTable = () => {
     pagination.pageSize,
     sorting,
   ]);
-
+console.log(data,'date');
   const columns1 = useMemo(
+    () => [
+      {
+        accessorKey: "PARTNAME",
+        header: "Κωδικός",
+        Cell: ({ cell }) => (
+          <button
+            className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+            onClick={() => productPopup(cell.row.original)}
+          >
+            {data.map((column) => {
+              console.log(column,'column');
+          // <div key={column.id}>
+          //     <input type="checkbox" {...column.getToggleHiddenProps()} />
+          // </div>
+      })}
+          </button>
+        ),
+      },
+    ],
+    []
+  );
+
+  const columns2 = useMemo(
     () =>
       COLUMNS.filter(
         (col) =>
@@ -97,18 +121,17 @@ const MaterialTable = () => {
     []
   );
 
-  const columns2 = useMemo(
+  const columns3 = useMemo(
     () => [
       {
         accessorKey: "addToCart",
         header: "Add to cart",
-
         Cell: ({ cell }) => (
-          <button className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-          onClick={() => {
-            handleDelete(cell
-            );
-          }}
+          <button
+            className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+            onClick={() => {
+              handleAddToCart(cell);
+            }}
           >
             <FaCartArrowDown />
           </button>
@@ -118,13 +141,11 @@ const MaterialTable = () => {
     []
   );
 
-  const columns = [...columns1, ...columns2];
-  const handleRowClick = (rowData) => {
-    console.log("Clicked cell:", rowData.email);
-  };
+  const columns = [...columns1, ...columns2, ...columns3];
 
   //from DataTable/js
   const [showCart, setShowCart] = useState(false);
+  const [popupModalData, setPopupModalData] = useState({});
 
   const handleCartClick = () => {
     setShowCart(!showCart);
@@ -133,18 +154,80 @@ const MaterialTable = () => {
   const handleCartClose = () => {
     setShowCart(false);
   };
+  //popup close
+  const handleClose = () => setShow(false);
 
-  const handleDelete = (row) => {
-    console.log(row,'test row');
-  }
+  const [show, setShow] = useState(false);
 
-  const renderRowActions = (row) => {
-    console.log('renderRowActions');
-    return (
-      <button onClick={() => handleDelete(row)}>Delete</button>
-    );
-  }
-  
+  const total = (price) => {
+    const total = cartItems.reduce((acc, item) => acc + item.WSPLPRICE, price);
+    return total;
+  };
+
+  const handleAddToCart = (product) => {
+    console.log(cartItems, "cartItems before");
+    const { PARTNAME, WSPLPRICE } = product.row.original;
+    product.row.original.quantity = 1;
+    const found = cartItems.find((element) => element.PARTNAME == PARTNAME);
+    //if (found) {
+      //alert("Product is already in the cart!");
+    //} else {
+      total(WSPLPRICE);
+
+      setCartItems([...cartItems, product.row.original]);
+      console.log(cartItems, "cartItems after");
+      setShowCart(true);
+    //}
+  };
+
+  const removeItem = (id) => {
+    const updatedCart = cartItems.filter((item) => item.name !== id);
+    setCartItems(updatedCart);
+  };
+
+  const decrementQuantity = (item) => {
+    if (item.quantity === 1) {
+      removeItem(item);
+    } else {
+      const updatedItem = { ...item, quantity: item.quantity - 1 };
+      const updatedCart = [
+        ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
+        updatedItem,
+      ];
+      setCartItems(updatedCart);
+    }
+  };
+
+  const incrementQuantity = (item) => {
+    const updatedItem = { ...item, quantity: item.quantity + 1 };
+    const updatedCart = [
+      ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
+      updatedItem,
+    ];
+    setCartItems(updatedCart);
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const productPopup = (id) => {
+    const rowSearch = data.find((result) => result.PARTNAME == id.value);
+
+    setShow(!show);
+
+    setPopupModalData({
+      code: rowSearch.PARTNAME,
+      description: rowSearch.PARTDES,
+      stock: rowSearch.availableQuantity,
+      price: rowSearch.WSPLPRICE,
+      vat: rowSearch.VATPRICE,
+      distributer: rowSearch.SUPNAME,
+      barcode: rowSearch.BARCODE,
+      pharmaCode: rowSearch.SPEC14,
+      supplier: rowSearch.SUPNAME,
+    });
+  };
 
   return (
     <>
@@ -187,7 +270,13 @@ const MaterialTable = () => {
           showProgressBars: isRefetching,
           sorting,
         }}
-        renderRowActions={renderRowActions}
+        //renderRowActions={renderRowActions}
+      />
+      {/* product pop info */}
+      <ProductModal
+        show={show}
+        handleClose={handleClose}
+        popupModalData={popupModalData}
       />
       {/* add to cart */}
       <div>
@@ -205,7 +294,7 @@ const MaterialTable = () => {
               </div>
             </div>
             <ul class="cart-list">
-              {/* {cartItems.map((item, index) => (
+              {cartItems.map((item, index) => (
                 <li class="cart-item" key={index}>
                   <div class="cart-item-details">
                     <p class="cart-item-name">Code:{item.PARTNAME}</p>
@@ -233,14 +322,14 @@ const MaterialTable = () => {
                     </button>
                   </div>
                 </li>
-              ))} */}
+              ))}
             </ul>
 
             <div className="total-container">
-              {/* <p className="total-text">Total: {total}</p> */}
+              <p className="total-text">Total: {total}</p>
             </div>
             <button
-              //   onClick={() => clearCart()}
+              onClick={() => clearCart()}
               class="btn btn-danger cart-clear-btn"
             >
               Clear Cart
