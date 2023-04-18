@@ -17,6 +17,7 @@ import { Info } from "@mui/icons-material";
 import ProductModal from "./Modal";
 import { FaCartArrowDown } from "react-icons/fa";
 import { COLUMNS } from "./columns-material";
+import DATA from "./data.json";
 import "./Cart.css";
 
 const MaterialTable = () => {
@@ -38,6 +39,8 @@ const MaterialTable = () => {
 
   const [cartItems, setCartItems] = useState([]);
 
+  const discountData = useMemo(() => DATA, []);
+  let productData;
   //if you want to avoid useEffect, look at the React Query example instead
   useEffect(() => {
     const fetchData = async () => {
@@ -49,45 +52,56 @@ const MaterialTable = () => {
 
       const url = new URL("/parts/", "http://localhost:8000");
       //const url = new URL("/parts/", "https://kedifap-portal.com2go.co/");
-      url.searchParams.set(
-        "page",
-        `${pagination.pageIndex}`,
-      );
-      url.searchParams.set('size', `${pagination.pageSize}`);
-      url.searchParams.set('filters', JSON.stringify(columnFilters ?? []));
-      url.searchParams.set('globalFilter', globalFilter ?? '');
-      url.searchParams.set('sorting', JSON.stringify(sorting ?? []));
-      console.log(JSON.stringify(columnFilters), "columnFilters");
+      url.searchParams.set("page", `${pagination.pageIndex}`);
+      url.searchParams.set("size", `${pagination.pageSize}`);
+      url.searchParams.set("filters", JSON.stringify(columnFilters ?? []));
+      url.searchParams.set("globalFilter", globalFilter ?? "");
+      url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
       console.log(url, "url");
       try {
         const response = await fetch(url.href);
         const json = await response.json();
-        //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_DISCOFFERS?$filter=DEXT_OFFERPARTNAME%20eq%20'AC2525'%20and%20ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00
-      
-        
-        setData(json.data);
+        //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_DISCOFFERS?$filter=ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00
+
+        //cross matching product array and discount array to add discount object to the product array
+        const updatedArray = json.data.map((item) => {
+          const discountObjs = discountData.filter(
+            (discountItem) => discountItem.DEXT_OFFERPARTNAME === item.PARTNAME
+          );
+          if (discountObjs.length > 0) {
+            return {
+              ...item,
+              discounts: discountObjs.map((discountObj) => ({
+                DISCOUNT: discountObj.DISCOUNT,
+                OFFERQTY: discountObj.OFFERQTY,
+              })),
+            };
+          }
+          return item;
+        });
+        setData(updatedArray);
         setRowCount(json.totalRows);
       } catch (error) {
         setIsError(true);
         console.error(error);
         return;
       }
+
       //fetch discount
-      const discountUrl = new URL("odata/Priority/tabula.ini/efk/B2B_DISCOFFERSB2B_DISCOFFERS?$filter=ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00", "https://ked.priority-software.com.cy/");
-      try {
-        const discountResponse = await fetch(discountUrl.href);
-        const discountJson = await discountResponse.json();
-        console.log(data,'parts json');
-        console.log(discountJson,'discountJson json');
-      } catch (error) {
-        
-      }
+      // const discountUrl = new URL("odata/Priority/tabula.ini/efk/B2B_DISCOFFERSB2B_DISCOFFERS?$filter=ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00", "https://ked.priority-software.com.cy/");
+      // try {
+      //   const discountResponse = await fetch(discountUrl.href);
+      //   const discountJson = await discountResponse.json();
+      //   console.log(data,'parts json');
+      //   console.log(discountJson,'discountJson json');
+      // } catch (error) {
+
+      // }
       setIsError(false);
       setIsLoading(false);
       setIsRefetching(false);
     };
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     columnFilters,
     globalFilter,
@@ -121,11 +135,6 @@ const MaterialTable = () => {
     setShowCart(false);
   };
 
-  // const setTotal = (price) => {    
-  //   const total = cartItems.reduce((acc, item) => acc + parseFloat(item.WSPLPRICE), parseFloat(price));
-  //   return total;
-  // };
-
   const handleAddToCart = (product) => {
     const { PARTNAME, WSPLPRICE } = product.original;
     product.original.quantity = 1;
@@ -134,8 +143,12 @@ const MaterialTable = () => {
       alert("Product is already in the cart!");
     } else {
       //const total = cartItems.reduce((acc, item) => acc + parseFloat(item.WSPLPRICE), parseFloat(price));
-      console.log(cartItems,'cartItems');
-      setTotal(cartItems.reduce((acc, item) => acc + parseFloat(item.WSPLPRICE)*item.quantity, parseFloat(WSPLPRICE)));
+      setTotal(
+        cartItems.reduce(
+          (acc, item) => acc + parseFloat(item.WSPLPRICE) * item.quantity,
+          parseFloat(WSPLPRICE)
+        )
+      );
 
       setCartItems([...cartItems, product.original]);
       setShowCart(true);
@@ -143,15 +156,17 @@ const MaterialTable = () => {
   };
 
   const removeItem = (product) => {
-    console.log(product,'product');
-    const updatedCart = cartItems.filter((item) => item.PARTNAME !== product.PARTNAME);
+    const updatedCart = cartItems.filter(
+      (item) => item.PARTNAME !== product.PARTNAME
+    );
     setCartItems(updatedCart);
 
-    setTotal(total - (parseFloat(product.WSPLPRICE)*parseFloat(product.quantity)));
+    setTotal(
+      total - parseFloat(product.WSPLPRICE) * parseFloat(product.quantity)
+    );
   };
 
   const decrementQuantity = (item) => {
-    
     if (item.quantity == 1) {
       removeItem(item);
     } else {
@@ -172,8 +187,22 @@ const MaterialTable = () => {
       updatedItem,
     ];
     setCartItems(updatedCart);
-    setTotal(total + parseFloat(item.WSPLPRICE));
+    //const hasDiscount = item.discounts.some(discount => item.quantity >= discount.OFFERQTY);
+    let applicableDiscount = null;
 
+    item.discounts.forEach((discount) => {
+      if (
+        item.quantity + 1 >= discount.OFFERQTY &&
+        (!applicableDiscount || discount.OFFERQTY > applicableDiscount.OFFERQTY)
+      ) {
+        applicableDiscount = discount;
+      }
+    });
+    if (applicableDiscount) {
+      let totalItemDiscount = item.quantity * applicableDiscount.DISCOUNT / 100;
+      setTotal(total + parseFloat(item.WSPLPRICE) - totalItemDiscount);
+      console.log(totalItemDiscount, "totalItemDiscount here");
+    } else setTotal(total + parseFloat(item.WSPLPRICE));
   };
 
   const clearCart = () => {
@@ -186,7 +215,6 @@ const MaterialTable = () => {
   const handleClose = () => setShow(false);
 
   const productPopup = (data, id) => {
-
     const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
     setShow(!show);
     setPopupModalData({
@@ -253,9 +281,9 @@ const MaterialTable = () => {
               <FaCartArrowDown />
             </button>
             <Info
-            style={{color: "#1f79d5",width: "50px", height: "50px"}}
+              style={{ color: "#1f79d5", width: "50px", height: "50px" }}
               onClick={() => {
-                productPopup(data , row.original);
+                productPopup(data, row.original);
               }}
             ></Info>
           </div>
