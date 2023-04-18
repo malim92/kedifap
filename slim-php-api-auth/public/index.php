@@ -132,7 +132,8 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 
             $response->withHeader("Content-Type", "application/json")
                 ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-            return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
+            //return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
+            return $response->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co/');
         } else {
             $flash = $this->get('flash');
             $flash->addMessage('error', 'Invalid username or password.');
@@ -185,31 +186,80 @@ $app->get('/hello/{name}', function (Request $request, Response $response, array
 //http://localhost:8000/?page=0
 $app->get('/parts/', function (Request $request, Response $response, array $args) {
     $partsObject = [];
-    $page = $request->getQueryParams('page');
-    $page = $page['page'];
-    //print_r($page) ; die;
+    $page = $request->getQueryParams('page')['page'];
+    $size = $request->getQueryParams('size')['size'];
+    $sorting = $request->getQueryParams('sorting')['sorting'];
+    $columnFilter = $request->getQueryParams('filters')['filters'];
+    $globalFilter = $request->getQueryParams('globalFilter')['globalFilter'];
+    //print_r($columnFilter ) ; die;
     $page *= 100;
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
 
-    //$name = $request->getParam('name');
-    //echo $name;die;
-    $sql = "SELECT * FROM parts LIMIT 100 OFFSET $page";
+    $sortingQuery = '';
+    $filterQuery = '';
+
     $toalRows = "SELECT COUNT(PARTNAME) FROM parts";
+    
+    if (!empty(json_decode($sorting))){
+        $soringArray = json_decode($sorting);
+        $columnId = $soringArray[0]->id;
+        $sortDirection = $soringArray[0]->desc;
+        $sortDirection = !empty($sortDirection) ? 'DESC': 'ASC';
+        $sortingQuery = "ORDER BY $columnId $sortDirection";
+        // print_r($columnId);
+        // print_r($sortDirection ) ; die;
+    }
+    
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)){
+        $columnFilterArray = json_decode($columnFilter);
+        $columnId = $columnFilterArray[0]->id;
+        $filterValue = $columnFilterArray[0]->value;
+        $filterQuery = "WHERE $columnId LIKE :filterValue";
+        // print_r($columnId);
+        
+    }
+
+    $sql = "SELECT * FROM parts $filterQuery $sortingQuery LIMIT :size OFFSET :page";
+
+    if ($globalFilter !== '' && $globalFilter !== null) {
+        $sql = "SELECT * FROM parts WHERE PARTNAME LIKE :globalFilter " . $sortingQuery;
+    }
+
+    
     try {
         // Get DB Object
         $db = new db();
         // Connect
         $db = $db->connect();
 
-        $stmt = $db->query($sql);
-        $parts= $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $db->prepare($sql);
+        //sorting enabled 
+        // if (!empty(json_decode($sorting))){
+        //     $stmt->bindValue(':columnId', $columnId, PDO::PARAM_STR);
+        //     $stmt->bindValue(':sortDirection', $sortDirection, PDO::PARAM_STR);
+        // }
+        //column search
+        
+        if (!empty(json_decode($columnFilter)) && !empty($columnFilter)){
+            $stmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
+        }
+
+        //user search
+        if ($globalFilter !== '' && $globalFilter !== null) {
+            $stmt->bindValue(':globalFilter', '%' . $globalFilter . '%', PDO::PARAM_STR);
+        } else {
+            $stmt->bindValue(':size', $size, PDO::PARAM_INT);
+            $stmt->bindValue(':page', $page, PDO::PARAM_INT);
+        }
+        //$stmt->debugDumpParams();die;
+        $stmt->execute();
+        $parts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         //$toalRows= $stmt->fetch(PDO::FETCH_ASSOC);
         $toalRows = current($db->query($toalRows)->fetch());
-        $partsObject = ["totalRows" => $toalRows , "data" => $parts];
+        $partsObject = ["totalRows" => $toalRows, "data" => $parts];
         return $response->withStatus(200)->withJson($partsObject);
-        
     } catch (PDOException $e) {
         echo '{"error": {"text": ' . $e->getMessage() . '}';
     }
