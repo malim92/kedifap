@@ -1,18 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
-  Stack,
-  TextField,
-  Tooltip,
-} from "@mui/material";
+// import {
+//   Box,
+//   Button,
+//   Dialog,
+//   DialogActions,
+//   DialogContent,
+//   DialogTitle,
+//   IconButton,
+//   MenuItem,
+//   Stack,
+//   TextField,
+//   Tooltip,
+// } from "@mui/material";
+import { Info } from "@mui/icons-material";
 import ProductModal from "./Modal";
 import { FaCartArrowDown } from "react-icons/fa";
 import { COLUMNS } from "./columns-material";
@@ -32,7 +33,7 @@ const MaterialTable = () => {
   const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 100,
   });
 
   const [cartItems, setCartItems] = useState([]);
@@ -47,29 +48,39 @@ const MaterialTable = () => {
       }
 
       const url = new URL("/parts/", "http://localhost:8000");
+      //const url = new URL("/parts/", "https://kedifap-portal.com2go.co/");
       url.searchParams.set(
         "page",
-        0
-        //`${pagination.pageIndex * pagination.pageSize}`,
+        `${pagination.pageIndex}`,
       );
-      //   url.searchParams.set('size', `${pagination.pageSize}`);
-      //   url.searchParams.set('filters', JSON.stringify(columnFilters ?? []));
-      //   url.searchParams.set('globalFilter', globalFilter ?? '');
-      //   url.searchParams.set('sorting', JSON.stringify(sorting ?? []));
+      url.searchParams.set('size', `${pagination.pageSize}`);
+      url.searchParams.set('filters', JSON.stringify(columnFilters ?? []));
+      url.searchParams.set('globalFilter', globalFilter ?? '');
+      url.searchParams.set('sorting', JSON.stringify(sorting ?? []));
+      console.log(JSON.stringify(columnFilters), "columnFilters");
       console.log(url, "url");
       try {
         const response = await fetch(url.href);
         const json = await response.json();
-        // const formatedData = json.data.map((fData) => {
-        //     fData
-        // })
+        //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_DISCOFFERS?$filter=DEXT_OFFERPARTNAME%20eq%20'AC2525'%20and%20ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00
+      
+        
         setData(json.data);
-        //setRowCount(json.meta.totalRowCount);
         setRowCount(json.totalRows);
       } catch (error) {
         setIsError(true);
         console.error(error);
         return;
+      }
+      //fetch discount
+      const discountUrl = new URL("odata/Priority/tabula.ini/efk/B2B_DISCOFFERSB2B_DISCOFFERS?$filter=ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00", "https://ked.priority-software.com.cy/");
+      try {
+        const discountResponse = await fetch(discountUrl.href);
+        const discountJson = await discountResponse.json();
+        console.log(data,'parts json');
+        console.log(discountJson,'discountJson json');
+      } catch (error) {
+        
       }
       setIsError(false);
       setIsLoading(false);
@@ -84,68 +95,23 @@ const MaterialTable = () => {
     pagination.pageSize,
     sorting,
   ]);
-console.log(data,'date');
-  const columns1 = useMemo(
-    () => [
-      {
-        accessorKey: "PARTNAME",
-        header: "Κωδικός",
-        Cell: ({ cell }) => (
-          <button
-            className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-            onClick={() => productPopup(cell.row.original)}
-          >
-            {data.map((column) => {
-              console.log(column,'column');
-          // <div key={column.id}>
-          //     <input type="checkbox" {...column.getToggleHiddenProps()} />
-          // </div>
-      })}
-          </button>
-        ),
-      },
-    ],
-    []
-  );
 
-  const columns2 = useMemo(
+  const columns = useMemo(
     () =>
       COLUMNS.filter(
         (col) =>
-          col.Header === "Κωδικός" ||
-          col.Header === "Περιγραφή" ||
-          col.Header === "Απόθεμα" ||
-          col.Header === "ΧΤ" ||
-          col.Header === "ΛΤ"
+          col.header === "Κωδικός" ||
+          col.header === "Περιγραφή" ||
+          col.header === "Απόθεμα" ||
+          col.header === "ΧΤ" ||
+          col.header === "ΛΤ"
       ),
     []
   );
 
-  const columns3 = useMemo(
-    () => [
-      {
-        accessorKey: "addToCart",
-        header: "Add to cart",
-        Cell: ({ cell }) => (
-          <button
-            className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-            onClick={() => {
-              handleAddToCart(cell);
-            }}
-          >
-            <FaCartArrowDown />
-          </button>
-        ),
-      },
-    ],
-    []
-  );
-
-  const columns = [...columns1, ...columns2, ...columns3];
-
-  //from DataTable/js
   const [showCart, setShowCart] = useState(false);
-  const [popupModalData, setPopupModalData] = useState({});
+
+  const [total, setTotal] = useState(0);
 
   const handleCartClick = () => {
     setShowCart(!showCart);
@@ -154,39 +120,39 @@ console.log(data,'date');
   const handleCartClose = () => {
     setShowCart(false);
   };
-  //popup close
-  const handleClose = () => setShow(false);
 
-  const [show, setShow] = useState(false);
-
-  const total = (price) => {
-    const total = cartItems.reduce((acc, item) => acc + item.WSPLPRICE, price);
-    return total;
-  };
+  // const setTotal = (price) => {    
+  //   const total = cartItems.reduce((acc, item) => acc + parseFloat(item.WSPLPRICE), parseFloat(price));
+  //   return total;
+  // };
 
   const handleAddToCart = (product) => {
-    console.log(cartItems, "cartItems before");
-    const { PARTNAME, WSPLPRICE } = product.row.original;
-    product.row.original.quantity = 1;
+    const { PARTNAME, WSPLPRICE } = product.original;
+    product.original.quantity = 1;
     const found = cartItems.find((element) => element.PARTNAME == PARTNAME);
-    //if (found) {
-      //alert("Product is already in the cart!");
-    //} else {
-      total(WSPLPRICE);
+    if (found) {
+      alert("Product is already in the cart!");
+    } else {
+      //const total = cartItems.reduce((acc, item) => acc + parseFloat(item.WSPLPRICE), parseFloat(price));
+      console.log(cartItems,'cartItems');
+      setTotal(cartItems.reduce((acc, item) => acc + parseFloat(item.WSPLPRICE)*item.quantity, parseFloat(WSPLPRICE)));
 
-      setCartItems([...cartItems, product.row.original]);
-      console.log(cartItems, "cartItems after");
+      setCartItems([...cartItems, product.original]);
       setShowCart(true);
-    //}
+    }
   };
 
-  const removeItem = (id) => {
-    const updatedCart = cartItems.filter((item) => item.name !== id);
+  const removeItem = (product) => {
+    console.log(product,'product');
+    const updatedCart = cartItems.filter((item) => item.PARTNAME !== product.PARTNAME);
     setCartItems(updatedCart);
+
+    setTotal(total - (parseFloat(product.WSPLPRICE)*parseFloat(product.quantity)));
   };
 
   const decrementQuantity = (item) => {
-    if (item.quantity === 1) {
+    
+    if (item.quantity == 1) {
       removeItem(item);
     } else {
       const updatedItem = { ...item, quantity: item.quantity - 1 };
@@ -195,6 +161,7 @@ console.log(data,'date');
         updatedItem,
       ];
       setCartItems(updatedCart);
+      setTotal(total - parseFloat(item.WSPLPRICE));
     }
   };
 
@@ -205,17 +172,23 @@ console.log(data,'date');
       updatedItem,
     ];
     setCartItems(updatedCart);
+    setTotal(total + parseFloat(item.WSPLPRICE));
+
   };
 
   const clearCart = () => {
     setCartItems([]);
+    setTotal(0);
   };
 
-  const productPopup = (id) => {
-    const rowSearch = data.find((result) => result.PARTNAME == id.value);
+  const [show, setShow] = useState(false);
+  const [popupModalData, setPopupModalData] = useState({});
+  const handleClose = () => setShow(false);
 
+  const productPopup = (data, id) => {
+
+    const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
     setShow(!show);
-
     setPopupModalData({
       code: rowSearch.PARTNAME,
       description: rowSearch.PARTDES,
@@ -242,8 +215,6 @@ console.log(data,'date');
         }}
         columns={columns}
         data={data}
-        enableRowSelection
-        getRowId={(row) => row.phoneNumber}
         initialState={{ showColumnFilters: true }}
         manualFiltering
         manualPagination
@@ -270,9 +241,26 @@ console.log(data,'date');
           showProgressBars: isRefetching,
           sorting,
         }}
-        //renderRowActions={renderRowActions}
+        enableRowActions
+        renderRowActions={({ row }) => (
+          <div align="center">
+            <button
+              className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+              onClick={() => {
+                handleAddToCart(row);
+              }}
+            >
+              <FaCartArrowDown />
+            </button>
+            <Info
+            style={{color: "#1f79d5",width: "50px", height: "50px"}}
+              onClick={() => {
+                productPopup(data , row.original);
+              }}
+            ></Info>
+          </div>
+        )}
       />
-      {/* product pop info */}
       <ProductModal
         show={show}
         handleClose={handleClose}
@@ -316,7 +304,7 @@ console.log(data,'date');
                     </button>
                     <button
                       class="cart-item-remove-btn"
-                      onClick={() => removeItem(item.name)}
+                      onClick={() => removeItem(item)}
                     >
                       &times;
                     </button>
@@ -326,7 +314,7 @@ console.log(data,'date');
             </ul>
 
             <div className="total-container">
-              <p className="total-text">Total: {total}</p>
+              <p className="total-text">Total: {total.toFixed(2)}</p>
             </div>
             <button
               onClick={() => clearCart()}
