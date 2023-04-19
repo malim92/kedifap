@@ -1,23 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
-// import {
-//   Box,
-//   Button,
-//   Dialog,
-//   DialogActions,
-//   DialogContent,
-//   DialogTitle,
-//   IconButton,
-//   MenuItem,
-//   Stack,
-//   TextField,
-//   Tooltip,
-// } from "@mui/material";
 import { Info } from "@mui/icons-material";
 import ProductModal from "./Modal";
 import { FaCartArrowDown } from "react-icons/fa";
+import { FcMoneyTransfer } from "react-icons/fc";
 import { COLUMNS } from "./columns-material";
+import { FetchPartsData } from "./partsApi";
 import DATA from "./data.json";
+import STOCK from "./stock.json";
 import "./Cart.css";
 
 const MaterialTable = () => {
@@ -40,68 +30,23 @@ const MaterialTable = () => {
   const [cartItems, setCartItems] = useState([]);
 
   const discountData = useMemo(() => DATA, []);
-  let productData;
-  //if you want to avoid useEffect, look at the React Query example instead
+  const stockData = useMemo(() => STOCK, []);
+
+  const [iconDisplay, setIconDisplay] = useState(["none"]);
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!data.length) {
-        setIsLoading(true);
-      } else {
-        setIsRefetching(true);
-      }
-
-      const url = new URL("/parts/", "http://localhost:8000");
-      //const url = new URL("/parts/", "https://kedifap-portal.com2go.co/");
-      url.searchParams.set("page", `${pagination.pageIndex}`);
-      url.searchParams.set("size", `${pagination.pageSize}`);
-      url.searchParams.set("filters", JSON.stringify(columnFilters ?? []));
-      url.searchParams.set("globalFilter", globalFilter ?? "");
-      url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
-      console.log(url, "url");
-      try {
-        const response = await fetch(url.href);
-        const json = await response.json();
-        //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_DISCOFFERS?$filter=ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00
-
-        //cross matching product array and discount array to add discount object to the product array
-        const updatedArray = json.data.map((item) => {
-          const discountObjs = discountData.filter(
-            (discountItem) => discountItem.DEXT_OFFERPARTNAME === item.PARTNAME
-          );
-          if (discountObjs.length > 0) {
-            return {
-              ...item,
-              discounts: discountObjs.map((discountObj) => ({
-                DISCOUNT: discountObj.DISCOUNT,
-                OFFERQTY: discountObj.OFFERQTY,
-              })),
-            };
-          }
-          return item;
-        });
-        setData(updatedArray);
-        setRowCount(json.totalRows);
-      } catch (error) {
-        setIsError(true);
-        console.error(error);
-        return;
-      }
-
-      //fetch discount
-      // const discountUrl = new URL("odata/Priority/tabula.ini/efk/B2B_DISCOFFERSB2B_DISCOFFERS?$filter=ACTIVE%20eq%20'Y'%20and%20TODATE%20ge%202023-04-18T23:59:59%2B02:00", "https://ked.priority-software.com.cy/");
-      // try {
-      //   const discountResponse = await fetch(discountUrl.href);
-      //   const discountJson = await discountResponse.json();
-      //   console.log(data,'parts json');
-      //   console.log(discountJson,'discountJson json');
-      // } catch (error) {
-
-      // }
-      setIsError(false);
-      setIsLoading(false);
-      setIsRefetching(false);
-    };
-    fetchData();
+    FetchPartsData(
+      sorting,
+      globalFilter,
+      columnFilters,
+      pagination,
+      discountData,
+      stockData,
+      setIconDisplay,
+      setData,
+      setRowCount,
+      setIsError
+    );
   }, [
     columnFilters,
     globalFilter,
@@ -160,10 +105,55 @@ const MaterialTable = () => {
       (item) => item.PARTNAME !== product.PARTNAME
     );
     setCartItems(updatedCart);
+    console.log(total, "total 1");
+    console.log(product, "product 1");
 
     setTotal(
-      total - parseFloat(product.WSPLPRICE) * parseFloat(product.quantity)
+      total - parseFloat(product.WSPLPRICE) * parseInt(product.quantity)
     );
+
+    console.log(total, "total 2");
+  };
+
+  const [productQuantity, setProductQuantity] = useState(1);
+
+  const handleQuantityChange = (event, item) => {
+    setProductQuantity(event);
+    const updatedItem = { ...item, quantity: event };
+    const updatedCart = [
+      ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
+      updatedItem,
+    ];
+    console.log(updatedItem, "updatedItem");
+    console.log(updatedCart, "updatedCart");
+    setCartItems(updatedCart);
+    //setProductQuantity(parseInt(event.target.value));
+    let applicableDiscount = null;
+
+    if (updatedItem.discounts) {
+      updatedItem.discounts.forEach((discount) => {
+        if (
+          updatedItem.quantity + 1 >= discount.OFFERQTY &&
+          (!applicableDiscount ||
+            discount.OFFERQTY > applicableDiscount.OFFERQTY)
+        ) {
+          console.log("here 1");
+          applicableDiscount = discount;
+        }
+      });
+    }
+    if (applicableDiscount) {
+      console.log(updatedItem.quantity, "updatedItem.quantity 1");
+      let totalItemDiscount =
+        (updatedItem.quantity * applicableDiscount.DISCOUNT) / 100;
+      setTotal(total + parseFloat(updatedItem.WSPLPRICE) - totalItemDiscount);
+    } else {
+      console.log(typeof( total), "typeof total 1");
+      console.log(total, "total 1");
+      console.log(updatedItem.WSPLPRICE, "updatedItem.WSPLPRICE 1");
+      setTotal(total + parseFloat(updatedItem.WSPLPRICE));
+      console.log(total, "total 2");
+    }
   };
 
   const decrementQuantity = (item) => {
@@ -190,24 +180,28 @@ const MaterialTable = () => {
     //const hasDiscount = item.discounts.some(discount => item.quantity >= discount.OFFERQTY);
     let applicableDiscount = null;
 
-    item.discounts.forEach((discount) => {
-      if (
-        item.quantity + 1 >= discount.OFFERQTY &&
-        (!applicableDiscount || discount.OFFERQTY > applicableDiscount.OFFERQTY)
-      ) {
-        applicableDiscount = discount;
-      }
-    });
+    if (item.discounts) {
+      item.discounts.forEach((discount) => {
+        if (
+          item.quantity + 1 >= discount.OFFERQTY &&
+          (!applicableDiscount ||
+            discount.OFFERQTY > applicableDiscount.OFFERQTY)
+        ) {
+          applicableDiscount = discount;
+        }
+      });
+    }
     if (applicableDiscount) {
-      let totalItemDiscount = item.quantity * applicableDiscount.DISCOUNT / 100;
+      let totalItemDiscount =
+        (item.quantity * applicableDiscount.DISCOUNT) / 100;
       setTotal(total + parseFloat(item.WSPLPRICE) - totalItemDiscount);
-      console.log(totalItemDiscount, "totalItemDiscount here");
     } else setTotal(total + parseFloat(item.WSPLPRICE));
   };
 
   const clearCart = () => {
     setCartItems([]);
     setTotal(0);
+    setProductQuantity(1);
   };
 
   const [show, setShow] = useState(false);
@@ -280,6 +274,13 @@ const MaterialTable = () => {
             >
               <FaCartArrowDown />
             </button>
+            <FcMoneyTransfer
+              style={{
+                display: iconDisplay,
+                fontSize: "30px",
+                transform: "translate(-50%, -50%)",
+              }}
+            />
             <Info
               style={{ color: "#1f79d5", width: "50px", height: "50px" }}
               onClick={() => {
@@ -315,21 +316,29 @@ const MaterialTable = () => {
                   <div class="cart-item-details">
                     <p class="cart-item-name">Code:{item.PARTNAME}</p>
                     <p class="cart-item-price">Price:{item.WSPLPRICE}</p>
-                    <p class="cart-item-quantity">Quantity: {item.quantity}</p>
+                    {/* <p class="cart-item-quantity">Quantity: {item.quantity}</p> */}
                   </div>
                   <div class="cart-item-controls">
-                    <button
+                    {/* <button
                       class="cart-item-control-btn"
                       onClick={() => decrementQuantity(item)}
                     >
                       -
-                    </button>
-                    <button
+                    </button> */}
+                    <input
+                      type="number"
+                      value={productQuantity}
+                      onChange={(e) =>
+                        handleQuantityChange(e.target.value, item)
+                      }
+                    />
+
+                    {/* <button
                       class="cart-item-control-btn"
                       onClick={() => incrementQuantity(item)}
                     >
                       +
-                    </button>
+                    </button> */}
                     <button
                       class="cart-item-remove-btn"
                       onClick={() => removeItem(item)}

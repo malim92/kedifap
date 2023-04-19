@@ -224,7 +224,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     $sql = "SELECT * FROM parts $filterQuery $sortingQuery LIMIT :size OFFSET :page";
 
     if ($globalFilter !== '' && $globalFilter !== null) {
-        $sql = "SELECT * FROM parts WHERE PARTNAME LIKE :globalFilter " . $sortingQuery;
+        $sql = "SELECT * FROM parts WHERE PARTNAME OR PARTDES LIKE :globalFilter " . $sortingQuery;
     }
 
     

@@ -9,7 +9,7 @@ export const COLUMNS = [
     },
     {
         header: "Απόθεμα",
-        accessorKey: 'availableQuantity',
+        accessorKey: 'stock',
     },
     {
         header: "Bar Code",
