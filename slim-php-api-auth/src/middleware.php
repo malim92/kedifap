@@ -54,7 +54,7 @@ $app->add(new \Slim\Middleware\HttpBasicAuthentication(
 
 $app->add(new \Slim\Middleware\JwtAuthentication([
     "path" => ["/"],
-    "passthrough" => ["/authenticate", "/", "/test",  '/validate-token', '/front'],
+    "passthrough" => ["/authenticate", "/", "/test",  '/validate-token', '/front', '/login'],
     "secret" => $dotenv_vars['SECRET'],
     "callback" => function ($request, $response, $arguments) use ($container) {
         $container["jwt"] = $arguments["decoded"];

@@ -6,7 +6,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { useEffect } from "react";
-import Cookies from "js-cookie";
+import withAuth from './middlewares/tokenValidation';
 
 import ProductsTable from "./pages/ProductsTable";
 import Home from "./pages/Home";
@@ -30,27 +30,11 @@ const router = createBrowserRouter(
 );
 
 function App() {
-  const token = Cookies.get("jwt_token");
-  // return (
-  //   <div className="App">
-  //       <RouterProvider router={router} />
-  //   </div>
-  // );
-  if (!token) {
-    //window.location.href = "http://localhost:8000/?error=noToken";
-    //window.location.href = "http://kedifap-portal.com2go.co/?error=noToken";
-    return (
-      <div className="App">
+  return (
+    <div className="App">
         <RouterProvider router={router} />
-      </div>
-    );
-  } else {
-    return (
-      <div className="App">
-        <RouterProvider router={router} />
-      </div>
-    );
-  }
+    </div>
+  );
 }
-
 export default App;
+//export default withAuth(App);

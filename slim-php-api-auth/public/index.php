@@ -50,39 +50,6 @@ $app->get('/', function (Request $request, Response $response, $args) {
     return $response;
 });
 
-// Register
-$app->post('/register', function (Request $request, Response $response) {
-    $first_name = $request->getParam('name');
-    $phone = $request->getParam('phone');
-    $email = $request->getParam('email');
-    $address = $request->getParam('address');
-
-    $sql = "INSERT INTO test (name,email,phone,address) VALUES
-    (:name,:email,:phone,:address)";
-
-    try {
-        // Get DB Object
-        $db = new db();
-        // Connect
-        $db = $db->connect();
-
-        $stmt = $db->prepare($sql);
-
-        $stmt->bindParam(':name', $first_name);
-        $stmt->bindParam(':email',      $email);
-
-        $stmt->bindParam(':phone',      $phone);
-        $stmt->bindParam(':address',    $address);
-
-        $stmt->execute();
-
-        echo '{"notice": {"text": "Customer Added"}';
-    } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
-    }
-});
-
-
 // Authenticate
 $app->post('/authenticate', function (Request $request, Response $response) {
     session_start();
@@ -95,7 +62,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     $params = $request->getParsedBody();
     $name = $params['username'] ?? '';
     //echo $name;die;
-    $sql = "SELECT * FROM test WHERE name = '$name'";
+    $sql = "SELECT * FROM customers WHERE CUSTNAME = '$name'";
     try {
         // Get DB Object
         $db = new db();
@@ -104,8 +71,8 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 
         $stmt = $db->query($sql);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user['name'] == $name) {
+        
+        if ($user['CUSTNAME'] === $name) {
 
             $MyJWT = $this->JWT;
             $now = new DateTime();
@@ -132,12 +99,12 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 
             $response->withHeader("Content-Type", "application/json")
                 ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-            //return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
-            return $response->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co/');
+            return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
+            //return $response->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co/');
         } else {
             $flash = $this->get('flash');
             $flash->addMessage('error', 'Invalid username or password.');
-            return $response->withStatus(302)->withHeader('Location', '/login');
+            return $response->withStatus(302)->withHeader('Location', '/');
             //return '{"success": "false", "msg": "User not found"}';
         }
     } catch (PDOException $e) {

@@ -1,5 +1,5 @@
-import banner1 from "../assets/banner-1.jpg";
-import banner2 from "../assets/banner-2.jpg";
+import banner1 from "../assets/728x90.gif";
+import banner2 from "../assets/300.gif";
 
 function Banners() {
     return (

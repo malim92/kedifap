@@ -1,34 +1,35 @@
-function validateTokenMiddleware(token) {
-    return function(next) {
-      return function(action) {
-        // Check if the action has a token property
-        if (action.token) {
-          // Make a POST request to the validation endpoint with the token in the header
-          fetch('http://localhost:8000/validate-token', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
-          .then(response => {
-            if (!response.ok) {
-              // Token validation failed
-              throw new Error('Invalid token');
-            }
-            return response;
-          })
-          .then(response => {
-            // Token validation succeeded, pass the action to the next middleware
-            return next(action);
-          })
-          .catch(error => {
-            console.error(error);
-          });
-        } else {
-          // If the action doesn't have a token property, pass it to the next middleware
-          return next(action);
-        }
+import React, { useEffect, useState } from 'react';
+import Cookies from "js-cookie";
+
+function withAuth(Component) {
+  return function WithAuth(props) {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    useEffect(() => {
+      const token = Cookies.get("jwt_token");
+      async function checkAuth() {
+        console.log();
+        // Make a request to the server to check if the token is authenticated
+        const response = await fetch('http://localhost:8000/validate-token', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        const data = await response.json();
+        setIsAuthenticated(data.isAuthenticated);
       }
+      checkAuth();
+    }, []);
+
+    if (isAuthenticated) {
+      return <Component {...props} />;
+    } else {
+      // Redirect the user to a login page or display an error message
+      return window.location.href = "http://localhost:8000/?error=noToken";
+      //return <p>You are not authorized to access this page.</p>;
     }
-  }
-  
+  };
+}
+
+export default withAuth;
+//http://localhost:8000/validate-token

@@ -105,54 +105,60 @@ const MaterialTable = () => {
       (item) => item.PARTNAME !== product.PARTNAME
     );
     setCartItems(updatedCart);
-    console.log(total, "total 1");
-    console.log(product, "product 1");
-
+    setProductQuantity(1);
     setTotal(
       total - parseFloat(product.WSPLPRICE) * parseInt(product.quantity)
     );
-
-    console.log(total, "total 2");
   };
 
-  const [productQuantity, setProductQuantity] = useState(1);
+  //const [productQuantity, setProductQuantity] = useState(1);
+  const [productQuantity, setProductQuantity] = useState({});
 
-  const handleQuantityChange = (event, item) => {
-    setProductQuantity(event);
-    const updatedItem = { ...item, quantity: event };
-    const updatedCart = [
-      ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
-      updatedItem,
-    ];
-    console.log(updatedItem, "updatedItem");
-    console.log(updatedCart, "updatedCart");
-    setCartItems(updatedCart);
+  const handleQuantityChange = (event, item, index) => {
+    //setProductQuantity(event);
+    setProductQuantity((prevQuantities) => ({
+      ...prevQuantities,
+      [item.PARTNAME]: event,
+    }));
+    //const updatedItem = { ...item, quantity: event };
+    //{PARTNAME: 'LP01059', PARTDES: 'NUROFEN 200MG 24TAB', SPEC19: 'ANXIOLYTIC', DEXT_NARCOTIC: '1', DEXT_ACTIVE: '1', …}BARCODE: "5000158103375"CUSTNAME: "For Labeling"DEXT_ACTIVE: "1"DEXT_BRAND: "RECKITT BENCKISER"DEXT_CMVO: "6"DEXT_CSPOLICYCODE: "NONE"DEXT_FRAGILE: nullDEXT_GHS: "1"DEXT_IMPORTERNAME: "V1059"DEXT_LIQUID: nullDEXT_NARCOTIC: "1"DEXT_PARTBARCODE: "KDLP01059"DEXT_SUPPOLICYCODE: "EXP"PARTDES: "NUROFEN 200MG 24TAB"PARTNAME: "LP01059"SPEC1: "IBUPROFEN"SPEC14: "8400598/2"SPEC19: "ANXIOLYTIC"SUPNAME: "V1057"UDATE: "2023-04-01"VATPRICE: "5.32"WSPLPRICE: "3.7"discounts: (5) [{…}, {…}, {…}, {…}, {…}]quantity: "19"stock: 4288[[Prototype]]: Object 'updatedItem 1 '
+    const updatedItems = [...cartItems];
+    console.log(updatedItems, "updatedItem 2 ");
+    updatedItems[index] = { ...updatedItems[index], quantity: event };
+    setCartItems(updatedItems);
+    // const updatedCart = [
+    //   ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
+    //   updatedItems,
+    // ];
+    //setCartItems(updatedCart);
     //setProductQuantity(parseInt(event.target.value));
     let applicableDiscount = null;
 
-    if (updatedItem.discounts) {
-      updatedItem.discounts.forEach((discount) => {
+    if (updatedItems.discounts) {
+      updatedItems.discounts.forEach((discount) => {
         if (
-          updatedItem.quantity + 1 >= discount.OFFERQTY &&
+          parseInt(updatedItems.quantity) + 1 >= discount.OFFERQTY &&
           (!applicableDiscount ||
             discount.OFFERQTY > applicableDiscount.OFFERQTY)
         ) {
-          console.log("here 1");
           applicableDiscount = discount;
         }
       });
     }
     if (applicableDiscount) {
-      console.log(updatedItem.quantity, "updatedItem.quantity 1");
       let totalItemDiscount =
-        (updatedItem.quantity * applicableDiscount.DISCOUNT) / 100;
-      setTotal(total + parseFloat(updatedItem.WSPLPRICE) - totalItemDiscount);
+        (parseInt(updatedItems.quantity) * applicableDiscount.DISCOUNT) / 100;
+      setTotal(total + parseFloat(updatedItems.WSPLPRICE) - totalItemDiscount);
     } else {
-      console.log(typeof( total), "typeof total 1");
-      console.log(total, "total 1");
-      console.log(updatedItem.WSPLPRICE, "updatedItem.WSPLPRICE 1");
-      setTotal(total + parseFloat(updatedItem.WSPLPRICE));
-      console.log(total, "total 2");
+      let productPrice = parseFloat(updatedItems.WSPLPRICE);
+      let totalCartItemPrice = 0;
+      updatedItems.forEach((carItem) => {
+        console.log(carItem, "carItem ");
+        totalCartItemPrice +=
+          parseFloat(carItem.WSPLPRICE) * parseInt(carItem.quantity);
+      });
+      //console.log(updatedCart, "updatedCart ");
+      setTotal(totalCartItemPrice);
     }
   };
 
@@ -266,6 +272,21 @@ const MaterialTable = () => {
         enableRowActions
         renderRowActions={({ row }) => (
           <div align="center">
+            {row.original.hasOwnProperty("discounts") && (
+            <button
+              className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+              onClick={() => {
+                handleAddToCart(row);
+              }}
+              style={{
+                backgroundColor: '#db2d2d'
+              }}
+            >
+              <FaCartArrowDown />
+            </button>
+            )}
+            {/* else */}
+            {!row.original.hasOwnProperty("discounts") && (
             <button
               className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
               onClick={() => {
@@ -274,15 +295,24 @@ const MaterialTable = () => {
             >
               <FaCartArrowDown />
             </button>
-            <FcMoneyTransfer
-              style={{
-                display: iconDisplay,
-                fontSize: "30px",
-                transform: "translate(-50%, -50%)",
-              }}
-            />
+            )}
+            {row.original.hasOwnProperty("discounts") && (
+              <FcMoneyTransfer
+                style={{
+                  display: iconDisplay,
+                  fontSize: "30px",
+                  transform: "translate(-75%, -10%)",
+                }}
+              />
+            )}
             <Info
-              style={{ color: "#1f79d5", width: "50px", height: "50px" }}
+              style={{
+                color: "#1f79d5",
+                width: "50px",
+                height: "50px",
+                cursor: "pointer",
+                float: "right"
+              }}
               onClick={() => {
                 productPopup(data, row.original);
               }}
@@ -327,10 +357,21 @@ const MaterialTable = () => {
                     </button> */}
                     <input
                       type="number"
-                      value={productQuantity}
+                      value={productQuantity[item.PARTNAME] || 1}
+                      min={1}
+                      max={item.stock}
                       onChange={(e) =>
-                        handleQuantityChange(e.target.value, item)
+                        handleQuantityChange(e.target.value, item, index)
                       }
+                      style={{
+                        width: "50px",
+                        marginRight: "10px",
+                        borderRadius: "5px",
+                        border: "1px solid #ccc",
+                        padding: "5px",
+                        fontSize: "1rem",
+                        textAlign: "center",
+                      }}
                     />
 
                     {/* <button
