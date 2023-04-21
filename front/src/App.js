@@ -36,5 +36,5 @@ function App() {
     </div>
   );
 }
-export default App;
-//export default withAuth(App);
+//export default App;
+export default withAuth(App);

@@ -71,7 +71,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 
         $stmt = $db->query($sql);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         if ($user['CUSTNAME'] === $name) {
 
             $MyJWT = $this->JWT;
@@ -115,7 +115,8 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 $app->post('/validate-token', function ($request, $response, $args) {
     // $data = array('message' => 'Hello from the backend!');
     // return $response->withJson($data);
-
+    $file = '../log.txt'; // path to file
+    file_put_contents($file, 'here 1', FILE_APPEND);
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
@@ -124,18 +125,27 @@ $app->post('/validate-token', function ($request, $response, $args) {
     //$token = json_decode($request->getBody())->token;
     $token_parts = explode(' ', $token);
 
-
+    file_put_contents($file, 'here 2', FILE_APPEND);
     if ($token_parts[0] === 'Bearer') {
         $token = $token_parts[1];
     }
     $permissions = 'admin';
-
+   
+    
+    $content = 'This is example text.'; // content to write
+    
     if (!$token) {
         //return $response->withStatus(202)->withJson(['error' => 'Unauthorized']);
         return $response->withStatus(200)->withJson(['isTokenValid' => false]);
     }
+    file_put_contents($file, 'here 3', FILE_APPEND);
     try {
         $decoded = JWT::decode($token, $dotenv_vars['SECRET'], array('HS512'));
+        $data_string = serialize($decoded);
+        //file_put_contents($file, gettype($decoded) , FILE_APPEND);
+        file_put_contents($file, $data_string, FILE_APPEND);
+        //print_r($decoded);
+        //die;
         //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
         return $response->withStatus(200)->withJson(['isTokenValid' => true]);
     } catch (\Throwable $th) {
@@ -168,24 +178,24 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     $filterQuery = '';
 
     $toalRows = "SELECT COUNT(PARTNAME) FROM parts";
-    
-    if (!empty(json_decode($sorting))){
+
+    if (!empty(json_decode($sorting))) {
         $soringArray = json_decode($sorting);
         $columnId = $soringArray[0]->id;
         $sortDirection = $soringArray[0]->desc;
-        $sortDirection = !empty($sortDirection) ? 'DESC': 'ASC';
+        $sortDirection = !empty($sortDirection) ? 'DESC' : 'ASC';
         $sortingQuery = "ORDER BY $columnId $sortDirection";
         // print_r($columnId);
         // print_r($sortDirection ) ; die;
     }
-    
-    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)){
+
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
         $filterValue = $columnFilterArray[0]->value;
         $filterQuery = "WHERE $columnId LIKE :filterValue";
         // print_r($columnId);
-        
+
     }
 
     $sql = "SELECT * FROM parts $filterQuery $sortingQuery LIMIT :size OFFSET :page";
@@ -194,7 +204,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         $sql = "SELECT * FROM parts WHERE PARTNAME OR PARTDES LIKE :globalFilter " . $sortingQuery;
     }
 
-    
+
     try {
         // Get DB Object
         $db = new db();
@@ -208,8 +218,8 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         //     $stmt->bindValue(':sortDirection', $sortDirection, PDO::PARAM_STR);
         // }
         //column search
-        
-        if (!empty(json_decode($columnFilter)) && !empty($columnFilter)){
+
+        if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
             $stmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
         }
 
