@@ -15,6 +15,7 @@ import Information from "./pages/Information";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
+import Login from "./pages/Login";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,7 +25,8 @@ const router = createBrowserRouter(
       <Route path="/orders" element={<Orders />} />
       <Route path="/general-information" element={<Information />} />
       <Route path="/contact" element={<Contact />} />
-      <Route path="/profile" element={<Profile />} />
+      {/* <Route path="/profile" element={<Profile />} /> */}
+      <Route path="/login" element={<Login />} />
     </Route>
   )
 );
@@ -36,5 +38,5 @@ function App() {
     </div>
   );
 }
-//export default App;
-export default withAuth(App);
+export default App;
+//export default withAuth(App);

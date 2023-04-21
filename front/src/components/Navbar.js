@@ -30,6 +30,9 @@ export default function Navbar() {
                             <li>
                                 <Link to='/profile'>Το προφίλ μου</Link>
                             </li>
+                            <li>
+                                <Link to='/login'>login</Link>
+                            </li>
                         </ul>
                     </div>
                 </div>            
