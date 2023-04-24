@@ -1,4 +1,4 @@
-import logo from "../assets/kedifap-logo.png";
+import logo from "../assets/kedi logo.png";
 import { Link, Outlet } from "react-router-dom";
 import Banners from "./Banners";
 
@@ -20,6 +20,9 @@ export default function Navbar() {
                             </li>
                             <li>
                                 <Link to='/orders'>Παραγγελίες</Link>
+                            </li>
+                            <li>
+                                <Link to='/invoices'>Invoices</Link>
                             </li>
                             <li>
                                 <Link to='/general-information'>Σχετικά</Link>

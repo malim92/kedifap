@@ -15,19 +15,24 @@ import Information from "./pages/Information";
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
+import Invoices from "./pages/Invoices";
 import Login from "./pages/Login";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
+    <>
     <Route element={<Navbar />}>
       <Route path="/" element={<Home />} />
       <Route path="/catalogue" element={<ProductsTable />} />
       <Route path="/orders" element={<Orders />} />
+      <Route path="/invoices" element={<Invoices />} />
       <Route path="/general-information" element={<Information />} />
       <Route path="/contact" element={<Contact />} />
-      {/* <Route path="/profile" element={<Profile />} /> */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/profile" element={<Profile />} />
+      {/* <Route path="/login" element={<Login />} /> */}
     </Route>
+    <Route path="/login" element={<Login />} />
+    </>
   )
 );
 
