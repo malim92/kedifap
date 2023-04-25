@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 import Contact from "./pages/Contact";
 import Information from "./pages/Information";
 import Orders from "./pages/Orders";
+import Statements from "./pages/Statements";
 import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 import Invoices from "./pages/Invoices";
@@ -26,6 +27,7 @@ const router = createBrowserRouter(
       <Route path="/catalogue" element={<ProductsTable />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/invoices" element={<Invoices />} />
+      <Route path="/customer-statements" element={<Statements />} />
       <Route path="/general-information" element={<Information />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/profile" element={<Profile />} />

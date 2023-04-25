@@ -17,6 +17,7 @@ function LoginForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    return window.location.href = "https://kedi-app.com2go.co/";
     console.log(`Username: ${username}, Password: ${password}`);
   };
 
@@ -62,7 +63,7 @@ function LoginForm() {
         </button>
         <img
           src={pill}
-          style={{ right: "30px", width:'6em', position: 'relative',     top: '10px'}}
+          style={{ right: "30px", width:'6em', position: 'relative', top: '10px'}}
         />
       </div>
     </form>

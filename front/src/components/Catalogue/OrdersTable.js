@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
-import { INVOICE_COLUMNS } from "./columns-invoice";
+import { ORDERS_COLUMNS } from "./columns-orders";
 //import { FetchInvoiceData } from "./invoiceApi";
-import INVOICEDATA from "./invoiceData.json";
+import ORDERSDATA from "./ordersData.json";
 
 const InvoicesTable = () => {
   //data and fetching state
@@ -39,11 +39,19 @@ const InvoicesTable = () => {
     sorting,
   ]);
 
-  const columns = useMemo(() => INVOICE_COLUMNS, []);
-  const data = useMemo(() => INVOICEDATA, []);
+  const columns = useMemo(() => ORDERS_COLUMNS, []);
+  const data = useMemo(() => ORDERSDATA, []);
   return (
     <>
       <MaterialReactTable
+        // displayColumnDefOptions={{
+        //   "mrt-row-actions": {
+        //     muiTableHeadCellProps: {
+        //       align: "center",
+        //     },
+        //     size: 120,
+        //   },
+        // }}
         columns={columns}
         data={data}
         initialState={{ showColumnFilters: true }}
@@ -72,6 +80,20 @@ const InvoicesTable = () => {
           showProgressBars: isRefetching,
           sorting,
         }}
+        // enableRowActions
+        // renderRowActions={({ row }) => (
+        //   <div align="center">
+        //     <Info
+        //       style={{
+        //         color: "#1f79d5",
+        //         width: "50px",
+        //         height: "50px",
+        //         cursor: "pointer",
+        //         float: "right",
+        //       }}
+        //     ></Info>
+        //   </div>
+        // )}
       />
     </>
   );

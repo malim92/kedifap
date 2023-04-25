@@ -210,6 +210,14 @@ const MaterialTable = () => {
     setProductQuantity(1);
   };
 
+  const sendOrder = (order, cartTotal) => {
+    console.log(order, 'order');
+    console.log(cartTotal, 'cartTotal');
+    setCartItems([]);
+    setTotal(0);
+    setProductQuantity(1);
+  };
+
   const [show, setShow] = useState(false);
   const [popupModalData, setPopupModalData] = useState({});
   const handleClose = () => setShow(false);
@@ -273,28 +281,28 @@ const MaterialTable = () => {
         renderRowActions={({ row }) => (
           <div align="center">
             {row.original.hasOwnProperty("discounts") && (
-            <button
-              className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-              onClick={() => {
-                handleAddToCart(row);
-              }}
-              style={{
-                backgroundColor: '#db2d2d'
-              }}
-            >
-              <FaCartArrowDown />
-            </button>
+              <button
+                className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                onClick={() => {
+                  handleAddToCart(row);
+                }}
+                style={{
+                  backgroundColor: "#db2d2d",
+                }}
+              >
+                <FaCartArrowDown />
+              </button>
             )}
             {/* else */}
             {!row.original.hasOwnProperty("discounts") && (
-            <button
-              className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-              onClick={() => {
-                handleAddToCart(row);
-              }}
-            >
-              <FaCartArrowDown />
-            </button>
+              <button
+                className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                onClick={() => {
+                  handleAddToCart(row);
+                }}
+              >
+                <FaCartArrowDown />
+              </button>
             )}
             {row.original.hasOwnProperty("discounts") && (
               <FcMoneyTransfer
@@ -311,7 +319,7 @@ const MaterialTable = () => {
                 width: "50px",
                 height: "50px",
                 cursor: "pointer",
-                float: "right"
+                float: "right",
               }}
               onClick={() => {
                 productPopup(data, row.original);
@@ -394,12 +402,16 @@ const MaterialTable = () => {
             <div className="total-container">
               <p className="total-text">Total: {total.toFixed(2)}</p>
             </div>
+            
+            <div class="d-flex justify-content-between">
             <button
               onClick={() => clearCart()}
               class="btn btn-danger cart-clear-btn"
             >
               Clear Cart
             </button>
+              <button onClick={() => sendOrder(cartItems, total)} class="btn btn-primary">Send order</button>
+            </div>
           </div>
         )}
       </div>

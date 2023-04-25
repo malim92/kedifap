@@ -15,11 +15,12 @@ import leafe from "../assets/leafe.png";
 import "./login.css";
 
 export default () => {
-  const handleLoginFormSubmit = (credentials) => {
-    console.log(
-      `Username: ${credentials.username}, Password: ${credentials.password}`
-    );
-  };
+  // const handleLoginFormSubmit = (credentials) => {
+  //   return window.location.href = "https://kedi-app.com2go.co/";
+  //   console.log(
+  //     `Username: ${credentials.username}, Password: ${credentials.password}`
+  //   );
+  // };
 
   return (
     <>
@@ -71,7 +72,7 @@ export default () => {
                   />
                 </div>
 
-                <LoginForm onSubmit={handleLoginFormSubmit} />
+                <LoginForm />
               </div>
             </Col>
           </Row>

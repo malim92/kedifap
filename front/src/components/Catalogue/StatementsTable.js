@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
-import { INVOICE_COLUMNS } from "./columns-invoice";
+import { STATEMENTS_COLUMNS } from "./columns-statements";
 //import { FetchInvoiceData } from "./invoiceApi";
-import INVOICEDATA from "./invoiceData.json";
+import STATEMENTSDATA from "./statementsData.json";
 
-const InvoicesTable = () => {
+const StatementsTable = () => {
   //data and fetching state
   //const [data, setData] = useState([]);
   const [isError, setIsError] = useState(false);
@@ -39,8 +39,8 @@ const InvoicesTable = () => {
     sorting,
   ]);
 
-  const columns = useMemo(() => INVOICE_COLUMNS, []);
-  const data = useMemo(() => INVOICEDATA, []);
+  const columns = useMemo(() => STATEMENTS_COLUMNS, []);
+  const data = useMemo(() => STATEMENTSDATA, []);
   return (
     <>
       <MaterialReactTable
@@ -77,4 +77,4 @@ const InvoicesTable = () => {
   );
 };
 
-export default InvoicesTable;
+export default StatementsTable;

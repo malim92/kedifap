@@ -25,6 +25,9 @@ export default function Navbar() {
                                 <Link to='/invoices'>Invoices</Link>
                             </li>
                             <li>
+                                <Link to='/customer-statements'>Statements</Link>
+                            </li>
+                            <li>
                                 <Link to='/general-information'>Σχετικά</Link>
                             </li>
                             <li>

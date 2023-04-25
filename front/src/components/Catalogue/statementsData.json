@@ -1,0 +1,20 @@
+[{
+    "CUSTNAME2": "C1001",
+    "CUSTDES": "ERACLEOUS PHARMACY LTD",
+    "FROMDATE": "2021-01-01T00:00:00+02:00",
+    "TODATE": "2021-01-31T00:00:00+02:00",
+    "BALFORPERIOD": 83704.7600000,
+    "RECPREP": "N",
+    "RECNUMBER": 0.0000000,
+    "RECBALANCE": 0.0000000,
+    "STPRINTED": "Y",
+    "REC_EXTFILENAME": "../../system/mail/_receipts38806.pdf",
+    "TIMESTAMP": "2023-03-24T15:32:00+02:00",
+    "PAYCODE": "20",
+    "PAYDES": "1/3 - 2/3 25th Month",
+    "STMT_EXTFILENAME": "../../system/mail/_statement38806.pdf",
+    "DEXT_CHECKEDFLAG": null,
+    "APIPATH": "/statem/BA977F75358141529B73A76761EDFE66.pdf",
+    "CUSTNAME": "C1001",
+    "ID": 38806
+  }]
