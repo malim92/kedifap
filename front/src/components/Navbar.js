@@ -13,32 +13,30 @@ export default function Navbar() {
                     <div className="basis-10/12">
                         <ul className="flex gap-x-6">
                             <li>
-                                <Link to='/'>Αρχική</Link>
+                                <Link to='/app'>Αρχική</Link>
                             </li>
                             <li>
-                                <Link to='/catalogue'>Κατάλογος</Link>
+                                <Link to='/app/catalogue'>Κατάλογος</Link>
                             </li>
                             <li>
-                                <Link to='/orders'>Παραγγελίες</Link>
+                                <Link to='/app/orders'>Παραγγελίες</Link>
                             </li>
                             <li>
-                                <Link to='/invoices'>Invoices</Link>
+                                <Link to='/app/invoices'>Invoices</Link>
                             </li>
                             <li>
-                                <Link to='/customer-statements'>Statements</Link>
+                                <Link to='/app/customer-statements'>Statements</Link>
                             </li>
                             <li>
-                                <Link to='/general-information'>Σχετικά</Link>
+                                <Link to='/app/general-information'>Σχετικά</Link>
                             </li>
                             <li>
-                                <Link to='/contact'>Επικοινωνία</Link>
+                                <Link to='/app/contact'>Επικοινωνία</Link>
                             </li>
                             <li>
-                                <Link to='/profile'>Το προφίλ μου</Link>
+                                <Link to='/app/profile'>Το προφίλ μου</Link>
                             </li>
-                            <li>
-                                <Link to='/login'>login</Link>
-                            </li>
+                            
                         </ul>
                     </div>
                 </div>            

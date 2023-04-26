@@ -4,22 +4,22 @@ import Button from 'react-bootstrap/Button';
 
 function ProductModal(props) {
   const { show, handleClose, popupModalData } = props;
-
+  
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Product Info</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>Part Code: {popupModalData.code}</p>
-        <p>Part Description: {popupModalData.description}</p>
-        <p>Current Stock: {popupModalData.stock}</p>
-        <p>Retail Price: {popupModalData.price}</p>
-        <p>VAT Percentage: {popupModalData.vat}</p>
-        <p>Distributer/Importer: {popupModalData.distributer}</p>
-        <p>Package Barcode: {popupModalData.barcode}</p>
-        <p>Pharma Service Code: {popupModalData.pharmaCode}</p>
-        <p>Supplier: {popupModalData.supplier}</p>
+        <p>Κωδικός: {popupModalData.code}</p>
+        <p>Περιγραφή: {popupModalData.description}</p>
+        <p>Απόθεμα: {popupModalData.stock}</p>
+        <p>ΧΤ: {popupModalData.price}</p>
+        <p>ΛΤ %: {popupModalData.vat}</p>
+        <p>Αντιπρόσωπο: {popupModalData.distributer}</p>
+        <p>Barcode: {popupModalData.barcode}</p>
+        <p>Κωδικός ΓΕΣΥ: {popupModalData.pharmaCode}</p>
+        <p>Διανομέα: {popupModalData.supplier}</p>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="danger" style={{ color: 'red' }} onClick={handleClose}>

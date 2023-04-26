@@ -5,40 +5,48 @@ import {
   RouterProvider,
   useNavigate,
 } from "react-router-dom";
-import { useEffect } from "react";
-import withAuth from './middlewares/tokenValidation';
-
-import ProductsTable from "./pages/ProductsTable";
-import Home from "./pages/Home";
-import Contact from "./pages/Contact";
-import Information from "./pages/Information";
-import Orders from "./pages/Orders";
-import Statements from "./pages/Statements";
-import Profile from "./pages/Profile";
+import { useState } from "react";
 import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import ProductsTable from "./pages/ProductsTable";
+import Orders from "./pages/Orders";
 import Invoices from "./pages/Invoices";
+import Statements from "./pages/Statements";
+import Information from "./pages/Information";
+import Contact from "./pages/Contact";
+import Profile from "./pages/Profile";
 import Login from "./pages/Login";
+//import router from "./Routes/routes";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-    <Route element={<Navbar />}>
-      <Route path="/" element={<Home />} />
-      <Route path="/catalogue" element={<ProductsTable />} />
-      <Route path="/orders" element={<Orders />} />
-      <Route path="/invoices" element={<Invoices />} />
-      <Route path="/customer-statements" element={<Statements />} />
-      <Route path="/general-information" element={<Information />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/profile" element={<Profile />} />
-      {/* <Route path="/login" element={<Login />} /> */}
-    </Route>
-    <Route path="/login" element={<Login />} />
+      <Route element={<Navbar />}>
+        <Route path="/app" element={<Home />} />
+        <Route path="/app/catalogue" element={<ProductsTable />} />
+        <Route path="/app/orders" element={<Orders />} />
+        <Route path="/app/invoices" element={<Invoices />} />
+        <Route path="/app/customer-statements" element={<Statements />} />
+        <Route path="/app/general-information" element={<Information />} />
+        <Route path="/app/contact" element={<Contact />} />
+        <Route path="/app/profile" element={<Profile />} />
+      </Route>
+      <Route path="/" element={<Login />} />
     </>
   )
 );
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
   return (
     <div className="App">
         <RouterProvider router={router} />

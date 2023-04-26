@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import pill from "../assets/login img side.png";
 
-
 function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,7 +16,8 @@ function LoginForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    return window.location.href = "https://kedi-app.com2go.co/";
+    //return window.location.href = "http://localhost:3000/app";
+    return (window.location.href = "https://kedi-app.com2go.co/app");
     console.log(`Username: ${username}, Password: ${password}`);
   };
 
@@ -52,18 +52,24 @@ function LoginForm() {
             background: "#82b78d",
             marginTop: "15px",
             textAlign: "center",
-            width:'10em',
-            border: '0px',
-            color: '#000'
+            width: "10em",
+            border: "0px",
+            color: "#000",
           }}
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary form-button"
         >
           Είσοδος
         </button>
         <img
+          alt=""
           src={pill}
-          style={{ right: "30px", width:'6em', position: 'relative', top: '10px'}}
+          style={{
+            right: "30px",
+            width: "6em",
+            position: "relative",
+            top: "10px",
+          }}
         />
       </div>
     </form>

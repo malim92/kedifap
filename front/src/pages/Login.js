@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Navigation, Pagination, Scrollbar, A11y } from "swiper";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -15,12 +16,16 @@ import leafe from "../assets/leafe.png";
 import "./login.css";
 
 export default () => {
-  // const handleLoginFormSubmit = (credentials) => {
-  //   return window.location.href = "https://kedi-app.com2go.co/";
-  //   console.log(
-  //     `Username: ${credentials.username}, Password: ${credentials.password}`
-  //   );
-  // };
+  const [swiperHeight, setSwiperHeight] = useState(0);
+
+  useEffect(() => {
+    function handleResize() {
+      setSwiperHeight(window.innerHeight - 100); // subtracting any additional padding/margin
+    }
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <>
@@ -32,7 +37,7 @@ export default () => {
                 // className="shadowed"
                 modules={[Navigation, Scrollbar, A11y]}
                 navigation={true}
-                style={{ height: "500px" }}
+                style={{ height: `${swiperHeight}px` }}
                 scrollbar={{ draggable: true }}
               >
                 <SwiperSlide>
@@ -42,7 +47,7 @@ export default () => {
                     style={{
                       objectFit: "cover",
                       width: "400px",
-                      height: "500px",
+                      height: `${swiperHeight}px`
                     }}
                   />
                 </SwiperSlide>
@@ -53,7 +58,7 @@ export default () => {
                     style={{
                       objectFit: "cover",
                       width: "400px",
-                      height: "500px",
+                      height: `${swiperHeight}px`
                     }}
                   />
                 </SwiperSlide>
@@ -63,12 +68,12 @@ export default () => {
             <Col sm={6}>
               <div className="container">
                 <img className="logo-login-top" src={logo} alt="" />
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div className='form-header'>
                   <h3>Καλώς ήρθατε στο Web Portal της ΚΕΔΙΦΑΠ</h3>
                   <img
+                  className='form-img'
                     src={leafe}
                     alt="placeholder"
-                    style={{ marginRight: "10px", width: "4em" }}
                   />
                 </div>
 

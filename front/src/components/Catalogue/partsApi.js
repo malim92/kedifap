@@ -34,6 +34,8 @@ export const FetchPartsData = async (
           discounts: discountObjs.map((discountObj) => ({
             DISCOUNT: discountObj.DISCOUNT,
             OFFERQTY: discountObj.OFFERQTY,
+            OFFERNUM: discountObj.OFFERNUM,
+            OFFERDES: discountObj.OFFERDES,
           })),
         };
       }
