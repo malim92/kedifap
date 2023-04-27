@@ -4,7 +4,7 @@ import Button from "react-bootstrap/Button";
 
 function ProductDiscountModal(props) {
   const { show, handleClose, popupModalDiscount } = props;
-  
+
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -12,11 +12,22 @@ function ProductDiscountModal(props) {
       </Modal.Header>
       <Modal.Body>
         <p>Part Code: {popupModalDiscount.code}</p>
-        {popupModalDiscount.hasOwnProperty("discounts") &&(popupModalDiscount.discounts.map((discount, index) => (
-          <div key={index}>
-            <p>Buy: {discount.OFFERDES}</p>
-          </div>
-        )))}
+        {popupModalDiscount.hasOwnProperty("discounts") &&
+          popupModalDiscount.discounts.map((discount, index) => (
+            <div class="d-flex justify-content-between" key={index}>
+              <p>Buy: {discount.OFFERDES}</p>
+              <button
+                style={{
+                  marginTop: "5px",
+                  marginBottom: "5px",
+                }}
+                //onClick={() => sendOrder(cartItems, total)}
+                class="btn btn-primary"
+              >
+                Get the discount
+              </button>
+            </div>
+          ))}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="danger" style={{ color: "red" }} onClick={handleClose}>

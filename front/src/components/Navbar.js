@@ -22,7 +22,7 @@ export default function Navbar() {
                                 <Link to='/app/orders'>Παραγγελίες</Link>
                             </li>
                             <li>
-                                <Link to='/app/invoices'>Invoices</Link>
+                                <Link to='/app/invoices'>Τιμολόγια</Link>
                             </li>
                             <li>
                                 <Link to='/app/customer-statements'>Statements</Link>

@@ -46,15 +46,9 @@
   margin-bottom: 10px;
 }
 
-.cart-item-name {
-  font-size: 1.0rem;
-  font-weight: bold;
-  margin: 0;
-}
-
-.cart-item-price {
-  font-size: 1.0rem;
-  font-weight: bold;
+.cart-item-name , .cart-item-price, .cart-item-code {
+  font-size: 0.8rem;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -156,14 +150,6 @@
   margin-right: 10px;
   padding: 10px;
 
-}
-
-
-
-.cart-item-price {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 0;
 }
 
 .cart-item-quantity {

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import moment from 'moment';
 import MaterialReactTable from "material-react-table";
 import { STATEMENTS_COLUMNS } from "./columns-statements";
 //import { FetchInvoiceData } from "./invoiceApi";
@@ -40,7 +41,12 @@ const StatementsTable = () => {
   ]);
 
   const columns = useMemo(() => STATEMENTS_COLUMNS, []);
-  const data = useMemo(() => STATEMENTSDATA, []);
+  const data = useMemo(() => {
+    return STATEMENTSDATA.map(item => ({
+      ...item,
+      TIMESTAMP: moment(item.TIMESTAMP).format('DD-MM-YYYY')
+    }));
+  }, []);
   return (
     <>
       <MaterialReactTable

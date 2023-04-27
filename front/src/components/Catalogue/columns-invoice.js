@@ -6,16 +6,6 @@ export const INVOICE_COLUMNS = [
     },
     {
         header: "Date",
-        accessorKey: 'REQDATE',
+        accessorKey: 'IVDATE',
     },
-    {
-        header: "PDF",
-        accessorKey: 'APIPATH',
-        enableColumnFilter: false,
-        enableSorting: false,
-        enableGlobalFilter: false,
-        Cell: (props) => {
-            return <a href={props.renderedCellValue} target="_blank">PDF Link</a>;
-          }
-    }
 ];

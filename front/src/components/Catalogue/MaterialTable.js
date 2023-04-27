@@ -59,14 +59,6 @@ const MaterialTable = () => {
 
   const columns = useMemo(
     () => COLUMNS,
-      // COLUMNS.filter(
-      //   (col) =>
-      //     col.header === "Κωδικός" ||
-      //     col.header === "Περιγραφή" ||
-      //     col.header === "Απόθεμα" ||
-      //     col.header === "ΧΤ" ||
-      //     col.header === "ΛΤ"
-      // ),
     []
   );
 
@@ -210,7 +202,7 @@ const MaterialTable = () => {
     setProductQuantity(1);
   };
 
-  const sendOrder = (order, cartTotal) => {
+  const sendOrder = async (order, cartTotal) => {
     
     const productsinOrder = order.map(obj => ({
       PARTNAME: obj.PARTNAME,
@@ -225,7 +217,7 @@ const MaterialTable = () => {
 
     const orderObject = {
       CUSTNAME: "C1001",
-      CDES: "IT MANAGER - test account",
+      CDES:"ERACLEOUS PHARMACY LTD",
       CURDATE: "2023-04-21T00:00:00+02:00",
       DEXT_SUPPNAME: "V1239",
       DEXT_SUPPDES: "4MORE LTD 2",
@@ -233,23 +225,28 @@ const MaterialTable = () => {
       DETAILS: "Test from API",
       DEXT_SUBMISSIONDATE: "2023-04-26T14:30:00+02:00",
       PAYCODE: "20",
-      DEXT_B2CONTACT: "803",
+      DEXT_B2CONTACT: 9,
       B2B_ORDERITEMS_SUBFORM: productsinOrder
     };
     console.log(JSON.stringify(orderObject), "str orderObject");
     alert("Order Sent Successfully, Thank you!!");
     setShowCart(false);
-    axios
-      .post(
-        "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS",
-        order
-      )
-      .then((response) => {
-        console.log(response, "sending order response");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    
+      //send order
+      const username = "apiuser";
+      const password = "1234";
+      const url =
+      "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS";
+      const auth = {
+        username: username,
+        password: password,
+      };
+      try {
+        const response = await axios.post(url, orderObject, { auth: auth });
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
+      }
     setCartItems([]);
     setTotal(0);
     setProductQuantity(1);
@@ -270,6 +267,7 @@ const MaterialTable = () => {
       description: rowSearch.PARTDES,
       stock: rowSearch.stock,
       price: rowSearch.WSPLPRICE,
+      priceVat: rowSearch.VATPRICE,
       vat: rowSearch.VATPRICE,
       distributer: rowSearch.SUPNAME,
       barcode: rowSearch.BARCODE,
@@ -280,7 +278,6 @@ const MaterialTable = () => {
 
   const discountPopup = (data, id) => {
     const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
-    //console.log(rowSearch.discounts, "rowSearch discounts d ");
     setDiscountShow(!discountShow);
     setPopupModalDiscount({
       code: rowSearch.PARTNAME,
@@ -350,7 +347,7 @@ const MaterialTable = () => {
               >
                 <FaCartArrowDown style={{
                   right: '8px',
-                  bottom: '10px',
+                  bottom: '8px',
                   position: 'relative'}} />
               </button>
             )}
@@ -368,7 +365,7 @@ const MaterialTable = () => {
               >
                 <FaCartArrowDown style={{
                   right: '8px',
-                  bottom: '10px',
+                  bottom: '8px',
                   position: 'relative'}} />
               </button>
             )}
@@ -389,6 +386,7 @@ const MaterialTable = () => {
               style={{
                 color: "#1f79d5",
                 cursor: "pointer",
+                fontSize:"35px"
               }}
               onClick={() => {
                 productPopup(data, row.original);
@@ -427,7 +425,8 @@ const MaterialTable = () => {
                 <li class="cart-item" key={index}>
                   <div class="cart-item-details">
                     <p class="cart-item-name">{item.PARTDES}</p>
-                    <p class="cart-item-price">Price:{item.WSPLPRICE}</p>
+                    <p class="cart-item-name">Code: {item.PARTNAME}</p>
+                    <p class="cart-item-price">Price: {item.WSPLPRICE.toFixed(2)}</p>
                     {/* <p class="cart-item-quantity">Quantity: {item.quantity}</p> */}
                   </div>
                   <div class="cart-item-controls">
@@ -470,6 +469,7 @@ const MaterialTable = () => {
                     </button>
                   </div>
                 </li>
+                
               ))}
             </ul>
 

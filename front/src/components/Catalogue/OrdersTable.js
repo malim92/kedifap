@@ -40,7 +40,7 @@ const InvoicesTable = () => {
   ]);
 
   const columns = useMemo(() => ORDERS_COLUMNS, []);
-  const data = useMemo(() => ORDERSDATA, []);
+  const data = useMemo(() => ORDERSDATA.value, []);
   return (
     <>
       <MaterialReactTable

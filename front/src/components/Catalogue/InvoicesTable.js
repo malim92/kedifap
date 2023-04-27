@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import moment from "moment";
+import axios from "axios";
 import MaterialReactTable from "material-react-table";
 import { INVOICE_COLUMNS } from "./columns-invoice";
 //import { FetchInvoiceData } from "./invoiceApi";
@@ -40,7 +42,36 @@ const InvoicesTable = () => {
   ]);
 
   const columns = useMemo(() => INVOICE_COLUMNS, []);
-  const data = useMemo(() => INVOICEDATA, []);
+  //const data = useMemo(() => INVOICEDATA, []);
+  const data = useMemo(() => {
+    return INVOICEDATA.map((item) => ({
+      ...item,
+      IVDATE: moment(item.IVDATE).format("DD-MM-YYYY"),
+    }));
+  }, []);
+
+  const fetchInvoice = async (product) => {
+    console.log(product.original, "product");
+    const data = {
+      IVNUM: product.original.IVNUM,
+    };
+
+    const username = "apiuser";
+    const password = "1234";
+    const url =
+      "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/DEXT_APINVOS";
+    const auth = {
+      username: username,
+      password: password,
+    };
+    try {
+      const response = await axios.post(url, data, { auth: auth });
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <MaterialReactTable
@@ -72,6 +103,22 @@ const InvoicesTable = () => {
           showProgressBars: isRefetching,
           sorting,
         }}
+        enableRowActions
+        renderRowActions={({ row }) => (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                fetchInvoice(row);
+              }}
+              style={{
+                fontSize: "15px",
+              }}
+            >
+              Request Invoice
+            </button>
+          </div>
+        )}
       />
     </>
   );
