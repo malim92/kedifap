@@ -46,7 +46,9 @@
   margin-bottom: 10px;
 }
 
-.cart-item-name , .cart-item-price, .cart-item-code {
+.cart-item-name,
+.cart-item-price,
+.cart-item-code {
   font-size: 0.8rem;
   font-weight: 500;
   margin: 0;
@@ -193,4 +195,22 @@
 
 .bg-kedifapgreen-200 {
   float: left;
+  
+}
+
+.custom-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f1f1f1;
+  padding: 10px;
+}
+
+.item {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-right: 10px;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }

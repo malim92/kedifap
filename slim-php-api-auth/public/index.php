@@ -3,6 +3,7 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use \Firebase\JWT\JWT;
+use GuzzleHttp\Client;
 
 
 
@@ -130,10 +131,10 @@ $app->post('/validate-token', function ($request, $response, $args) {
         $token = $token_parts[1];
     }
     $permissions = 'admin';
-   
-    
+
+
     $content = 'This is example text.'; // content to write
-    
+
     if (!$token) {
         //return $response->withStatus(202)->withJson(['error' => 'Unauthorized']);
         return $response->withStatus(200)->withJson(['isTokenValid' => false]);
@@ -244,6 +245,35 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     return $response;
 });
 
+$app->post('/order', function (Request $request, Response $response) { {
+    //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS
+        $order = $request->getParsedBody();
+        $username = 'apiuser';
+        $password = '1234';
+
+        $client = new Client([
+            'base_uri' => 'https://ked.priority-software.com.cy/',
+            //'base_uri' => 'https://webhook.site/',
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode("$username:$password")
+            ],
+            'verify' => false
+        ]);
+
+        $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
+            'json' => $order,
+        ]);
+        
+        $body = (string) $response->getBody();
+        $data = json_decode($body, true);
+        return $data;
+        // try {
+        //     return $response->withStatus(200)->withJson($data);
+        // } catch (\Throwable $th) {
+        //     return $response->withStatus(200)->withJson($th);
+        // }
+    }
+});
 
 
 $app->run();

@@ -57,10 +57,7 @@ const MaterialTable = () => {
     sorting,
   ]);
 
-  const columns = useMemo(
-    () => COLUMNS,
-    []
-  );
+  const columns = useMemo(() => COLUMNS, []);
 
   const [showCart, setShowCart] = useState(false);
 
@@ -74,20 +71,56 @@ const MaterialTable = () => {
     setShowCart(false);
   };
 
-  const handleAddToCart = (product) => {
+  const calculateCartTotal = () => {
+    let sumPrice;
+    console.log(cartItems, "cartItems ");
+    cartItems.forEach((singleCartItem) => {
+      console.log(singleCartItem, "singleCartItem ");
+      let applicableDiscount = null;
+      if (singleCartItem.discounts) {
+        singleCartItem.discounts.forEach((discount) => {
+          //check if product quantity more than discount quantity
+          if (
+            parseInt(singleCartItem.quantity) + 1 >= discount.OFFERQTY &&
+            (!applicableDiscount ||
+              discount.OFFERQTY > applicableDiscount.OFFERQTY)
+          ) {
+            applicableDiscount = discount;
+          }
+        });
+        if (applicableDiscount) {
+          console.log(applicableDiscount, "totalItemDiscount 2");
+          //if there's applicable discount apply it
+          let totalItemDiscount =
+            (parseInt(singleCartItem.quantity) * applicableDiscount.DISCOUNT) /
+            100;
+          // setTotal(
+          //   total + parseFloat(singleCartItem.WSPLPRICE) - totalItemDiscount
+          // );
+          sumPrice += totalItemDiscount;
+          console.log(sumPrice, "totalItemDiscount ");
+        }
+      } else {
+        let productPrice = parseFloat(singleCartItem.WSPLPRICE);
+        sumPrice += productPrice;
+        
+      }
+      //cartTotalPrice += WSPLPRICE;
+    });
+    return sumPrice;
+  };
+
+  const handleAddToCart = (product, total) => {
+    calculateCartTotal();
+    let cartTotalPrice = total;
     const { PARTNAME, WSPLPRICE } = product.original;
     product.original.quantity = 1;
     const found = cartItems.find((element) => element.PARTNAME == PARTNAME);
     if (found) {
       alert("Product is already in the cart!");
     } else {
-      //const total = cartItems.reduce((acc, item) => acc + parseFloat(item.WSPLPRICE), parseFloat(price));
-      setTotal(
-        cartItems.reduce(
-          (acc, item) => acc + parseFloat(item.WSPLPRICE) * item.quantity,
-          parseFloat(WSPLPRICE)
-        )
-      );
+      cartTotalPrice += WSPLPRICE;
+      setTotal(cartTotalPrice);
 
       setCartItems([...cartItems, product.original]);
       setShowCart(true);
@@ -110,48 +143,90 @@ const MaterialTable = () => {
 
   const handleQuantityChange = (event, item, index) => {
     //setProductQuantity(event);
+    
     setProductQuantity((prevQuantities) => ({
       ...prevQuantities,
       [item.PARTNAME]: event,
     }));
-    //const updatedItem = { ...item, quantity: event };
-    //{PARTNAME: 'LP01059', PARTDES: 'NUROFEN 200MG 24TAB', SPEC19: 'ANXIOLYTIC', DEXT_NARCOTIC: '1', DEXT_ACTIVE: '1', …}BARCODE: "5000158103375"CUSTNAME: "For Labeling"DEXT_ACTIVE: "1"DEXT_BRAND: "RECKITT BENCKISER"DEXT_CMVO: "6"DEXT_CSPOLICYCODE: "NONE"DEXT_FRAGILE: nullDEXT_GHS: "1"DEXT_IMPORTERNAME: "V1059"DEXT_LIQUID: nullDEXT_NARCOTIC: "1"DEXT_PARTBARCODE: "KDLP01059"DEXT_SUPPOLICYCODE: "EXP"PARTDES: "NUROFEN 200MG 24TAB"PARTNAME: "LP01059"SPEC1: "IBUPROFEN"SPEC14: "8400598/2"SPEC19: "ANXIOLYTIC"SUPNAME: "V1057"UDATE: "2023-04-01"VATPRICE: "5.32"WSPLPRICE: "3.7"discounts: (5) [{…}, {…}, {…}, {…}, {…}]quantity: "19"stock: 4288[[Prototype]]: Object 'updatedItem 1 '
+
     const updatedItems = [...cartItems];
+
     updatedItems[index] = { ...updatedItems[index], quantity: event };
     setCartItems(updatedItems);
+    console.log(updatedItems, "updatedItems after 2");
+    calculateCartTotal();
     // const updatedCart = [
     //   ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
     //   updatedItems,
     // ];
     //setCartItems(updatedCart);
     //setProductQuantity(parseInt(event.target.value));
-    let applicableDiscount = null;
+    
 
-    if (updatedItems.discounts) {
-      updatedItems.discounts.forEach((discount) => {
-        if (
-          parseInt(updatedItems.quantity) + 1 >= discount.OFFERQTY &&
-          (!applicableDiscount ||
-            discount.OFFERQTY > applicableDiscount.OFFERQTY)
-        ) {
-          applicableDiscount = discount;
-        }
-      });
-    }
-    if (applicableDiscount) {
-      let totalItemDiscount =
-        (parseInt(updatedItems.quantity) * applicableDiscount.DISCOUNT) / 100;
-      setTotal(total + parseFloat(updatedItems.WSPLPRICE) - totalItemDiscount);
-    } else {
-      let productPrice = parseFloat(updatedItems.WSPLPRICE);
-      let totalCartItemPrice = 0;
-      updatedItems.forEach((carItem) => {
-        totalCartItemPrice +=
-          parseFloat(carItem.WSPLPRICE) * parseInt(carItem.quantity);
-      });
-      //console.log(updatedCart, "updatedCart ");
-      setTotal(totalCartItemPrice);
-    }
+    // updatedItems.forEach((singleCartItem) => {
+    //   let applicableDiscount = null;
+    //   if (singleCartItem.discounts) {
+    //     singleCartItem.discounts.forEach((discount) => {
+    //       //check if product quantity more than discount quantity
+    //       if (
+    //         parseInt(singleCartItem.quantity) + 1 >= discount.OFFERQTY &&
+    //         (!applicableDiscount ||
+    //           discount.OFFERQTY > applicableDiscount.OFFERQTY)
+    //       ) {
+    //         applicableDiscount = discount;
+    //       }
+    //     });
+    //   }
+    //   if (applicableDiscount) {
+    //     console.log(applicableDiscount, "applicableDiscount ");
+    //     //if there's applicable discount apply it
+    //     let totalItemDiscount =
+    //       (parseInt(singleCartItem.quantity) * applicableDiscount.DISCOUNT) /
+    //       100;
+    //     setTotal(
+    //       total + parseFloat(singleCartItem.WSPLPRICE) - totalItemDiscount
+    //     );
+    //     console.log(totalItemDiscount, "totalItemDiscount ");
+    //   } else {
+    //     let productPrice = parseFloat(singleCartItem.WSPLPRICE);
+    //     let totalCartItemPrice = 0;
+    //     //singleCartItem.forEach((carItem) => {
+    //     totalCartItemPrice +=
+    //       parseFloat(singleCartItem.WSPLPRICE) *
+    //       parseInt(singleCartItem.quantity);
+    //     //});
+    //     //
+    //     setTotal(totalCartItemPrice);
+    //   }
+    // });
+    //check if product has a discout
+    // if (updatedItems.discounts) {
+    //   updatedItems.discounts.forEach((discount) => {
+    //     //check if product quantity more than discount quantity
+    //     if (
+    //       parseInt(updatedItems.quantity) + 1 >= discount.OFFERQTY &&
+    //       (!applicableDiscount ||
+    //         discount.OFFERQTY > applicableDiscount.OFFERQTY)
+    //     ) {
+    //       applicableDiscount = discount;
+    //     }
+    //   });
+    // }
+    // if (applicableDiscount) {
+    //   //if there's applicable discount apply it
+    //   let totalItemDiscount =
+    //     (parseInt(updatedItems.quantity) * applicableDiscount.DISCOUNT) / 100;
+    //   setTotal(total + parseFloat(updatedItems.WSPLPRICE) - totalItemDiscount);
+    // } else {
+    //   let productPrice = parseFloat(updatedItems.WSPLPRICE);
+    //   let totalCartItemPrice = 0;
+    //   updatedItems.forEach((carItem) => {
+    //     totalCartItemPrice +=
+    //       parseFloat(carItem.WSPLPRICE) * parseInt(carItem.quantity);
+    //   });
+    //   //console.log(updatedCart, "updatedCart ");
+    //   setTotal(totalCartItemPrice);
+    // }
   };
 
   const decrementQuantity = (item) => {
@@ -203,21 +278,20 @@ const MaterialTable = () => {
   };
 
   const sendOrder = async (order, cartTotal) => {
-    
-    const productsinOrder = order.map(obj => ({
+    const productsinOrder = order.map((obj) => ({
       PARTNAME: obj.PARTNAME,
       PDES: obj.PARTDES,
       TQUANT: obj.quantity,
       DEXT_REQUESTEDQTY: obj.quantity,
       DEXT_FREEQTY: 0,
-      PERCENT: 0
+      PERCENT: 0,
     }));
-    
-    console.log(productsinOrder,'productsinOrder');
+
+    console.log(productsinOrder, "productsinOrder");
 
     const orderObject = {
       CUSTNAME: "C1001",
-      CDES:"ERACLEOUS PHARMACY LTD",
+      CDES: "ERACLEOUS PHARMACY LTD",
       CURDATE: "2023-04-21T00:00:00+02:00",
       DEXT_SUPPNAME: "V1239",
       DEXT_SUPPDES: "4MORE LTD 2",
@@ -226,27 +300,25 @@ const MaterialTable = () => {
       DEXT_SUBMISSIONDATE: "2023-04-26T14:30:00+02:00",
       PAYCODE: "20",
       DEXT_B2CONTACT: 9,
-      B2B_ORDERITEMS_SUBFORM: productsinOrder
+      B2B_ORDERITEMS_SUBFORM: productsinOrder,
     };
     console.log(JSON.stringify(orderObject), "str orderObject");
-    alert("Order Sent Successfully, Thank you!!");
-    setShowCart(false);
     
-      //send order
-      const username = "apiuser";
-      const password = "1234";
-      const url =
-      "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS";
-      const auth = {
-        username: username,
-        password: password,
-      };
-      try {
-        const response = await axios.post(url, orderObject, { auth: auth });
-        console.log(response.data);
-      } catch (error) {
-        console.error(error);
-      }
+    setShowCart(false);
+
+    //send order
+    
+    const url =
+      //"http://localhost:8000/order";
+      "https://kedifap-portal.com2go.co/order";
+    
+    try {
+      const response = await axios.post(url, orderObject);
+      console.log(response,'response');
+      alert("Order Sent Successfully, Thank you!!");
+    } catch (error) {
+      console.error(error);
+    }
     setCartItems([]);
     setTotal(0);
     setProductQuantity(1);
@@ -279,11 +351,7 @@ const MaterialTable = () => {
   const discountPopup = (data, id) => {
     const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
     setDiscountShow(!discountShow);
-    setPopupModalDiscount({
-      code: rowSearch.PARTNAME,
-      discounts: rowSearch.discounts,
-      
-    });
+    setPopupModalDiscount({ rowSearch });
   };
 
   const options = {
@@ -291,6 +359,28 @@ const MaterialTable = () => {
   };
   return (
     <>
+      <div class="custom-filters">
+        <input
+          type="text"
+          id="filterInput"
+          onkeyup="filterList()"
+          placeholder="Search for brand..."
+        />
+
+        <input
+          type="text"
+          id="filterInput"
+          onkeyup="filterList()"
+          placeholder="Search for code..."
+        />
+        <input
+          type="text"
+          id="filterInput"
+          onkeyup="filterList()"
+          placeholder="Search for items..."
+        />
+      </div>
+
       <MaterialReactTable
         displayColumnDefOptions={{
           "mrt-row-actions": {
@@ -302,7 +392,18 @@ const MaterialTable = () => {
         }}
         columns={columns}
         data={data}
-        initialState={{ showColumnFilters: true, columnVisibility: { BARCODE: false, stock: false, SPEC19: true, SUPNAME: false, DEXT_IMPORTERNAME: false, DEXT_BRAND: true, SPEC1: false  } }}
+        initialState={{
+          showColumnFilters: true,
+          columnVisibility: {
+            BARCODE: false,
+            stock: false,
+            SPEC19: true,
+            SUPNAME: false,
+            DEXT_IMPORTERNAME: false,
+            DEXT_BRAND: true,
+            SPEC1: false,
+          },
+        }}
         manualFiltering
         options={options}
         manualPagination
@@ -336,19 +437,22 @@ const MaterialTable = () => {
               <button
                 className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                 onClick={() => {
-                  handleAddToCart(row);
+                  handleAddToCart(row, total);
                 }}
                 style={{
                   backgroundColor: "#db2d2d",
-                  width: '30px',
-                  fontSize: '15px',
-                  height: '30px'
+                  width: "30px",
+                  fontSize: "15px",
+                  height: "30px",
                 }}
               >
-                <FaCartArrowDown style={{
-                  right: '8px',
-                  bottom: '8px',
-                  position: 'relative'}} />
+                <FaCartArrowDown
+                  style={{
+                    right: "8px",
+                    bottom: "8px",
+                    position: "relative",
+                  }}
+                />
               </button>
             )}
             {/* else */}
@@ -356,17 +460,16 @@ const MaterialTable = () => {
               <button
                 className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                 onClick={() => {
-                  handleAddToCart(row);
+                  handleAddToCart(row, total);
                 }}
-                style={{
-                  width: '30px',
-                  fontSize: '15px',
-                  height: '30px'}}
               >
-                <FaCartArrowDown style={{
-                  right: '8px',
-                  bottom: '8px',
-                  position: 'relative'}} />
+                <FaCartArrowDown
+                  style={{
+                    right: "8px",
+                    bottom: "8px",
+                    position: "relative",
+                  }}
+                />
               </button>
             )}
             {row.original.hasOwnProperty("discounts") && (
@@ -374,11 +477,10 @@ const MaterialTable = () => {
                 style={{
                   display: iconDisplay,
                   fontSize: "30px",
-                  cursor: 'pointer'
+                  cursor: "pointer",
                 }}
                 onClick={() => {
                   discountPopup(data, row.original);
-                  
                 }}
               />
             )}
@@ -386,7 +488,7 @@ const MaterialTable = () => {
               style={{
                 color: "#1f79d5",
                 cursor: "pointer",
-                fontSize:"35px"
+                fontSize: "35px",
               }}
               onClick={() => {
                 productPopup(data, row.original);
@@ -404,7 +506,12 @@ const MaterialTable = () => {
         show={discountShow}
         handleClose={handleDiscountClose}
         popupModalDiscount={popupModalDiscount}
+        cartItems={cartItems}
+        setCartItems={setCartItems}
+        setTotal={setTotal}
+        setShowCart={setShowCart}
       />
+
       {/* add to cart */}
       <div>
         <button class="basket" onClick={handleCartClick}>
@@ -426,7 +533,9 @@ const MaterialTable = () => {
                   <div class="cart-item-details">
                     <p class="cart-item-name">{item.PARTDES}</p>
                     <p class="cart-item-name">Code: {item.PARTNAME}</p>
-                    <p class="cart-item-price">Price: {item.WSPLPRICE.toFixed(2)}</p>
+                    <p class="cart-item-price">
+                      Price: {item.WSPLPRICE.toFixed(2)}
+                    </p>
                     {/* <p class="cart-item-quantity">Quantity: {item.quantity}</p> */}
                   </div>
                   <div class="cart-item-controls">
@@ -469,7 +578,6 @@ const MaterialTable = () => {
                     </button>
                   </div>
                 </li>
-                
               ))}
             </ul>
 

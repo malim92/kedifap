@@ -83,8 +83,8 @@ $app->add(new \Tuupola\Middleware\CorsMiddleware([
 $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response
-        ->withHeader('Access-Control-Allow-Origin', 'https://kedi-app.com2go.co/')
-        //->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
+        //->withHeader('Access-Control-Allow-Origin', 'https://kedi-app.com2go.co/')
+        ->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         ->withHeader('Access-Control-Allow-Credentials', 'true');
