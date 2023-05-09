@@ -3,6 +3,8 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { FaCartArrowDown } from "react-icons/fa";
 
+import './DiscountModal.css';
+
 const getDiscount = async (
   product,
   discountSelection,
@@ -58,7 +60,7 @@ function ProductDiscountModal(props) {
           {/* <p>Part Code: {rowSearch.PARTNAME}</p> */}
           {rowSearch.hasOwnProperty("discounts") &&
             rowSearch.discounts.map((discount, index) => (
-              <div class="d-flex justify-content-between" key={index}>
+              <div class="d-flex justify-content-between px-padding" key={index}>
                 <p>Buy: {discount.OFFERDES}</p>
 
                 <button

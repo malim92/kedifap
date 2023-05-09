@@ -5,12 +5,12 @@ import { Info } from "@mui/icons-material";
 import PopupModal from "./Modal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown } from "react-icons/fa";
-import { FcMoneyTransfer } from "react-icons/fc";
 import { COLUMNS } from "./columns-material";
 import { FetchPartsData } from "./partsApi";
 import DATA from "./data.json";
 import STOCK from "./stock.json";
-import "./Cart.css";
+import Cart from "./Cart-components/Cart";
+import "./Cart-components/Cart.css";
 
 const MaterialTable = () => {
   //data and fetching state
@@ -28,6 +28,7 @@ const MaterialTable = () => {
     pageIndex: 0,
     pageSize: 20,
   });
+
 
   const [cartItems, setCartItems] = useState([]);
 
@@ -63,13 +64,7 @@ const MaterialTable = () => {
 
   const [total, setTotal] = useState(0);
 
-  const handleCartClick = () => {
-    setShowCart(!showCart);
-  };
-
-  const handleCartClose = () => {
-    setShowCart(false);
-  };
+  
 
   const calculateCartTotal = () => {
     let sumPrice;
@@ -110,6 +105,7 @@ const MaterialTable = () => {
     return sumPrice;
   };
 
+  
   const handleAddToCart = (product, total) => {
     calculateCartTotal();
     let cartTotalPrice = total;
@@ -119,10 +115,11 @@ const MaterialTable = () => {
     if (found) {
       alert("Product is already in the cart!");
     } else {
-      cartTotalPrice += WSPLPRICE;
+      cartTotalPrice += parseFloat(WSPLPRICE);
       setTotal(cartTotalPrice);
-
+      console.log(product.original,'product.original 1');
       setCartItems([...cartItems, product.original]);
+      console.log(cartItems,'cartItems 2');
       setShowCart(true);
     }
   };
@@ -155,121 +152,10 @@ const MaterialTable = () => {
     setCartItems(updatedItems);
     console.log(updatedItems, "updatedItems after 2");
     calculateCartTotal();
-    // const updatedCart = [
-    //   ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
-    //   updatedItems,
-    // ];
-    //setCartItems(updatedCart);
-    //setProductQuantity(parseInt(event.target.value));
     
-
-    // updatedItems.forEach((singleCartItem) => {
-    //   let applicableDiscount = null;
-    //   if (singleCartItem.discounts) {
-    //     singleCartItem.discounts.forEach((discount) => {
-    //       //check if product quantity more than discount quantity
-    //       if (
-    //         parseInt(singleCartItem.quantity) + 1 >= discount.OFFERQTY &&
-    //         (!applicableDiscount ||
-    //           discount.OFFERQTY > applicableDiscount.OFFERQTY)
-    //       ) {
-    //         applicableDiscount = discount;
-    //       }
-    //     });
-    //   }
-    //   if (applicableDiscount) {
-    //     console.log(applicableDiscount, "applicableDiscount ");
-    //     //if there's applicable discount apply it
-    //     let totalItemDiscount =
-    //       (parseInt(singleCartItem.quantity) * applicableDiscount.DISCOUNT) /
-    //       100;
-    //     setTotal(
-    //       total + parseFloat(singleCartItem.WSPLPRICE) - totalItemDiscount
-    //     );
-    //     console.log(totalItemDiscount, "totalItemDiscount ");
-    //   } else {
-    //     let productPrice = parseFloat(singleCartItem.WSPLPRICE);
-    //     let totalCartItemPrice = 0;
-    //     //singleCartItem.forEach((carItem) => {
-    //     totalCartItemPrice +=
-    //       parseFloat(singleCartItem.WSPLPRICE) *
-    //       parseInt(singleCartItem.quantity);
-    //     //});
-    //     //
-    //     setTotal(totalCartItemPrice);
-    //   }
-    // });
-    //check if product has a discout
-    // if (updatedItems.discounts) {
-    //   updatedItems.discounts.forEach((discount) => {
-    //     //check if product quantity more than discount quantity
-    //     if (
-    //       parseInt(updatedItems.quantity) + 1 >= discount.OFFERQTY &&
-    //       (!applicableDiscount ||
-    //         discount.OFFERQTY > applicableDiscount.OFFERQTY)
-    //     ) {
-    //       applicableDiscount = discount;
-    //     }
-    //   });
-    // }
-    // if (applicableDiscount) {
-    //   //if there's applicable discount apply it
-    //   let totalItemDiscount =
-    //     (parseInt(updatedItems.quantity) * applicableDiscount.DISCOUNT) / 100;
-    //   setTotal(total + parseFloat(updatedItems.WSPLPRICE) - totalItemDiscount);
-    // } else {
-    //   let productPrice = parseFloat(updatedItems.WSPLPRICE);
-    //   let totalCartItemPrice = 0;
-    //   updatedItems.forEach((carItem) => {
-    //     totalCartItemPrice +=
-    //       parseFloat(carItem.WSPLPRICE) * parseInt(carItem.quantity);
-    //   });
-    //   //console.log(updatedCart, "updatedCart ");
-    //   setTotal(totalCartItemPrice);
-    // }
   };
 
-  const decrementQuantity = (item) => {
-    if (item.quantity == 1) {
-      removeItem(item);
-    } else {
-      const updatedItem = { ...item, quantity: item.quantity - 1 };
-      const updatedCart = [
-        ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
-        updatedItem,
-      ];
-      setCartItems(updatedCart);
-      setTotal(total - parseFloat(item.WSPLPRICE));
-    }
-  };
-
-  const incrementQuantity = (item) => {
-    const updatedItem = { ...item, quantity: item.quantity + 1 };
-    const updatedCart = [
-      ...cartItems.filter((i) => i.PARTNAME !== item.PARTNAME),
-      updatedItem,
-    ];
-    setCartItems(updatedCart);
-    //const hasDiscount = item.discounts.some(discount => item.quantity >= discount.OFFERQTY);
-    let applicableDiscount = null;
-
-    if (item.discounts) {
-      item.discounts.forEach((discount) => {
-        if (
-          item.quantity + 1 >= discount.OFFERQTY &&
-          (!applicableDiscount ||
-            discount.OFFERQTY > applicableDiscount.OFFERQTY)
-        ) {
-          applicableDiscount = discount;
-        }
-      });
-    }
-    if (applicableDiscount) {
-      let totalItemDiscount =
-        (item.quantity * applicableDiscount.DISCOUNT) / 100;
-      setTotal(total + parseFloat(item.WSPLPRICE) - totalItemDiscount);
-    } else setTotal(total + parseFloat(item.WSPLPRICE));
-  };
+  
 
   const clearCart = () => {
     setCartItems([]);
@@ -357,6 +243,17 @@ const MaterialTable = () => {
   const options = {
     filtering: true,
   };
+
+  const handleCartClick = () => {
+    setShowCart(!showCart);
+  };
+
+  const handleCartClose = () => {
+    setShowCart(false);
+  };
+
+
+  
   return (
     <>
       <div class="custom-filters">
@@ -437,7 +334,7 @@ const MaterialTable = () => {
               <button
                 className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                 onClick={() => {
-                  handleAddToCart(row, total);
+                  discountPopup(data, row.original);
                 }}
                 style={{
                   backgroundColor: "#db2d2d",
@@ -462,6 +359,11 @@ const MaterialTable = () => {
                 onClick={() => {
                   handleAddToCart(row, total);
                 }}
+                style={{
+                  width: "30px",
+                  fontSize: "15px",
+                  height: "30px",
+                }}
               >
                 <FaCartArrowDown
                   style={{
@@ -472,7 +374,7 @@ const MaterialTable = () => {
                 />
               </button>
             )}
-            {row.original.hasOwnProperty("discounts") && (
+            {/* {row.original.hasOwnProperty("discounts") && (
               <FcMoneyTransfer
                 style={{
                   display: iconDisplay,
@@ -483,7 +385,7 @@ const MaterialTable = () => {
                   discountPopup(data, row.original);
                 }}
               />
-            )}
+            )} */}
             <Info
               style={{
                 color: "#1f79d5",
@@ -511,97 +413,16 @@ const MaterialTable = () => {
         setTotal={setTotal}
         setShowCart={setShowCart}
       />
-
-      {/* add to cart */}
-      <div>
-        <button class="basket" onClick={handleCartClick}>
-          Cart
-        </button>
-        {showCart && (
-          <div class="cart-container">
-            <div class="row">
-              <div class="col">
-                <h2 class="cart-title">Cart</h2>
-              </div>
-              <div class="col">
-                <button class="close-icon" onClick={handleCartClose}></button>
-              </div>
-            </div>
-            <ul class="cart-list">
-              {cartItems.map((item, index) => (
-                <li class="cart-item" key={index}>
-                  <div class="cart-item-details">
-                    <p class="cart-item-name">{item.PARTDES}</p>
-                    <p class="cart-item-name">Code: {item.PARTNAME}</p>
-                    <p class="cart-item-price">
-                      Price: {item.WSPLPRICE.toFixed(2)}
-                    </p>
-                    {/* <p class="cart-item-quantity">Quantity: {item.quantity}</p> */}
-                  </div>
-                  <div class="cart-item-controls">
-                    {/* <button
-                      class="cart-item-control-btn"
-                      onClick={() => decrementQuantity(item)}
-                    >
-                      -
-                    </button> */}
-                    <input
-                      type="number"
-                      value={productQuantity[item.PARTNAME] || 1}
-                      min={1}
-                      max={item.stock}
-                      onChange={(e) =>
-                        handleQuantityChange(e.target.value, item, index)
-                      }
-                      style={{
-                        width: "50px",
-                        marginRight: "10px",
-                        borderRadius: "5px",
-                        border: "1px solid #ccc",
-                        padding: "5px",
-                        fontSize: "1rem",
-                        textAlign: "center",
-                      }}
-                    />
-
-                    {/* <button
-                      class="cart-item-control-btn"
-                      onClick={() => incrementQuantity(item)}
-                    >
-                      +
-                    </button> */}
-                    <button
-                      class="cart-item-remove-btn"
-                      onClick={() => removeItem(item)}
-                    >
-                      &times;
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="total-container">
-              <p className="total-text">Total: {total.toFixed(2)}</p>
-            </div>
-
-            <div class="d-flex justify-content-between">
-              <button
-                onClick={() => clearCart()}
-                class="btn btn-danger cart-clear-btn"
-              >
-                Clear Cart
-              </button>
-              <button
-                onClick={() => sendOrder(cartItems, total)}
-                class="btn btn-primary"
-              >
-                Send order
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <Cart
+      showCart={showCart}
+      setShowCart={setShowCart}
+      cartItems={cartItems}
+      setCartItems={setCartItems}
+      handleCartClose={handleCartClose}
+      handleCartClick={handleCartClick}
+      total={total}
+      setTotal={setTotal}
+      />
     </>
   );
 };

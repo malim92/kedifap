@@ -4,6 +4,7 @@ import { ORDERS_COLUMNS } from "./columns-orders";
 //import { FetchInvoiceData } from "./invoiceApi";
 import ORDERSDATA from "./ordersData.json";
 
+//https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=DEXT_SUBMISSIONDATE%20ge%202022-04-02T00:00:00%2B02:00%20and%20DEXT_SUBMISSIONDATE%20le%202022-04-27T23:59:59%2B02:00
 const InvoicesTable = () => {
   //data and fetching state
   //const [data, setData] = useState([]);

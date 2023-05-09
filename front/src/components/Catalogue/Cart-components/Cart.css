@@ -2,7 +2,7 @@
   bottom: 0%;
   left: 90%;
   background-color: #fff;
-  background-image: url("../../../public/cart-icon.svg");
+  background-image: url("../../../../public/cart-icon.svg");
   background-position: 0 center;
   background-size: 144px;
   background-repeat: no-repeat;
@@ -130,7 +130,7 @@
   width: 24px;
   height: 24px;
   cursor: pointer;
-  background-image: url("../../../public/close.svg");
+  background-image: url("../../../../public/close.svg");
 }
 
 .cart-list {
