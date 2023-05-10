@@ -2,8 +2,11 @@ import React from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { FaCartArrowDown } from "react-icons/fa";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
-import './DiscountModal.css';
+import "./DiscountModal.css";
 
 const getDiscount = async (
   product,
@@ -13,7 +16,6 @@ const getDiscount = async (
   setTotal,
   setShowCart
 ) => {
-  
   setShowCart(true);
   const found = cartItems.find(
     (element) => element.PARTNAME == product.PARTNAME
@@ -35,7 +37,6 @@ const getDiscount = async (
       )
     );
     setCartItems([...cartItems, product]);
-    
   }
 };
 
@@ -46,11 +47,14 @@ function ProductDiscountModal(props) {
     popupModalDiscount,
     cartItems,
     setCartItems,
+    total,
     setTotal,
-    setShowCart
+    setShowCart,
+    handleAddToCart,
   } = props;
   const { rowSearch } = popupModalDiscount;
-  if (rowSearch !== undefined ) {
+  const productOriginal = { original: rowSearch };
+  if (rowSearch !== undefined) {
     return (
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -60,39 +64,76 @@ function ProductDiscountModal(props) {
           {/* <p>Part Code: {rowSearch.PARTNAME}</p> */}
           {rowSearch.hasOwnProperty("discounts") &&
             rowSearch.discounts.map((discount, index) => (
-              <div class="d-flex justify-content-between px-padding" key={index}>
-                <p>Buy: {discount.OFFERDES}</p>
+              <>
+                <Container>
+                  <Row>
+                    <div
+                      class="d-flex justify-content-between px-padding"
+                      key={index}
+                    >
+                      <p>Buy: {discount.OFFERDES}</p>
 
-                <button
-                  className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                  onClick={() =>
-                    getDiscount(
-                      rowSearch,
-                      discount,
-                      cartItems,
-                      setCartItems,
-                      setTotal,
-                      setShowCart
-                    )
-                  }
-                  style={{
-                    backgroundColor: "#db2d2d",
-                    backgroundColor: "#db2d2d",
-                    width: "30px",
-                    fontSize: "15px",
-                    height: "30px",
-                  }}
-                >
-                  <FaCartArrowDown
-                    style={{
-                      right: "8px",
-                      bottom: "8px",
-                      position: "relative",
-                    }}
-                  />
-                </button>
-              </div>
+                      <button
+                        className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                        onClick={() =>
+                          getDiscount(
+                            rowSearch,
+                            discount,
+                            cartItems,
+                            setCartItems,
+                            setTotal,
+                            setShowCart
+                          )
+                        }
+                        style={{
+                          backgroundColor: "#db2d2d",
+                          backgroundColor: "#db2d2d",
+                          width: "30px",
+                          fontSize: "15px",
+                          height: "30px",
+                        }}
+                      >
+                        <FaCartArrowDown
+                          style={{
+                            right: "8px",
+                            bottom: "8px",
+                            position: "relative",
+                          }}
+                        />
+                      </button>
+                    </div>
+                  </Row>
+                </Container>
+              </>
             ))}
+          <Container>
+            <Row>
+            <div
+                      class="d-flex justify-content-between px-padding"
+                    >
+              <p>Add single unit</p>
+              <button
+                className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                onClick={() => {
+                  handleAddToCart(productOriginal, total);
+                }}
+                style={{
+                  width: "30px",
+                  fontSize: "15px",
+                  height: "30px",
+                }}
+              >
+                <FaCartArrowDown
+                  style={{
+                    right: "8px",
+                    bottom: "8px",
+                    position: "relative",
+                  }}
+                />
+              </button>
+              </div>
+            </Row>
+          </Container>
         </Modal.Body>
         <Modal.Footer>
           <Button

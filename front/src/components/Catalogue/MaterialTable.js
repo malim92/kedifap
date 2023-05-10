@@ -22,6 +22,7 @@ const MaterialTable = () => {
 
   //table state
   const [columnFilters, setColumnFilters] = useState([]);
+  console.log(JSON.stringify(columnFilters), "str columnFilters");
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
@@ -29,13 +30,40 @@ const MaterialTable = () => {
     pageSize: 20,
   });
 
-
   const [cartItems, setCartItems] = useState([]);
 
   const discountData = useMemo(() => DATA, []);
   const stockData = useMemo(() => STOCK, []);
 
   const [iconDisplay, setIconDisplay] = useState(["none"]);
+
+  const [inputValue, setInputValue] = useState("");
+
+  const debounce = (callback, delay) => {
+    let debounceTimer;
+    return (...args) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    };
+  };
+
+  const filterBarcode = (value) => {
+    setColumnFilters[{id : "BARCODE", value:value}]
+    debounce(() => {
+      console.log(value, "value deb");
+      // [{"id":"PARTNAME","value":"lpa"}]
+      
+    }, 1000); // Adjust the delay (in milliseconds) as needed
+  };
+
+  const handleBarcodeChange = (event) => {
+    const value = event.target.value;
+    setInputValue(value);
+    filterBarcode(value);
+    console.log(value, "value");
+  };
 
   useEffect(() => {
     FetchPartsData(
@@ -48,7 +76,8 @@ const MaterialTable = () => {
       setIconDisplay,
       setData,
       setRowCount,
-      setIsError
+      setIsError,
+      filterBarcode
     );
   }, [
     columnFilters,
@@ -64,50 +93,7 @@ const MaterialTable = () => {
 
   const [total, setTotal] = useState(0);
 
-  
-
-  const calculateCartTotal = () => {
-    let sumPrice;
-    console.log(cartItems, "cartItems ");
-    cartItems.forEach((singleCartItem) => {
-      console.log(singleCartItem, "singleCartItem ");
-      let applicableDiscount = null;
-      if (singleCartItem.discounts) {
-        singleCartItem.discounts.forEach((discount) => {
-          //check if product quantity more than discount quantity
-          if (
-            parseInt(singleCartItem.quantity) + 1 >= discount.OFFERQTY &&
-            (!applicableDiscount ||
-              discount.OFFERQTY > applicableDiscount.OFFERQTY)
-          ) {
-            applicableDiscount = discount;
-          }
-        });
-        if (applicableDiscount) {
-          console.log(applicableDiscount, "totalItemDiscount 2");
-          //if there's applicable discount apply it
-          let totalItemDiscount =
-            (parseInt(singleCartItem.quantity) * applicableDiscount.DISCOUNT) /
-            100;
-          // setTotal(
-          //   total + parseFloat(singleCartItem.WSPLPRICE) - totalItemDiscount
-          // );
-          sumPrice += totalItemDiscount;
-          console.log(sumPrice, "totalItemDiscount ");
-        }
-      } else {
-        let productPrice = parseFloat(singleCartItem.WSPLPRICE);
-        sumPrice += productPrice;
-        
-      }
-      //cartTotalPrice += WSPLPRICE;
-    });
-    return sumPrice;
-  };
-
-  
   const handleAddToCart = (product, total) => {
-    calculateCartTotal();
     let cartTotalPrice = total;
     const { PARTNAME, WSPLPRICE } = product.original;
     product.original.quantity = 1;
@@ -117,98 +103,13 @@ const MaterialTable = () => {
     } else {
       cartTotalPrice += parseFloat(WSPLPRICE);
       setTotal(cartTotalPrice);
-      console.log(product.original,'product.original 1');
       setCartItems([...cartItems, product.original]);
-      console.log(cartItems,'cartItems 2');
       setShowCart(true);
     }
   };
 
-  const removeItem = (product) => {
-    const updatedCart = cartItems.filter(
-      (item) => item.PARTNAME !== product.PARTNAME
-    );
-    setCartItems(updatedCart);
-    setProductQuantity(1);
-    setTotal(
-      total - parseFloat(product.WSPLPRICE) * parseInt(product.quantity)
-    );
-  };
-
   //const [productQuantity, setProductQuantity] = useState(1);
-  const [productQuantity, setProductQuantity] = useState({});
-
-  const handleQuantityChange = (event, item, index) => {
-    //setProductQuantity(event);
-    
-    setProductQuantity((prevQuantities) => ({
-      ...prevQuantities,
-      [item.PARTNAME]: event,
-    }));
-
-    const updatedItems = [...cartItems];
-
-    updatedItems[index] = { ...updatedItems[index], quantity: event };
-    setCartItems(updatedItems);
-    console.log(updatedItems, "updatedItems after 2");
-    calculateCartTotal();
-    
-  };
-
-  
-
-  const clearCart = () => {
-    setCartItems([]);
-    setTotal(0);
-    setProductQuantity(1);
-  };
-
-  const sendOrder = async (order, cartTotal) => {
-    const productsinOrder = order.map((obj) => ({
-      PARTNAME: obj.PARTNAME,
-      PDES: obj.PARTDES,
-      TQUANT: obj.quantity,
-      DEXT_REQUESTEDQTY: obj.quantity,
-      DEXT_FREEQTY: 0,
-      PERCENT: 0,
-    }));
-
-    console.log(productsinOrder, "productsinOrder");
-
-    const orderObject = {
-      CUSTNAME: "C1001",
-      CDES: "ERACLEOUS PHARMACY LTD",
-      CURDATE: "2023-04-21T00:00:00+02:00",
-      DEXT_SUPPNAME: "V1239",
-      DEXT_SUPPDES: "4MORE LTD 2",
-      DCODE: null,
-      DETAILS: "Test from API",
-      DEXT_SUBMISSIONDATE: "2023-04-26T14:30:00+02:00",
-      PAYCODE: "20",
-      DEXT_B2CONTACT: 9,
-      B2B_ORDERITEMS_SUBFORM: productsinOrder,
-    };
-    console.log(JSON.stringify(orderObject), "str orderObject");
-    
-    setShowCart(false);
-
-    //send order
-    
-    const url =
-      //"http://localhost:8000/order";
-      "https://kedifap-portal.com2go.co/order";
-    
-    try {
-      const response = await axios.post(url, orderObject);
-      console.log(response,'response');
-      alert("Order Sent Successfully, Thank you!!");
-    } catch (error) {
-      console.error(error);
-    }
-    setCartItems([]);
-    setTotal(0);
-    setProductQuantity(1);
-  };
+  //const [productQuantity, setProductQuantity] = useState({});
 
   const [show, setShow] = useState(false);
   const [discountShow, setDiscountShow] = useState(false);
@@ -252,28 +153,27 @@ const MaterialTable = () => {
     setShowCart(false);
   };
 
-
-  
   return (
     <>
       <div class="custom-filters">
         <input
           type="text"
           id="filterInput"
-          onkeyup="filterList()"
-          placeholder="Search for brand..."
+          value={inputValue}
+          onChange={handleBarcodeChange}
+          placeholder="Search for barcode..."
         />
 
         <input
           type="text"
           id="filterInput"
-          onkeyup="filterList()"
+          onKeyUp="filterList()"
           placeholder="Search for code..."
         />
         <input
           type="text"
           id="filterInput"
-          onkeyup="filterList()"
+          onKeyUp="filterList()"
           placeholder="Search for items..."
         />
       </div>
@@ -410,18 +310,20 @@ const MaterialTable = () => {
         popupModalDiscount={popupModalDiscount}
         cartItems={cartItems}
         setCartItems={setCartItems}
+        total={total}
         setTotal={setTotal}
         setShowCart={setShowCart}
+        handleAddToCart={handleAddToCart}
       />
       <Cart
-      showCart={showCart}
-      setShowCart={setShowCart}
-      cartItems={cartItems}
-      setCartItems={setCartItems}
-      handleCartClose={handleCartClose}
-      handleCartClick={handleCartClick}
-      total={total}
-      setTotal={setTotal}
+        showCart={showCart}
+        setShowCart={setShowCart}
+        cartItems={cartItems}
+        setCartItems={setCartItems}
+        handleCartClose={handleCartClose}
+        handleCartClick={handleCartClick}
+        total={total}
+        setTotal={setTotal}
       />
     </>
   );
