@@ -108,29 +108,27 @@ function ProductDiscountModal(props) {
             ))}
           <Container>
             <Row>
-            <div
-                      class="d-flex justify-content-between px-padding"
-                    >
-              <p>Add single unit</p>
-              <button
-                className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                onClick={() => {
-                  handleAddToCart(productOriginal, total);
-                }}
-                style={{
-                  width: "30px",
-                  fontSize: "15px",
-                  height: "30px",
-                }}
-              >
-                <FaCartArrowDown
-                  style={{
-                    right: "8px",
-                    bottom: "8px",
-                    position: "relative",
+              <div class="d-flex justify-content-between px-padding">
+                <p>Add single unit</p>
+                <button
+                  className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                  onClick={() => {
+                    handleAddToCart(productOriginal, total);
                   }}
-                />
-              </button>
+                  style={{
+                    width: "30px",
+                    fontSize: "15px",
+                    height: "30px",
+                  }}
+                >
+                  <FaCartArrowDown
+                    style={{
+                      right: "8px",
+                      bottom: "8px",
+                      position: "relative",
+                    }}
+                  />
+                </button>
               </div>
             </Row>
           </Container>

@@ -18,26 +18,30 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 //import router from "./Routes/routes";
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <>
-      <Route element={<Navbar />}>
-        <Route path="/app" element={<Home />} />
-        <Route path="/app/catalogue" element={<ProductsTable />} />
-        <Route path="/app/orders" element={<Orders />} />
-        <Route path="/app/invoices" element={<Invoices />} />
-        <Route path="/app/customer-statements" element={<Statements />} />
-        <Route path="/app/general-information" element={<Information />} />
-        <Route path="/app/contact" element={<Contact />} />
-        <Route path="/app/profile" element={<Profile />} />
-      </Route>
-      <Route path="/" element={<Login />} />
-    </>
-  )
-);
+
 
 function App() {
+
   const [isAuthenticated, setIsAuthenticated] = useState(true);
+
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <>
+        <Route element={<Navbar />}>
+          <Route path="/app" element={<Home />} />
+          <Route path="/app/catalogue" element={<ProductsTable />} />
+          <Route path="/app/orders" element={<Orders />} />
+          <Route path="/app/invoices" element={<Invoices />} />
+          <Route path="/app/customer-statements" element={<Statements />} />
+          <Route path="/app/general-information" element={<Information />} />
+          <Route path="/app/contact" element={<Contact />} />
+          <Route path="/app/profile" element={<Profile />} />
+        </Route>
+        <Route path="/" element={<Login />} setIsAuthenticated={setIsAuthenticated} />
+      </>
+    )
+  );
+
 
   const handleLogin = () => {
     setIsAuthenticated(true);

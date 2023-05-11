@@ -14,6 +14,8 @@ const Cart = (props) => {
     handleCartClick,
     total,
     setTotal,
+    cartTemplate,
+    setCartTemplate
   } = props;
 
   const [productQuantity, setProductQuantity] = useState({});
@@ -115,9 +117,8 @@ const Cart = (props) => {
 
     //send order
 
-    const url =
-      "http://localhost:8000/order";
-      //"https://kedifap-portal.com2go.co/order";
+    const url = "http://localhost:8000/order";
+    //"https://kedifap-portal.com2go.co/order";
 
     try {
       const response = await axios.post(url, orderObject);
@@ -130,7 +131,9 @@ const Cart = (props) => {
     setTotal(0);
     setProductQuantity(1);
   };
-
+  const saveCart = async (cartItems) => {
+    setCartTemplate(cartItems)
+  }
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
@@ -216,6 +219,14 @@ const Cart = (props) => {
               class="btn btn-primary"
             >
               Send order
+            </button>
+          </div>
+          <div class="cart-template">
+            <button
+              onClick={() => saveCart(cartItems)}
+              class="btn btn-secondary"
+            >
+              Save Cart
             </button>
           </div>
         </div>

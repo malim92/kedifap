@@ -15,7 +15,8 @@ import logo from "../assets/kedi logo.png";
 import leafe from "../assets/leafe.png";
 import "./login.css";
 
-export default () => {
+export default (setIsAuthenticated) => {
+  console.log(setIsAuthenticated,'props');
   const [swiperHeight, setSwiperHeight] = useState(0);
 
   useEffect(() => {

@@ -10,18 +10,32 @@ export const FetchPartsData = async (
   setIconDisplay,
   setData,
   setRowCount,
-  setIsError
+  setIsError,
+  barcodeValue,
+  supValue,
+  activeIngValue
 ) => {
   try {
+
     const url = new URL("/parts/", "http://localhost:8000");
     //const url = new URL("/parts/", "https://kedifap-portal.com2go.co/");
     url.searchParams.set("page", `${pagination.pageIndex}`);
     url.searchParams.set("size", `${pagination.pageSize}`);
-    url.searchParams.set("filters", JSON.stringify(columnFilters ?? []));
+    url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
     url.searchParams.set("globalFilter", globalFilter ?? "");
     url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
-    console.log(url, "urls");
-
+    if (barcodeValue !== '' && barcodeValue !==undefined){
+      url.searchParams.set("customFilters", JSON.stringify([{"id":"BARCODE","value":barcodeValue}]));
+    }
+    else if (supValue !== '' && supValue !==undefined){
+      url.searchParams.set("customFilters", JSON.stringify([{"id":"SUPNAME","value":supValue}]));
+    }
+    else if (activeIngValue !== '' && activeIngValue !==undefined){
+      url.searchParams.set("customFilters", JSON.stringify([{"id":"SPEC1","value":activeIngValue}]));
+    }
+    else url.searchParams.set("customFilters", "");
+    ///parts/?page=0&size=20&filters=%5B%7B%22id%22%3A%22PARTNAME%22%2C%22value%22%3A%22sa%22%7D%5D&globalFilter=&sorting=%5B%5D
+    console.log(url, "url");
     const response = await fetch(url.href);
     const json = await response.json();
 

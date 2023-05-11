@@ -1,0 +1,7 @@
+.cart-template {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #cbd1cc8d;
+    padding: 10px 30px 10px 30px;
+}

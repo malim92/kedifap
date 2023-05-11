@@ -3,14 +3,17 @@ import MaterialReactTable from "material-react-table";
 import axios from "axios";
 import { Info } from "@mui/icons-material";
 import PopupModal from "./Modal";
+import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown } from "react-icons/fa";
+import { BiCartDownload } from "react-icons/bi";
+
 import { COLUMNS } from "./columns-material";
 import { FetchPartsData } from "./partsApi";
 import DATA from "./data.json";
 import STOCK from "./stock.json";
 import Cart from "./Cart-components/Cart";
-import "./Cart-components/Cart.css";
+import "./MaterialTable.css";
 
 const MaterialTable = () => {
   //data and fetching state
@@ -22,7 +25,7 @@ const MaterialTable = () => {
 
   //table state
   const [columnFilters, setColumnFilters] = useState([]);
-  console.log(JSON.stringify(columnFilters), "str columnFilters");
+
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
@@ -31,13 +34,16 @@ const MaterialTable = () => {
   });
 
   const [cartItems, setCartItems] = useState([]);
+  const [cartTemplate, setCartTemplate] = useState([]);
 
   const discountData = useMemo(() => DATA, []);
   const stockData = useMemo(() => STOCK, []);
 
   const [iconDisplay, setIconDisplay] = useState(["none"]);
 
-  const [inputValue, setInputValue] = useState("");
+  const [barcodeValue, setBarcodeValue] = useState("");
+  const [supValue, setSupValue] = useState("");
+  const [activeIngValue, setActiveIngValue] = useState("");
 
   const debounce = (callback, delay) => {
     let debounceTimer;
@@ -49,21 +55,50 @@ const MaterialTable = () => {
     };
   };
 
-  const filterBarcode = (value) => {
-    setColumnFilters[{id : "BARCODE", value:value}]
-    debounce(() => {
-      console.log(value, "value deb");
-      // [{"id":"PARTNAME","value":"lpa"}]
-      
-    }, 1000); // Adjust the delay (in milliseconds) as needed
+  const handleBarcodeChange = (event) => {
+    setBarcodeValue(event.target.value);
   };
 
-  const handleBarcodeChange = (event) => {
-    const value = event.target.value;
-    setInputValue(value);
-    filterBarcode(value);
-    console.log(value, "value");
+  const handleSupplierChange = (event) => {
+    setSupValue(event.target.value);
   };
+
+  const handleActiveIngredientChange = (event) => {
+    setActiveIngValue(event.target.value);
+  };
+
+  useEffect(() => {
+    const debounceTimeout = setTimeout(() => {
+      FetchPartsData(
+        sorting,
+        globalFilter,
+        columnFilters,
+        pagination,
+        discountData,
+        stockData,
+        setIconDisplay,
+        setData,
+        setRowCount,
+        setIsError,
+        barcodeValue,
+        supValue,
+        activeIngValue
+      );
+    }, 1000);
+
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [
+    columnFilters,
+    globalFilter,
+    pagination.pageIndex,
+    pagination.pageSize,
+    sorting,
+    barcodeValue,
+    supValue,
+    activeIngValue,
+  ]);
 
   useEffect(() => {
     FetchPartsData(
@@ -76,8 +111,7 @@ const MaterialTable = () => {
       setIconDisplay,
       setData,
       setRowCount,
-      setIsError,
-      filterBarcode
+      setIsError
     );
   }, [
     columnFilters,
@@ -113,6 +147,7 @@ const MaterialTable = () => {
 
   const [show, setShow] = useState(false);
   const [discountShow, setDiscountShow] = useState(false);
+  const [cartTemplateShow, setCartTemplateShow] = useState(false);
   const [popupModalData, setPopupModalData] = useState({});
   const [popupModalDiscount, setPopupModalDiscount] = useState({});
   const handleClose = () => setShow(false);
@@ -135,6 +170,10 @@ const MaterialTable = () => {
     });
   };
 
+  const cartTemplatePopup = (cartTemplate) => {
+    setCartTemplateShow(!cartTemplateShow);
+  };
+
   const discountPopup = (data, id) => {
     const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
     setDiscountShow(!discountShow);
@@ -155,11 +194,28 @@ const MaterialTable = () => {
 
   return (
     <>
+      <div class="cart-template">
+        <h4>
+          Cart Templates
+          <BiCartDownload
+            style={{
+              color: "#1f79d5",
+              cursor: "pointer",
+              fontSize: "40px",
+              margin: "auto",
+            }}
+            onClick={() => {
+              console.log(JSON.stringify(cartTemplate), " cartTemplate here");
+              cartTemplatePopup(cartTemplate);
+            }}
+          ></BiCartDownload>
+        </h4>
+      </div>
       <div class="custom-filters">
         <input
           type="text"
           id="filterInput"
-          value={inputValue}
+          value={barcodeValue || ""}
           onChange={handleBarcodeChange}
           placeholder="Search for barcode..."
         />
@@ -167,14 +223,16 @@ const MaterialTable = () => {
         <input
           type="text"
           id="filterInput"
-          onKeyUp="filterList()"
-          placeholder="Search for code..."
+          value={supValue || ""}
+          onChange={handleSupplierChange}
+          placeholder="Search by supplier code..."
         />
         <input
           type="text"
           id="filterInput"
-          onKeyUp="filterList()"
-          placeholder="Search for items..."
+          value={activeIngValue || ""}
+          onChange={handleActiveIngredientChange}
+          placeholder="Search for Active Substance..."
         />
       </div>
 
@@ -299,6 +357,7 @@ const MaterialTable = () => {
           </div>
         )}
       />
+      <CartPopupModal show={cartTemplateShow}></CartPopupModal>
       <PopupModal
         show={show}
         handleClose={handleClose}
@@ -324,6 +383,8 @@ const MaterialTable = () => {
         handleCartClick={handleCartClick}
         total={total}
         setTotal={setTotal}
+        cartTemplate={cartTemplate}
+        setCartTemplate={setCartTemplate}
       />
     </>
   );

@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 import pill from "../assets/login img side.png";
 
-function LoginForm() {
+function LoginForm(setIsAuthenticated) {
+
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -14,11 +17,25 @@ function LoginForm() {
     setPassword(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    try {
+      const loginCredentials = {
+        username: username,
+        password: password
+      }
+      console.log(JSON.stringify(loginCredentials), "loginCredentials");
+      
+      //const url = "https://kedi-portal.com2go.co/authenticate"; not correct
+      const url = "http://localhost:8000/authenticate";
+      const response = await axios.post(url, loginCredentials);
+      setIsAuthenticated(true);
+      console.log(response, "response");
+    } catch (error) {
+      console.error(error);
+    }
     //return window.location.href = "http://localhost:3000/app";
-    return (window.location.href = "https://kedi-app.com2go.co/app");
-    console.log(`Username: ${username}, Password: ${password}`);
+    //return (window.location.href = "https://kedi-app.com2go.co/app");
   };
 
   return (
