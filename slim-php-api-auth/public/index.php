@@ -72,7 +72,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 
         $stmt = $db->query($sql);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        //print_r($user);print_r($user['CUSTNAME']);die;
         if ($user['CUSTNAME'] === $name) {
 
             $MyJWT = $this->JWT;
@@ -98,14 +98,14 @@ $app->post('/authenticate', function (Request $request, Response $response) {
             setcookie('jwt_token', $token, time() + $cookie_lifetime, $cookie_params['path'], $cookie_params['domain'], $cookie_params['secure'], $cookie_params['httponly']);
 
 
-            $response->withHeader("Content-Type", "application/json")
+            return $response->withHeader("Content-Type", "application/json")
                 ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-            return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
+            return $response->withStatus(302)->withJson('Location', 'http://localhost:3000/');
             //return $response->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co/');
         } else {
             $flash = $this->get('flash');
             $flash->addMessage('error', 'Invalid username or password.');
-            return $response->withStatus(302)->withHeader('Location', '/');
+            return $response->withStatus(404)->withJson(['error' => 'Invalid username or password']);
             //return '{"success": "false", "msg": "User not found"}';
         }
     } catch (PDOException $e) {
@@ -168,8 +168,8 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     $size = $request->getQueryParams('size')['size'];
     $sorting = $request->getQueryParams('sorting')['sorting'];
     $columnFilter = $request->getQueryParams('filters')['filters'];
+    $customColumnFilter = $request->getQueryParams('customFilters')['customFilters'];
     $globalFilter = $request->getQueryParams('globalFilter')['globalFilter'];
-    //print_r($columnFilter ) ; die;
     $page *= 100;
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
@@ -177,6 +177,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
 
     $sortingQuery = '';
     $filterQuery = '';
+    $customFilterQuery = '';
 
     $toalRows = "SELECT COUNT(PARTNAME) FROM parts";
 
@@ -196,10 +197,15 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         $filterValue = $columnFilterArray[0]->value;
         $filterQuery = "WHERE $columnId LIKE :filterValue";
         // print_r($columnId);
-
+    }
+    if (!empty(json_decode($customColumnFilter)) && !empty($customColumnFilter)) {
+        $customColumnFilterArray = json_decode($customColumnFilter);
+        $columnId = $customColumnFilterArray[0]->id;
+        $custonFilterValue = $customColumnFilterArray[0]->value;
+        $customFilterQuery = "WHERE $columnId LIKE :customFilterValue";
     }
 
-    $sql = "SELECT * FROM parts $filterQuery $sortingQuery LIMIT :size OFFSET :page";
+    $sql = "SELECT * FROM parts $filterQuery $customFilterQuery $sortingQuery LIMIT :size OFFSET :page";
 
     if ($globalFilter !== '' && $globalFilter !== null) {
         $sql = "SELECT * FROM parts WHERE PARTNAME OR PARTDES LIKE :globalFilter " . $sortingQuery;
@@ -223,6 +229,9 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
             $stmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
         }
+        if (!empty(json_decode($customColumnFilter)) && !empty($customColumnFilter)) {
+            $stmt->bindValue(':customFilterValue', '%' . $custonFilterValue . '%', PDO::PARAM_STR);
+        }
 
         //user search
         if ($globalFilter !== '' && $globalFilter !== null) {
@@ -234,6 +243,8 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         //$stmt->debugDumpParams();die;
         $stmt->execute();
         $parts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //print_r($custonFilterValue);die;
+
         //$toalRows= $stmt->fetch(PDO::FETCH_ASSOC);
         $toalRows = current($db->query($toalRows)->fetch());
         $partsObject = ["totalRows" => $toalRows, "data" => $parts];
@@ -246,24 +257,25 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
 });
 
 $app->post('/order', function (Request $request, Response $response) { {
-    //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS
+        //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS
         $order = $request->getParsedBody();
         $username = 'apiuser';
         $password = '1234';
 
         $client = new Client([
-            'base_uri' => 'https://ked.priority-software.com.cy/',
-            //'base_uri' => 'https://webhook.site/',
+            //'base_uri' => 'https://ked.priority-software.com.cy/',
+            'base_uri' => 'https://webhook.site/',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password")
             ],
             'verify' => false
         ]);
 
-        $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
+        //$response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
+        $response = $client->post('/ce17d721-531d-498f-8041-0af5f5df5d2b', [
             'json' => $order,
         ]);
-        
+
         $body = (string) $response->getBody();
         $data = json_decode($body, true);
         return $data;

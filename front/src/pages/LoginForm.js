@@ -1,10 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate   } from 'react-router-dom'
 import axios from "axios";
 
 import pill from "../assets/login img side.png";
 
-function LoginForm(setIsAuthenticated) {
-
+function LoginForm({ setIsAuthenticated }) {
+  let navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,14 +25,17 @@ function LoginForm(setIsAuthenticated) {
         username: username,
         password: password
       }
-      console.log(JSON.stringify(loginCredentials), "loginCredentials");
-      
-      //const url = "https://kedi-portal.com2go.co/authenticate"; not correct
+            
+      //const url = "https://kedi-portal.com2go.co/authenticate"; //not correct
       const url = "http://localhost:8000/authenticate";
       const response = await axios.post(url, loginCredentials);
+      console.log( response,'response xxx' );
+
       setIsAuthenticated(true);
-      console.log(response, "response");
+      return navigate("/app");
     } catch (error) {
+      setIsAuthenticated(false);
+      alert("Username or Password is wrong!");
       console.error(error);
     }
     //return window.location.href = "http://localhost:3000/app";

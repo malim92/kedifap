@@ -149,9 +149,11 @@ const MaterialTable = () => {
   const [discountShow, setDiscountShow] = useState(false);
   const [cartTemplateShow, setCartTemplateShow] = useState(false);
   const [popupModalData, setPopupModalData] = useState({});
+  const [cartPopupModalData, setCartPopupModalData] = useState({});
   const [popupModalDiscount, setPopupModalDiscount] = useState({});
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
+  const handleCartTemplateClose = () => setCartTemplateShow(false);
 
   const productPopup = (data, id) => {
     const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
@@ -172,6 +174,7 @@ const MaterialTable = () => {
 
   const cartTemplatePopup = (cartTemplate) => {
     setCartTemplateShow(!cartTemplateShow);
+    setCartPopupModalData(cartTemplate)
   };
 
   const discountPopup = (data, id) => {
@@ -194,7 +197,7 @@ const MaterialTable = () => {
 
   return (
     <>
-      <div class="cart-template">
+      <div class="cart-template-row">
         <h4>
           Cart Templates
           <BiCartDownload
@@ -357,7 +360,15 @@ const MaterialTable = () => {
           </div>
         )}
       />
-      <CartPopupModal show={cartTemplateShow}></CartPopupModal>
+      <CartPopupModal
+      show={cartTemplateShow}
+      handleClose={handleCartTemplateClose}
+      cartPopupModalData={cartPopupModalData}
+      cartItems={cartItems}
+      setCartItems={setCartItems}
+      setTotal={setTotal}
+      setShowCart={setShowCart}
+      ></CartPopupModal>
       <PopupModal
         show={show}
         handleClose={handleClose}

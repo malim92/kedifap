@@ -6,6 +6,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { useState } from "react";
+import PrivateRoutes from './pages/Routes/PrivateRoutes';
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import ProductsTable from "./pages/ProductsTable";
@@ -22,11 +23,12 @@ import Login from "./pages/Login";
 
 function App() {
 
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  console.log(isAuthenticated,'isAuthenticated tesst');
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
+      <Route element={<PrivateRoutes isAuthenticated={isAuthenticated}/>}>
         <Route element={<Navbar />}>
           <Route path="/app" element={<Home />} />
           <Route path="/app/catalogue" element={<ProductsTable />} />
@@ -37,7 +39,8 @@ function App() {
           <Route path="/app/contact" element={<Contact />} />
           <Route path="/app/profile" element={<Profile />} />
         </Route>
-        <Route path="/" element={<Login />} setIsAuthenticated={setIsAuthenticated} />
+        </Route>
+        <Route path="/" element={<Login setIsAuthenticated={setIsAuthenticated}/>}/>
       </>
     )
   );
