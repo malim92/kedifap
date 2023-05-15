@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
 import { ORDERS_COLUMNS } from "./columns-orders";
-//import { FetchInvoiceData } from "./invoiceApi";
-import ORDERSDATA from "./ordersData.json";
+import { FetchOrdersData } from "./getOrderApi";
+import axios from "axios";
+import OrderProductsModal from './ProductsModal';
 
 //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=DEXT_SUBMISSIONDATE%20ge%202022-04-02T00:00:00%2B02:00%20and%20DEXT_SUBMISSIONDATE%20le%202022-04-27T23:59:59%2B02:00
-const InvoicesTable = () => {
+const OrdersTable = () => {
   //data and fetching state
-  //const [data, setData] = useState([]);
+  const [data, setData] = useState([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -22,16 +23,21 @@ const InvoicesTable = () => {
     pageSize: 100,
   });
 
+  //Modal state
+  const [productShow, setProductShow] = useState(false);
+  const [popupModalProduct, setPopupModalProduct] = useState({});
+
+
   useEffect(() => {
-    // FetchInvoiceData(
-    //   sorting,
-    //   globalFilter,
-    //   columnFilters,
-    //   pagination,
-    //   setData,
-    //   setRowCount,
-    //   setIsError
-    // );
+    FetchOrdersData(
+      sorting,
+      globalFilter,
+      columnFilters,
+      pagination,
+      setData,
+      setRowCount,
+      setIsError
+    );
   }, [
     columnFilters,
     globalFilter,
@@ -39,11 +45,37 @@ const InvoicesTable = () => {
     pagination.pageSize,
     sorting,
   ]);
+  console.log(data, "typeof data");
 
   const columns = useMemo(() => ORDERS_COLUMNS, []);
-  const data = useMemo(() => ORDERSDATA.value, []);
+
+  const fetchOrderProducts = async (order) => {
+    const orderId = order.original.ORDNAME;
+
+    const username = "apiuser";
+    const password = "1234";
+    const url = `https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS(ORDNAME='${orderId}')?$expand=B2B_ORDERITEMS_SUBFORM`;
+    const auth = {
+      username: username,
+      password: password,
+    };
+    try {
+      const response = await axios.get(url, { auth: auth });
+      const ordersList = response.data.B2B_ORDERITEMS_SUBFORM;
+      setProductShow(!productShow);
+      setPopupModalProduct({ ordersList });
+      console.log(ordersList, "ordersList ");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
+    <OrderProductsModal
+        show={productShow}
+        popupModalProduct={popupModalProduct}
+      />
       <MaterialReactTable
         // displayColumnDefOptions={{
         //   "mrt-row-actions": {
@@ -81,23 +113,25 @@ const InvoicesTable = () => {
           showProgressBars: isRefetching,
           sorting,
         }}
-        // enableRowActions
-        // renderRowActions={({ row }) => (
-        //   <div align="center">
-        //     <Info
-        //       style={{
-        //         color: "#1f79d5",
-        //         width: "50px",
-        //         height: "50px",
-        //         cursor: "pointer",
-        //         float: "right",
-        //       }}
-        //     ></Info>
-        //   </div>
-        // )}
+        enableRowActions
+        renderRowActions={({ row }) => (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                fetchOrderProducts(row);
+              }}
+              style={{
+                fontSize: "15px",
+              }}
+            >
+              Products Details
+            </button>
+          </div>
+        )}
       />
     </>
   );
 };
 
-export default InvoicesTable;
+export default OrdersTable;

@@ -17,8 +17,8 @@ export const FetchPartsData = async (
 ) => {
   try {
 
-    const url = new URL("/parts/", "http://localhost:8000");
-    //const url = new URL("/parts/", "https://kedifap-portal.com2go.co/");
+    //const url = new URL("/parts/", "http://localhost:8000");
+    const url = new URL("/parts/", "https://kedifap-portal.com2go.co/");
     url.searchParams.set("page", `${pagination.pageIndex}`);
     url.searchParams.set("size", `${pagination.pageSize}`);
     url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]

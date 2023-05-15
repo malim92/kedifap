@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 import "./Cart.css";
 import { FaCartArrowDown } from "react-icons/fa";
@@ -87,6 +88,7 @@ const Cart = (props) => {
   };
 
   const sendOrder = async (order, cartTotal) => {
+    const userId = Cookies.get("userId");
     const productsinOrder = order.map((obj) => ({
       PARTNAME: obj.PARTNAME,
       PDES: obj.PARTDES,
@@ -99,7 +101,7 @@ const Cart = (props) => {
     console.log(productsinOrder, "productsinOrder");
 
     const orderObject = {
-      CUSTNAME: "C1001",
+      CUSTNAME: userId,
       CDES: "ERACLEOUS PHARMACY LTD",
       CURDATE: "2023-04-21T00:00:00+02:00",
       DEXT_SUPPNAME: "V1239",
@@ -118,10 +120,22 @@ const Cart = (props) => {
     //send order
 
     //const url = "http://localhost:8000/order";
-    const url = "https://kedifap-portal.com2go.co/order";
+    const url = "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS";
+    //const url = "https://kedifap-portal.com2go.co/order";
 
+    let axiosConfig = {
+      headers: {
+          'Content-Type': 'application/json;charset=UTF-8',
+          "Access-Control-Allow-Origin": "*",
+      }
+    };
     try {
-      const response = await axios.post(url, orderObject);
+      const response = await axios.post(url, orderObject, {
+        auth: {
+          username: 'apiuser',
+          password: '1234'
+        }
+      });
       console.log(response, "response");
       alert("Order Sent Successfully, Thank you!!");
     } catch (error) {

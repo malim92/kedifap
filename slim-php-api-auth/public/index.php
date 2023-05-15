@@ -53,8 +53,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
 
 // Authenticate
 $app->post('/authenticate', function (Request $request, Response $response) {
-    session_start();
-
+    session_start();    
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
@@ -62,8 +61,9 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     //$name = $request->getParam('name');
     $params = $request->getParsedBody();
     $name = $params['username'] ?? '';
+    $pass = $params['password'] ?? '';
     //echo $name;die;
-    $sql = "SELECT * FROM customers WHERE CUSTNAME = '$name'";
+    $sql = "SELECT * FROM customers WHERE CUSTNAME = '$name'";    //echo $name;die;
     try {
         // Get DB Object
         $db = new db();
@@ -73,7 +73,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
         $stmt = $db->query($sql);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         //print_r($user);print_r($user['CUSTNAME']);die;
-        if ($user['CUSTNAME'] === $name) {
+        if ($user['CUSTNAME'] === $name && $user['DEXT_PASSWORD'] === $pass ) {
 
             $MyJWT = $this->JWT;
             $now = new DateTime();
@@ -100,7 +100,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 
             return $response->withHeader("Content-Type", "application/json")
                 ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-            return $response->withStatus(302)->withJson('Location', 'http://localhost:3000/');
+            //return $response->withStatus(302)->withJson('Location', 'http://localhost:3000/');
             //return $response->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co/');
         } else {
             $flash = $this->get('flash');
@@ -240,7 +240,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
             $stmt->bindValue(':size', $size, PDO::PARAM_INT);
             $stmt->bindValue(':page', $page, PDO::PARAM_INT);
         }
-        //$stmt->debugDumpParams();die;
+        $stmt->debugDumpParams();die;
         $stmt->execute();
         $parts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         //print_r($custonFilterValue);die;
@@ -264,9 +264,9 @@ $app->post('/order', function (Request $request, Response $response) { {
 
         $client = new Client([
             //'base_uri' => 'https://ked.priority-software.com.cy/',
-            'base_uri' => 'https://webhook.site/',
+            'base_uri' => 'https://webhook.site/    ',
             'headers' => [
-                'Authorization' => 'Basic ' . base64_encode("$username:$password")
+                'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
             'verify' => false
         ]);

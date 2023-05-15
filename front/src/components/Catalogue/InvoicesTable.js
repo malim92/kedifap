@@ -3,12 +3,11 @@ import moment from "moment";
 import axios from "axios";
 import MaterialReactTable from "material-react-table";
 import { INVOICE_COLUMNS } from "./columns-invoice";
-//import { FetchInvoiceData } from "./invoiceApi";
-import INVOICEDATA from "./invoiceData.json";
+import { FetchInvoiceData } from "./invoiceApi";
 
 const InvoicesTable = () => {
   //data and fetching state
-  //const [data, setData] = useState([]);
+  const [data, setData] = useState([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
@@ -24,15 +23,15 @@ const InvoicesTable = () => {
   });
 
   useEffect(() => {
-    // FetchInvoiceData(
-    //   sorting,
-    //   globalFilter,
-    //   columnFilters,
-    //   pagination,
-    //   setData,
-    //   setRowCount,
-    //   setIsError
-    // );
+    FetchInvoiceData(
+      sorting,
+      globalFilter,
+      columnFilters,
+      pagination,
+      setData,
+      setRowCount,
+      setIsError
+    );
   }, [
     columnFilters,
     globalFilter,
@@ -41,18 +40,11 @@ const InvoicesTable = () => {
     sorting,
   ]);
 
-  const columns = useMemo(() => INVOICE_COLUMNS, []);
-  //const data = useMemo(() => INVOICEDATA, []);
-  const data = useMemo(() => {
-    return INVOICEDATA.map((item) => ({
-      ...item,
-      IVDATE: moment(item.IVDATE).format("DD-MM-YYYY"),
-    }));
-  }, []);
+  const columns = useMemo(() => INVOICE_COLUMNS, []);  
 
   const fetchInvoice = async (product) => {
     console.log(product.original, "product");
-    const data = {
+    const pdfData = {
       IVNUM: product.original.IVNUM,
     };
 
@@ -65,8 +57,9 @@ const InvoicesTable = () => {
       password: password,
     };
     try {
-      const response = await axios.post(url, data, { auth: auth });
-      console.log(response.data);
+      const response = await axios.post(url, pdfData, { auth: auth });
+      const pdflink = response.data.APIPATH;
+      window.open(pdflink, '_blank');
     } catch (error) {
       console.error(error);
     }

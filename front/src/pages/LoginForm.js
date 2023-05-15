@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate   } from 'react-router-dom'
 import axios from "axios";
+import Cookies from "js-cookie";
 
 import pill from "../assets/login img side.png";
 
@@ -25,14 +26,25 @@ function LoginForm({ setIsAuthenticated }) {
         username: username,
         password: password
       }
+
+      let axiosConfig = {
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+        }
+      };
             
-      //const url = "https://kedi-portal.com2go.co/authenticate"; //not correct
-      const url = "http://localhost:8000/authenticate";
+      const url = "https://kedifap-portal.com2go.co/authenticate"; //not correct
+      //const url = "http://localhost:8000/authenticate";
       const response = await axios.post(url, loginCredentials);
       console.log( response,'response xxx' );
+      Cookies.set('userId', username)
 
-      setIsAuthenticated(true);
-      return navigate("/app");
+      setIsAuthenticated(true); 
+      return navigate({
+        pathname: '/app',
+        //search: `?userId=${username}`,
+      });
     } catch (error) {
       setIsAuthenticated(false);
       alert("Username or Password is wrong!");
