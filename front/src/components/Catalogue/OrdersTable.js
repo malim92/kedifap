@@ -27,6 +27,8 @@ const OrdersTable = () => {
   const [productShow, setProductShow] = useState(false);
   const [popupModalProduct, setPopupModalProduct] = useState({});
 
+  const handleProductClose = () => setProductShow(false);
+
 
   useEffect(() => {
     FetchOrdersData(
@@ -75,6 +77,7 @@ const OrdersTable = () => {
     <OrderProductsModal
         show={productShow}
         popupModalProduct={popupModalProduct}
+        handleClose={handleProductClose}
       />
       <MaterialReactTable
         // displayColumnDefOptions={{
