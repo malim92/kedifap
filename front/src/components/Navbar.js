@@ -36,6 +36,9 @@ export default function Navbar() {
                             <li>
                                 <Link to='/app/profile'>Το προφίλ μου</Link>
                             </li>
+                            <li>
+                                <Link to='/app/vendors'>Vendors</Link>
+                            </li>
                             
                         </ul>
                     </div>

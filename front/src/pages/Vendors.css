@@ -1,0 +1,17 @@
+.person-info {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .person-name {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .person-info-item {
+    margin: 5px 0;
+  }
+  

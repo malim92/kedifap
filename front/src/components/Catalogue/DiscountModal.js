@@ -13,7 +13,8 @@ const getDiscount = async (
   cartItems,
   setCartItems,
   setTotal,
-  setShowCart
+  setShowCart,
+  setQuantityInputValue
 ) => {
   setShowCart(true);
   const found = cartItems.find(
@@ -35,6 +36,7 @@ const getDiscount = async (
         )
       )
     );
+    setQuantityInputValue(product.quantity)
     setCartItems([...cartItems, product]);
   }
 };
@@ -50,7 +52,9 @@ function ProductDiscountModal(props) {
     setTotal,
     setShowCart,
     handleAddToCart,
+    setQuantityInputValue,
   } = props;
+
   const { rowSearch } = popupModalDiscount;
   const productOriginal = { original: rowSearch };
   if (rowSearch !== undefined) {
@@ -81,7 +85,8 @@ function ProductDiscountModal(props) {
                             cartItems,
                             setCartItems,
                             setTotal,
-                            setShowCart
+                            setShowCart,
+                            setQuantityInputValue
                           )
                         }
                         style={{

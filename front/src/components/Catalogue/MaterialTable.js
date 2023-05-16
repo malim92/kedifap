@@ -5,7 +5,7 @@ import { Info } from "@mui/icons-material";
 import PopupModal from "./Modal";
 import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
-import { FaCartArrowDown } from "react-icons/fa";
+import { FaCartArrowDown, FaImage } from "react-icons/fa";
 import { BiCartDownload } from "react-icons/bi";
 
 import { COLUMNS } from "./columns-material";
@@ -44,6 +44,7 @@ const MaterialTable = () => {
   const [barcodeValue, setBarcodeValue] = useState("");
   const [supValue, setSupValue] = useState("");
   const [activeIngValue, setActiveIngValue] = useState("");
+  const [quantityInputValue, setQuantityInputValue] = useState(1);
 
   const debounce = (callback, delay) => {
     let debounceTimer;
@@ -157,6 +158,7 @@ const MaterialTable = () => {
 
   const productPopup = (data, id) => {
     const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
+
     setShow(!show);
     setPopupModalData({
       code: rowSearch.PARTNAME,
@@ -169,12 +171,17 @@ const MaterialTable = () => {
       barcode: rowSearch.BARCODE,
       pharmaCode: rowSearch.SPEC14,
       supplier: rowSearch.DEXT_IMPORTERNAME,
+      ghs: rowSearch.DEXT_GHS,
+      fragile: rowSearch.DEXT_FRAGILE,
+      liquid: rowSearch.DEXT_LIQUID,
+      fridge: rowSearch.DEXT_FRAGILE,
+      policy: rowSearch.DEXT_SUPPOLICYCODE,
     });
   };
 
   const cartTemplatePopup = (cartTemplate) => {
     setCartTemplateShow(!cartTemplateShow);
-    setCartPopupModalData(cartTemplate)
+    setCartPopupModalData(cartTemplate);
   };
 
   const discountPopup = (data, id) => {
@@ -357,17 +364,33 @@ const MaterialTable = () => {
                 productPopup(data, row.original);
               }}
             ></Info>
+            {row.original.IMGFILENAME !==null && (
+              <FaImage
+                style={{
+                  color: "#1f79d5",
+                  cursor: "pointer",
+                  fontSize: "35px",
+                }}
+                onClick={() => {
+            console.log(row.original, "row.original.IMGFILENAM");
+
+                  window.open(row.original.IMGFILENAME, '_blank');
+                }}
+              ></FaImage>
+            )}
           </div>
         )}
       />
       <CartPopupModal
-      show={cartTemplateShow}
-      handleClose={handleCartTemplateClose}
-      cartPopupModalData={cartPopupModalData}
-      cartItems={cartItems}
-      setCartItems={setCartItems}
-      setTotal={setTotal}
-      setShowCart={setShowCart}
+        show={cartTemplateShow}
+        handleClose={handleCartTemplateClose}
+        cartPopupModalData={cartPopupModalData}
+        cartItems={cartItems}
+        setCartItems={setCartItems}
+        setTotal={setTotal}
+        setShowCart={setShowCart}
+        quantityInputValue={quantityInputValue}
+        setQuantityInputValue={setQuantityInputValue}
       ></CartPopupModal>
       <PopupModal
         show={show}
@@ -384,6 +407,7 @@ const MaterialTable = () => {
         setTotal={setTotal}
         setShowCart={setShowCart}
         handleAddToCart={handleAddToCart}
+        setQuantityInputValue={setQuantityInputValue}
       />
       <Cart
         showCart={showCart}
@@ -396,6 +420,8 @@ const MaterialTable = () => {
         setTotal={setTotal}
         cartTemplate={cartTemplate}
         setCartTemplate={setCartTemplate}
+        quantityInputValue={quantityInputValue}
+        setQuantityInputValue={setQuantityInputValue}
       />
     </>
   );

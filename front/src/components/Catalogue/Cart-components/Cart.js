@@ -17,11 +17,13 @@ const Cart = (props) => {
     setTotal,
     cartTemplate,
     setCartTemplate,
+    quantityInputValue,
+    setQuantityInputValue,
   } = props;
 
   const [productQuantity, setProductQuantity] = useState({});
 
-  const handleQuantityChange = (event, item, index) => {
+  const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
     //setProductQuantity(event);
 
     setProductQuantity((prevQuantities) => ({
@@ -29,6 +31,7 @@ const Cart = (props) => {
       [item.PARTNAME]: event,
     }));
 
+    setQuantityInputValue(event);
     const updatedItems = [...cartItems];
 
     updatedItems[index] = { ...updatedItems[index], quantity: event };
@@ -41,30 +44,47 @@ const Cart = (props) => {
         singleCartItem.discounts.forEach((discount) => {
           //check if product quantity more than discount quantity
           if (
-            parseInt(singleCartItem.quantity) + 1 >= discount.OFFERQTY &&
+            parseInt(singleCartItem.quantity) >= parseInt(discount.OFFERQTY) &&
             (!applicableDiscount ||
               discount.OFFERQTY > applicableDiscount.OFFERQTY)
           ) {
+            console.log(singleCartItem, "singleCartItem test xx");
             applicableDiscount = discount;
           }
         });
         if (applicableDiscount) {
+          // console.log(applicableDiscount, "applicableDiscount test xx");
+          let addedDiscountedUnit =
+            singleCartItem.WSPLPRICE -
+            (singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100;
+          // console.log(addedDiscountedUnit, "addedDiscountedUnit test xx");
+
           //if there's applicable discount apply it
-          let totalItemDiscount =
-            (parseInt(singleCartItem.quantity) * applicableDiscount.DISCOUNT) /
+          console.log(applicableDiscount, "applicableDiscount 1x");
+
+          let totalItemDiscount = ((total + singleCartItem.WSPLPRICE) *
+              applicableDiscount.DISCOUNT) /
             100;
-          // setTotal(
-          //   total + parseFloat(singleCartItem.WSPLPRICE) - totalItemDiscount
-          // );
+          
+
+          setTotal(total + singleCartItem.WSPLPRICE - totalItemDiscount);
           sumPrice += totalItemDiscount;
+        } else {
+          setTotal(
+            parseInt(singleCartItem.quantity) *
+              parseFloat(singleCartItem.WSPLPRICE)
+          );
         }
       } else {
         // let productPrice = parseFloat(singleCartItem.WSPLPRICE);
         // console.log(productPrice, "productPrice ");
+        console.log(sumPrice, "sumPrice 1");
+
         sumPrice +=
           parseInt(singleCartItem.quantity) *
           parseFloat(singleCartItem.WSPLPRICE);
         setTotal(sumPrice);
+        console.log(sumPrice, "sumPrice 2");
       }
       //cartTotalPrice += WSPLPRICE;
     });
@@ -120,21 +140,22 @@ const Cart = (props) => {
     //send order
 
     //const url = "http://localhost:8000/order";
-    const url = "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS";
+    const url =
+      "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS";
     //const url = "https://kedifap-portal.com2go.co/order";
 
     let axiosConfig = {
       headers: {
-          'Content-Type': 'application/json;charset=UTF-8',
-          "Access-Control-Allow-Origin": "*",
-      }
+        "Content-Type": "application/json;charset=UTF-8",
+        "Access-Control-Allow-Origin": "*",
+      },
     };
     try {
       const response = await axios.post(url, orderObject, {
         auth: {
-          username: 'apiuser',
-          password: '1234'
-        }
+          username: "apiuser",
+          password: "1234",
+        },
       });
       console.log(response, "response");
       alert("Order Sent Successfully, Thank you!!");
@@ -148,6 +169,7 @@ const Cart = (props) => {
   const saveCart = async (cartItems) => {
     setCartTemplate(cartItems);
   };
+
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
@@ -183,11 +205,16 @@ const Cart = (props) => {
                     </button> */}
                   <input
                     type="number"
-                    value={productQuantity[item.PARTNAME] || 1}
+                    value={quantityInputValue || 1}
                     min={1}
                     max={item.stock}
                     onChange={(e) =>
-                      handleQuantityChange(e.target.value, item, index)
+                      handleQuantityChange(
+                        e.target.value,
+                        item,
+                        index,
+                        setQuantityInputValue
+                      )
                     }
                     style={{
                       width: "50px",

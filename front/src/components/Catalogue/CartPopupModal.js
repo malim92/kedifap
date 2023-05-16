@@ -6,7 +6,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-import './CartPopupModal.css';
+import "./CartPopupModal.css";
 
 const addTemplateToCart = async (
   product,
@@ -14,14 +14,16 @@ const addTemplateToCart = async (
   cartItems,
   setCartItems,
   setTotal,
-  setShowCart
+  setShowCart,
+  quantityInputValue,
+  setQuantityInputValue
 ) => {
   setShowCart(true);
   const found = cartItems.find(
     (element) => element.PARTNAME == product.PARTNAME
   );
   if (found) {
-    alert("Product is already in the cart!");
+    alert("Product is already in the cart!!");
   } else {
     product.quantity = discountSelection.OFFERQTY;
     setTotal(
@@ -37,6 +39,8 @@ const addTemplateToCart = async (
       )
     );
     setCartItems([...cartItems, product]);
+    console.log(quantityInputValue, "quantityInputValue xx xx");
+
   }
 };
 
@@ -49,6 +53,8 @@ function CartPopupModal(props) {
     setCartItems,
     setTotal,
     setShowCart,
+    quantityInputValue,
+    setQuantityInputValue,
   } = props;
   console.log(JSON.stringify(cartPopupModalData), " cartPopupModalData here");
 
@@ -85,14 +91,16 @@ function CartPopupModal(props) {
                         <Col>
                           <div class="cart-item-controls px-padding right-float">
                             <button
-                              className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                              className="n bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                               onClick={() =>
                                 addTemplateToCart(
                                   productItem,
                                   cartItems,
                                   setCartItems,
                                   setTotal,
-                                  setShowCart
+                                  setShowCart,
+                                  quantityInputValue,
+                                  setQuantityInputValue
                                 )
                               }
                               style={{
