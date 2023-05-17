@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
-import { STATEMENTS_COLUMNS } from "./columns-statements";
-import { FetchStatementsData } from "./statementApi";
+import { BACKORDERS_COLUMNS } from "./columns-backorders";
+import { FetchBackordersData } from "./backorderApi";
+import OrderProductsModal from './ProductsModal';
+import axios from "axios";
 
 
-const StatementsTable = () => {
+const BackordersTable = () => {
   //data and fetching state
   const [data, setData] = useState([]);
   const [isError, setIsError] = useState(false);
@@ -21,8 +23,14 @@ const StatementsTable = () => {
     pageSize: 100,
   });
 
+  //Modal state
+  const [productShow, setProductShow] = useState(false);
+  const [popupModalProduct, setPopupModalProduct] = useState({});
+
+  const handleProductClose = () => setProductShow(false);
+
   useEffect(() => {
-    FetchStatementsData(
+    FetchBackordersData(
       sorting,
       globalFilter,
       columnFilters,
@@ -39,15 +47,36 @@ const StatementsTable = () => {
     sorting,
   ]);
 
-  const columns = useMemo(() => STATEMENTS_COLUMNS, []);
+  const columns = useMemo(() => BACKORDERS_COLUMNS, []);
 
-  const fetchStatement = async (statement) => {    
-    const pdflink = statement.original.APIPATH;
-      window.open(pdflink, '_blank');
+  const fetchOrderProducts = async (order) => {
+    const orderId = order.original.ORDNAME;
+
+    const username = "apiuser";
+    const password = "1234";
+    const url = `https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS(ORDNAME='${orderId}')?$expand=B2B_ORDERITEMS_SUBFORM`;
+    const auth = {
+      username: username,
+      password: password,
+    };
+    try {
+      const response = await axios.get(url, { auth: auth });
+      const ordersList = response.data.B2B_ORDERITEMS_SUBFORM;
+      setProductShow(!productShow);
+      setPopupModalProduct({ ordersList });
+      console.log(ordersList, "ordersList ");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
     <>
+    <OrderProductsModal
+        show={productShow}
+        popupModalProduct={popupModalProduct}
+        handleClose={handleProductClose}
+      />
       <MaterialReactTable
         columns={columns}
         data={data}
@@ -79,25 +108,23 @@ const StatementsTable = () => {
         }}
         enableRowActions
         renderRowActions={({ row }) => (
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {row.original.STPRINTED == 'Y' && (
+            <div style={{ display: "flex", alignItems: "center" }}>
               <button
                 className="btn btn-primary"
                 onClick={() => {
-                  fetchStatement(row);
+                  fetchOrderProducts(row);
                 }}
                 style={{
                   fontSize: "15px",
                 }}
               >
-                Request Statement
+                Products Details
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          )}
       />
     </>
   );
 };
 
-export default StatementsTable;
+export default BackordersTable;

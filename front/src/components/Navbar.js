@@ -28,6 +28,9 @@ export default function Navbar() {
                                 <Link to='/app/customer-statements'>Statements</Link>
                             </li>
                             <li>
+                                <Link to='/app/backorders'>Backorders</Link>
+                            </li>
+                            <li>
                                 <Link to='/app/general-information'>Σχετικά</Link>
                             </li>
                             <li>

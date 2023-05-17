@@ -53,7 +53,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
 
 // Authenticate
 $app->post('/authenticate', function (Request $request, Response $response) {
-    session_start();    
+    session_start();
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
@@ -71,43 +71,45 @@ $app->post('/authenticate', function (Request $request, Response $response) {
         $db = $db->connect();
 
         $stmt = $db->query($sql);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        //print_r($user);print_r($user['CUSTNAME']);die;
-        if ($user['CUSTNAME'] === $name && $user['DEXT_PASSWORD'] === $pass ) {
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $data["success"] = false;
+        $data["token"] = null;
+        $status = 404;
+        foreach ($users as $user) {
+            //print_r($user['CUSTNAME']) ;
 
-            $MyJWT = $this->JWT;
-            $now = new DateTime();
-            $future = new DateTime("now +20 minutes");
-            $server = $request->getParams();
-            $payload = [
-                "iat" => $now->getTimeStamp(),
-                "exp" => $future->getTimeStamp(),
-                "sub" => $server,
-            ];
-            $secret = $dotenv_vars['SECRET'];
+            if ($user['CUSTNAME'] === $name && $user['DEXT_PASSWORD'] === $pass) {
 
-
-            $token = $MyJWT->encode($payload, $secret, "HS512");
-            $data["success"] = true;
-            $data["token"] = $token;
-            $data["user"] = $user;
-
-            // set the token in a cookie
-            $cookie_lifetime = 60 * 20; // 20 minutes
-            $cookie_params = session_get_cookie_params();
-            setcookie('jwt_token', $token, time() + $cookie_lifetime, $cookie_params['path'], $cookie_params['domain'], $cookie_params['secure'], $cookie_params['httponly']);
+                $MyJWT = $this->JWT;
+                $now = new DateTime();
+                $future = new DateTime("now +20 minutes");
+                $server = $request->getParams();
+                $payload = [
+                    "iat" => $now->getTimeStamp(),
+                    "exp" => $future->getTimeStamp(),
+                    "sub" => $server,
+                ];
+                $secret = $dotenv_vars['SECRET'];
 
 
-            return $response->withHeader("Content-Type", "application/json")
-                ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-            //return $response->withStatus(302)->withJson('Location', 'http://localhost:3000/');
-            //return $response->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co/');
-        } else {
-            $flash = $this->get('flash');
-            $flash->addMessage('error', 'Invalid username or password.');
-            return $response->withStatus(404)->withJson(['error' => 'Invalid username or password']);
-            //return '{"success": "false", "msg": "User not found"}';
+                $token = $MyJWT->encode($payload, $secret, "HS512");
+                $data["success"] = true;
+                $data["token"] = $token;
+                $data["user"] = $user;
+
+                // set the token in a cookie
+                $cookie_lifetime = 60 * 20; // 20 minutes
+                $cookie_params = session_get_cookie_params();
+                setcookie('jwt_token', $token, time() + $cookie_lifetime, $cookie_params['path'], $cookie_params['domain'], $cookie_params['secure'], $cookie_params['httponly']);
+                $status = 200;
+                //->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co');
+                //return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
+                //return $response->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co');
+            }
         }
+        return $response->withStatus($status)->withHeader("Content-Type", "application/json")
+            ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT))
+            ->withHeader('Access-Control-Allow-Origin', 'https://kedi-app.com2go.co');
     } catch (PDOException $e) {
         echo '{"error": {"text": ' . $e->getMessage() . '}';
     }
@@ -240,7 +242,8 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
             $stmt->bindValue(':size', $size, PDO::PARAM_INT);
             $stmt->bindValue(':page', $page, PDO::PARAM_INT);
         }
-        $stmt->debugDumpParams();die;
+        $stmt->debugDumpParams();
+        die;
         $stmt->execute();
         $parts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         //print_r($custonFilterValue);die;

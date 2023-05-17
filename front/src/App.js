@@ -18,6 +18,7 @@ import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Vendors from "./pages/Vendors";
+import Backorders from "./pages/Backorders";
 //import router from "./Routes/routes";
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
             <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/vendors" element={<Vendors />} />
+            <Route path="/app/backorders" element={<Backorders />} />
           </Route>
         </Route>
       </>

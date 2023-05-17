@@ -44,17 +44,7 @@ const MaterialTable = () => {
   const [barcodeValue, setBarcodeValue] = useState("");
   const [supValue, setSupValue] = useState("");
   const [activeIngValue, setActiveIngValue] = useState("");
-  const [quantityInputValue, setQuantityInputValue] = useState(1);
-
-  const debounce = (callback, delay) => {
-    let debounceTimer;
-    return (...args) => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        callback(...args);
-      }, delay);
-    };
-  };
+  const [quantityInputValue, setQuantityInputValue] = useState({});
 
   const handleBarcodeChange = (event) => {
     setBarcodeValue(event.target.value);
@@ -128,7 +118,7 @@ const MaterialTable = () => {
 
   const [total, setTotal] = useState(0);
 
-  const handleAddToCart = (product, total) => {
+  const handleAddToCart = (product, total, setQuantityInputValue) => {
     let cartTotalPrice = total;
     const { PARTNAME, WSPLPRICE } = product.original;
     product.original.quantity = 1;
@@ -140,6 +130,7 @@ const MaterialTable = () => {
       setTotal(cartTotalPrice);
       setCartItems([...cartItems, product.original]);
       setShowCart(true);
+      setQuantityInputValue({ ...quantityInputValue, [PARTNAME]: 1 });
     }
   };
 
@@ -325,7 +316,7 @@ const MaterialTable = () => {
               <button
                 className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                 onClick={() => {
-                  handleAddToCart(row, total);
+                  handleAddToCart(row, total, setQuantityInputValue);
                 }}
                 style={{
                   width: "30px",
@@ -364,7 +355,7 @@ const MaterialTable = () => {
                 productPopup(data, row.original);
               }}
             ></Info>
-            {row.original.IMGFILENAME !==null && (
+            {row.original.IMGFILENAME !== null && (
               <FaImage
                 style={{
                   color: "#1f79d5",
@@ -372,9 +363,9 @@ const MaterialTable = () => {
                   fontSize: "35px",
                 }}
                 onClick={() => {
-            console.log(row.original, "row.original.IMGFILENAM");
+                  console.log(row.original, "row.original.IMGFILENAM");
 
-                  window.open(row.original.IMGFILENAME, '_blank');
+                  window.open(row.original.IMGFILENAME, "_blank");
                 }}
               ></FaImage>
             )}

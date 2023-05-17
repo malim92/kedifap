@@ -15,14 +15,14 @@ export const STATEMENTS_COLUMNS = [
         header: "Date",
         accessorKey: 'TIMESTAMP',
     },
-    {
-        header: "PDF",
-        accessorKey: 'STMT_EXTFILENAME',
-        enableColumnFilter: false,
-        enableSorting: false,
-        enableGlobalFilter: false,
-        Cell: (props) => {
-            return <a href={props.renderedCellValue} target="_blank">PDF Link</a>;
-          }
-    }
+    // {
+    //     header: "PDF",
+    //     accessorKey: 'STMT_EXTFILENAME',
+    //     enableColumnFilter: false,
+    //     enableSorting: false,
+    //     enableGlobalFilter: false,
+    //     Cell: (props) => {
+    //         return <a href={props.renderedCellValue} target="_blank">PDF Link</a>;
+    //       }
+    // }
 ];

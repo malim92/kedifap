@@ -36,7 +36,7 @@ const getDiscount = async (
         )
       )
     );
-    setQuantityInputValue(product.quantity)
+    setQuantityInputValue({[product.PARTNAME]:product.quantity})
     setCartItems([...cartItems, product]);
   }
 };
@@ -117,7 +117,7 @@ function ProductDiscountModal(props) {
                 <button
                   className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                   onClick={() => {
-                    handleAddToCart(productOriginal, total);
+                    handleAddToCart(productOriginal, total, setQuantityInputValue);
                   }}
                   style={{
                     width: "30px",

@@ -3,7 +3,6 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
 import gesy from "../../assets/GESY_FINAL_LOGO_NCR_L.png";
 import { BsExclamationTriangle } from "react-icons/bs";
 import { MdWaterDrop } from "react-icons/md";
@@ -12,7 +11,6 @@ import { TbFridge } from "react-icons/tb";
 
 function ProductModal(props) {
   const { show, handleClose, popupModalData } = props;
-  console.log(popupModalData, "popupModalData test xx");
 
   return (
     <Modal show={show} onHide={handleClose}>

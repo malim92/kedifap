@@ -24,22 +24,38 @@ const Cart = (props) => {
   const [productQuantity, setProductQuantity] = useState({});
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
-    //setProductQuantity(event);
+    setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
 
-    setProductQuantity((prevQuantities) => ({
-      ...prevQuantities,
-      [item.PARTNAME]: event,
-    }));
+    const productId = item.PARTNAME;
 
-    setQuantityInputValue(event);
+    setQuantityInputValue({
+      ...quantityInputValue,
+      [productId]: parseInt(event),
+    });
+
     const updatedItems = [...cartItems];
 
     updatedItems[index] = { ...updatedItems[index], quantity: event };
     setCartItems(updatedItems);
-    //calculateCartTotal();
     let sumPrice = 0;
     updatedItems.forEach((singleCartItem) => {
-      let applicableDiscount = null;
+      sumPrice +=
+        parseInt(singleCartItem.quantity) *
+        parseFloat(singleCartItem.WSPLPRICE);
+    });
+
+    const totalDiscountAmount = caluclateDiscount(updatedItems);
+    console.log(totalDiscountAmount, "totalDiscountAmount 2");
+    setTotal(sumPrice - totalDiscountAmount);
+  };
+
+  function caluclateDiscount(productsInCart) {
+    let totalDiscount = 0;
+    let applicableDiscount = null;
+    console.log(productsInCart, "productsInCart in discount");
+
+    let sumPrice = 0;
+    productsInCart.forEach((singleCartItem) => {
       if (singleCartItem.discounts) {
         singleCartItem.discounts.forEach((discount) => {
           //check if product quantity more than discount quantity
@@ -48,47 +64,24 @@ const Cart = (props) => {
             (!applicableDiscount ||
               discount.OFFERQTY > applicableDiscount.OFFERQTY)
           ) {
-            console.log(singleCartItem, "singleCartItem test xx");
             applicableDiscount = discount;
           }
         });
         if (applicableDiscount) {
-          // console.log(applicableDiscount, "applicableDiscount test xx");
           let addedDiscountedUnit =
-            singleCartItem.WSPLPRICE -
-            (singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100;
-          // console.log(addedDiscountedUnit, "addedDiscountedUnit test xx");
-
+            singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT / 100 * parseInt(singleCartItem.quantity) ;
+            console.log(addedDiscountedUnit, "addedDiscountedUnit test");
           //if there's applicable discount apply it
           console.log(applicableDiscount, "applicableDiscount 1x");
-
-          let totalItemDiscount = ((total + singleCartItem.WSPLPRICE) *
-              applicableDiscount.DISCOUNT) /
-            100;
+          totalDiscount += addedDiscountedUnit
           
-
-          setTotal(total + singleCartItem.WSPLPRICE - totalItemDiscount);
-          sumPrice += totalItemDiscount;
         } else {
-          setTotal(
-            parseInt(singleCartItem.quantity) *
-              parseFloat(singleCartItem.WSPLPRICE)
-          );
+          
         }
-      } else {
-        // let productPrice = parseFloat(singleCartItem.WSPLPRICE);
-        // console.log(productPrice, "productPrice ");
-        console.log(sumPrice, "sumPrice 1");
-
-        sumPrice +=
-          parseInt(singleCartItem.quantity) *
-          parseFloat(singleCartItem.WSPLPRICE);
-        setTotal(sumPrice);
-        console.log(sumPrice, "sumPrice 2");
       }
-      //cartTotalPrice += WSPLPRICE;
     });
-  };
+    return totalDiscount;
+  }
 
   const removeItem = (product) => {
     const updatedCart = cartItems.filter(
@@ -99,12 +92,15 @@ const Cart = (props) => {
     setTotal(
       total - parseFloat(product.WSPLPRICE) * parseInt(product.quantity)
     );
+    const productId = product.PARTNAME;
+    //setQuantityInputValue({ ...quantityInputValue, [productId]: parseInt(event) });
   };
 
   const clearCart = () => {
     setCartItems([]);
     setTotal(0);
     setProductQuantity(1);
+    setQuantityInputValue({});
   };
 
   const sendOrder = async (order, cartTotal) => {
@@ -205,7 +201,7 @@ const Cart = (props) => {
                     </button> */}
                   <input
                     type="number"
-                    value={quantityInputValue || 1}
+                    value={quantityInputValue[item.PARTNAME] || 1}
                     min={1}
                     max={item.stock}
                     onChange={(e) =>
