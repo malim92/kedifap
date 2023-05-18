@@ -273,7 +273,6 @@ $app->post('/order', function (Request $request, Response $response) { {
             ],
             'verify' => false
         ]);
-
         //$response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
         $response = $client->post('/ce17d721-531d-498f-8041-0af5f5df5d2b', [
             'json' => $order,
@@ -290,5 +289,72 @@ $app->post('/order', function (Request $request, Response $response) { {
     }
 });
 
+$app->get('/vendors', function (Request $request, Response $response, array $args) {
+
+    $username = 'apiuser';
+    $password = '1234';
+
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+
+    $response = $client->get('/odata/Priority/tabula.ini/efk/B2B_SUPPLIERS?$filter=STATDES eq \'Active\'', []);
+
+    $body = (string) $response->getBody();
+    $data = json_decode($body, true);
+
+    return $response;
+});
+
+$app->get('/invoices', function (Request $request, Response $response, array $args) {
+
+    $username = 'apiuser';
+    $password = '1234';
+
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+
+    $response = $client->get('/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq \'C1001\' and STATDES eq \'Final\'', []);
+
+    $body = (string) $response->getBody();
+    // return $data;
+
+    return $response;
+});
+
+$app->get('/invoice-pdf', function (Request $request, Response $response, array $args) {
+    $invoiceId = $request->getQueryParams('invoice_id')['invoice_id'];
+    $username = 'apiuser';
+    $password = '1234';
+    //print_r($invoiceId);die;
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+
+    $invoiceObj = ['IVNUM' => $invoiceId];
+
+    $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APINVOS', $invoiceObj);
+
+    $body = (string) $response->getBody();
+    // return $data;
+
+    return $body;
+});
 
 $app->run();
