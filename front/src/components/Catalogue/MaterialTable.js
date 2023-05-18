@@ -193,6 +193,50 @@ const MaterialTable = () => {
     setShowCart(false);
   };
 
+  function caluclateFlatTotal(allCartItems) {
+    let flatTotal = 0;
+    allCartItems.forEach((singleCartItem) => {
+      flatTotal +=
+        parseInt(singleCartItem.quantity) *
+        parseFloat(singleCartItem.WSPLPRICE);
+    });
+    return flatTotal;
+  }
+
+  function caluclateDiscount(productsInCart) {
+    let totalDiscount = 0;
+    console.log(productsInCart, "productsInCart in discount");
+    let sumPrice = 0;
+    let applicableDiscount = null;
+    productsInCart.forEach((singleCartItem) => {
+    let applicableDiscount = null;
+      if (singleCartItem.discounts) {
+        singleCartItem.discounts.forEach((discount) => {
+          //check if product quantity more than discount quantity
+          if (
+            parseInt(singleCartItem.quantity) >= parseInt(discount.OFFERQTY) &&
+            (!applicableDiscount ||
+              discount.OFFERQTY > applicableDiscount.OFFERQTY)
+          ) {
+            applicableDiscount = discount;
+          }
+        });
+        if (applicableDiscount !== null )  {
+          let addedDiscountedUnit =
+            singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT / 100 * parseInt(singleCartItem.quantity) ;
+            console.log(addedDiscountedUnit, "addedDiscountedUnit test");
+          //if there's applicable discount apply it
+          console.log(applicableDiscount, "applicableDiscount 1x");
+          totalDiscount += addedDiscountedUnit
+          
+        } else {
+          
+        }
+      }
+    });
+    return totalDiscount;
+  }
+
   return (
     <>
       <div class="cart-template-row">
@@ -398,7 +442,10 @@ const MaterialTable = () => {
         setTotal={setTotal}
         setShowCart={setShowCart}
         handleAddToCart={handleAddToCart}
+        quantityInputValue={quantityInputValue}
         setQuantityInputValue={setQuantityInputValue}
+        caluclateFlatTotal={caluclateFlatTotal}
+        caluclateDiscount={caluclateDiscount}
       />
       <Cart
         showCart={showCart}
@@ -413,6 +460,8 @@ const MaterialTable = () => {
         setCartTemplate={setCartTemplate}
         quantityInputValue={quantityInputValue}
         setQuantityInputValue={setQuantityInputValue}
+        caluclateFlatTotal={caluclateFlatTotal}
+        caluclateDiscount={caluclateDiscount}
       />
     </>
   );

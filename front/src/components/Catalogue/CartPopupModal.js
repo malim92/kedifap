@@ -56,7 +56,6 @@ function CartPopupModal(props) {
     quantityInputValue,
     setQuantityInputValue,
   } = props;
-  console.log(JSON.stringify(cartPopupModalData), " cartPopupModalData here");
 
   return (
     <Modal show={show} onHide={handleClose}>

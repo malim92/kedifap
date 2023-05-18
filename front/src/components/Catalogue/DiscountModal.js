@@ -14,7 +14,10 @@ const getDiscount = async (
   setCartItems,
   setTotal,
   setShowCart,
-  setQuantityInputValue
+  quantityInputValue,
+  setQuantityInputValue,
+  caluclateFlatTotal,
+  caluclateDiscount
 ) => {
   setShowCart(true);
   const found = cartItems.find(
@@ -24,20 +27,32 @@ const getDiscount = async (
     alert("Product is already in the cart!");
   } else {
     product.quantity = discountSelection.OFFERQTY;
-    setTotal(
-      cartItems.reduce(
-        (acc, item) => acc + parseFloat(item.WSPLPRICE) * item.quantity,
-        parseFloat(
-          product.WSPLPRICE * product.quantity -
-            (product.WSPLPRICE *
-              product.quantity *
-              discountSelection.DISCOUNT) /
-              100
-        )
-      )
-    );
-    setQuantityInputValue({[product.PARTNAME]:product.quantity})
+    console.log(cartItems, "cartItems in disc ");
     setCartItems([...cartItems, product]);
+    cartItems.push(product);
+    const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
+    const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
+    console.log(cartFlatTotalInDiscount, "cartFlatTotal in disc ");
+    console.log(cartDiscountTotalInDiscount, "quantityInputValue in disc ");
+
+    setTotal(cartFlatTotalInDiscount - cartDiscountTotalInDiscount);
+    // setTotal(
+    //   cartItems.reduce(
+    //     (acc, item) => acc + parseFloat(item.WSPLPRICE) * item.quantity,
+    //     parseFloat(
+    //       product.WSPLPRICE * product.quantity -
+    //         (product.WSPLPRICE *
+    //           product.quantity *
+    //           discountSelection.DISCOUNT) /
+    //           100
+    //     )
+    //   )
+    // );
+    setQuantityInputValue({
+      ...quantityInputValue,
+      [product.PARTNAME]: product.quantity,
+    });
+
   }
 };
 
@@ -52,7 +67,10 @@ function ProductDiscountModal(props) {
     setTotal,
     setShowCart,
     handleAddToCart,
+    quantityInputValue,
     setQuantityInputValue,
+    caluclateFlatTotal,
+  caluclateDiscount
   } = props;
 
   const { rowSearch } = popupModalDiscount;
@@ -86,7 +104,10 @@ function ProductDiscountModal(props) {
                             setCartItems,
                             setTotal,
                             setShowCart,
-                            setQuantityInputValue
+                            quantityInputValue,
+                            setQuantityInputValue,
+                            caluclateFlatTotal,
+                            caluclateDiscount
                           )
                         }
                         style={{
@@ -117,7 +138,11 @@ function ProductDiscountModal(props) {
                 <button
                   className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                   onClick={() => {
-                    handleAddToCart(productOriginal, total, setQuantityInputValue);
+                    handleAddToCart(
+                      productOriginal,
+                      total,
+                      setQuantityInputValue
+                    );
                   }}
                   style={{
                     width: "30px",

@@ -5,16 +5,12 @@ import "./Vendors.css";
 
 const fetchVendors = async () => {
   const url = new URL(
-    `https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_SUPPLIERS?$filter=STATDES eq 'Active'`
+    `https://kedifap-portal.com2go.co/vendors`
   );
+  console.log(url, "url vend xx xx");
 
   try {
-    const response = await axios.get(url, {
-      auth: {
-        username: "apiuser",
-        password: "1234",
-      },
-    });
+    const response = await axios.get(url);
 
     return response.data.value;
   } catch (error) {

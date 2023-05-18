@@ -19,6 +19,8 @@ const Cart = (props) => {
     setCartTemplate,
     quantityInputValue,
     setQuantityInputValue,
+    caluclateFlatTotal,
+    caluclateDiscount,
   } = props;
 
   const [productQuantity, setProductQuantity] = useState({});
@@ -37,51 +39,18 @@ const Cart = (props) => {
 
     updatedItems[index] = { ...updatedItems[index], quantity: event };
     setCartItems(updatedItems);
-    let sumPrice = 0;
-    updatedItems.forEach((singleCartItem) => {
-      sumPrice +=
-        parseInt(singleCartItem.quantity) *
-        parseFloat(singleCartItem.WSPLPRICE);
-    });
+    // let sumPrice = 0;
+    // updatedItems.forEach((singleCartItem) => {
+    //   sumPrice +=
+    //     parseInt(singleCartItem.quantity) *
+    //     parseFloat(singleCartItem.WSPLPRICE);
+    // });
 
+    const cartFlatTotal = caluclateFlatTotal(updatedItems);
     const totalDiscountAmount = caluclateDiscount(updatedItems);
     console.log(totalDiscountAmount, "totalDiscountAmount 2");
-    setTotal(sumPrice - totalDiscountAmount);
+    setTotal(cartFlatTotal - totalDiscountAmount);
   };
-
-  function caluclateDiscount(productsInCart) {
-    let totalDiscount = 0;
-    let applicableDiscount = null;
-    console.log(productsInCart, "productsInCart in discount");
-
-    let sumPrice = 0;
-    productsInCart.forEach((singleCartItem) => {
-      if (singleCartItem.discounts) {
-        singleCartItem.discounts.forEach((discount) => {
-          //check if product quantity more than discount quantity
-          if (
-            parseInt(singleCartItem.quantity) >= parseInt(discount.OFFERQTY) &&
-            (!applicableDiscount ||
-              discount.OFFERQTY > applicableDiscount.OFFERQTY)
-          ) {
-            applicableDiscount = discount;
-          }
-        });
-        if (applicableDiscount) {
-          let addedDiscountedUnit =
-            singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT / 100 * parseInt(singleCartItem.quantity) ;
-            console.log(addedDiscountedUnit, "addedDiscountedUnit test");
-          //if there's applicable discount apply it
-          console.log(applicableDiscount, "applicableDiscount 1x");
-          totalDiscount += addedDiscountedUnit
-          
-        } else {
-          
-        }
-      }
-    });
-    return totalDiscount;
-  }
 
   const removeItem = (product) => {
     const updatedCart = cartItems.filter(
@@ -89,9 +58,10 @@ const Cart = (props) => {
     );
     setCartItems(updatedCart);
     setProductQuantity(1);
-    setTotal(
-      total - parseFloat(product.WSPLPRICE) * parseInt(product.quantity)
-    );
+    const cartFlatTotal = caluclateFlatTotal(updatedCart);
+    const totalDiscountAmount = caluclateDiscount(updatedCart);
+    setTotal(cartFlatTotal - totalDiscountAmount);
+
     const productId = product.PARTNAME;
     //setQuantityInputValue({ ...quantityInputValue, [productId]: parseInt(event) });
   };
