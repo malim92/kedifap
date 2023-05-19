@@ -27,14 +27,7 @@ function LoginForm({ setIsAuthenticated }) {
         password: password
       }
 
-      let axiosConfig = {
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8',
-            "Access-Control-Allow-Origin": "*",
-        }
-      };
-            
-      const url = "https://kedifap-portal.com2go.co/authenticate"; //not correct
+      const url = `${process.env.REACT_APP_API_URL}/authenticate`; //not correct
       //const url = "http://localhost:8000/authenticate";
       const response = await axios.post(url, loginCredentials);
       console.log( response,'response xxx' );

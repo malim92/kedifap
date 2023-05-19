@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import moment from "moment";
 import axios from "axios";
 import MaterialReactTable from "material-react-table";
 import { INVOICE_COLUMNS } from "./columns-invoice";
@@ -40,26 +39,23 @@ const InvoicesTable = () => {
     sorting,
   ]);
 
-  const columns = useMemo(() => INVOICE_COLUMNS, []);  
+  const columns = useMemo(() => INVOICE_COLUMNS, []);
 
   const fetchInvoice = async (product) => {
     console.log(product.original, "product");
-    const pdfData = {
-      IVNUM: product.original.IVNUM,
-    };
+    const pdfData = product.original.IVNUM;
 
-    const username = "apiuser";
-    const password = "1234";
-    const url =
-      "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/DEXT_APINVOS";
-    const auth = {
-      username: username,
-      password: password,
-    };
+    const url = new URL(
+      `${process.env.REACT_APP_API_URL}/invoice-pdf?invoice_id=${pdfData}`
+      //`http://localhost:8000/invoice-pdf?invoice_id=${pdfData}`
+    );
+    console.log(url, "url invoices");
+
     try {
-      const response = await axios.post(url, pdfData, { auth: auth });
+      const response = await axios.get(url);
+      console.log(response, "response invoices");
       const pdflink = response.data.APIPATH;
-      window.open(pdflink, '_blank');
+      window.open(pdflink, "_blank");
     } catch (error) {
       console.error(error);
     }

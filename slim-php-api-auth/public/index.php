@@ -63,7 +63,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     $name = $params['username'] ?? '';
     $pass = $params['password'] ?? '';
     //echo $name;die;
-    $sql = "SELECT * FROM customers WHERE CUSTNAME = '$name'";    //echo $name;die;
+    $sql = "SELECT * FROM customers WHERE DEXT_USERLOGIN = '$name'";    //echo $name;die;
     try {
         // Get DB Object
         $db = new db();
@@ -78,7 +78,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
         foreach ($users as $user) {
             //print_r($user['CUSTNAME']) ;
 
-            if ($user['CUSTNAME'] === $name && $user['DEXT_PASSWORD'] === $pass) {
+            if ($user['DEXT_USERLOGIN'] === $name && $user['DEXT_PASSWORD'] === $pass) {
 
                 $MyJWT = $this->JWT;
                 $now = new DateTime();
@@ -157,12 +157,7 @@ $app->post('/validate-token', function ($request, $response, $args) {
     }
 });
 
-$app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
-    $name = $args['name'];
-    $response->getBody()->write("Hello, $name");
 
-    return $response;
-});
 //http://localhost:8000/?page=0
 $app->get('/parts/', function (Request $request, Response $response, array $args) {
     $partsObject = [];
@@ -242,8 +237,8 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
             $stmt->bindValue(':size', $size, PDO::PARAM_INT);
             $stmt->bindValue(':page', $page, PDO::PARAM_INT);
         }
-        $stmt->debugDumpParams();
-        die;
+        // $stmt->debugDumpParams();
+        // die;
         $stmt->execute();
         $parts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         //print_r($custonFilterValue);die;
@@ -262,25 +257,26 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
 $app->post('/order', function (Request $request, Response $response) { {
         //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS
         $order = $request->getParsedBody();
+        // print_r($order);die;
         $username = 'apiuser';
         $password = '1234';
 
         $client = new Client([
-            //'base_uri' => 'https://ked.priority-software.com.cy/',
-            'base_uri' => 'https://webhook.site/    ',
+            'base_uri' => 'https://ked.priority-software.com.cy/',
+            //'base_uri' => 'https://webhook.site/    ',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
             'verify' => false
         ]);
-        //$response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
-        $response = $client->post('/ce17d721-531d-498f-8041-0af5f5df5d2b', [
+        $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
+            //$response = $client->post('/8f26953c-abf6-4290-8515-65a906f7df75', [
             'json' => $order,
         ]);
 
         $body = (string) $response->getBody();
         $data = json_decode($body, true);
-        return $data;
+        return $body;
         // try {
         //     return $response->withStatus(200)->withJson($data);
         // } catch (\Throwable $th) {
@@ -337,7 +333,53 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
     $invoiceId = $request->getQueryParams('invoice_id')['invoice_id'];
     $username = 'apiuser';
     $password = '1234';
-    //print_r($invoiceId);die;
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'json' => ['IVNUM' => $invoiceId],
+        'verify' => false
+    ]);
+
+    $invoiceObj = json_encode(['IVNUM' => $invoiceId]);
+
+    // print_r($invoiceObj);die;
+    $response = $client->post('/odata/Priority/tabula.ini/efk/DEXT_APINVOS');
+
+    // $body = (string) $response->withHeader('Access-Control-Allow-Origin', 'http://localhost:3000')->getBody();
+    // return $data;
+
+    return $response;
+});
+
+$app->get('/statements', function (Request $request, Response $response, array $args) {
+
+    $username = 'apiuser';
+    $password = '1234';
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+    //2022-05-17    
+    $todayDate = date("Y-m-d");
+    $lastYearDate = date("Y-m-d", strtotime("-1 year"));
+    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq \'C1001\'';
+    // print_r($sub_url);die;
+    $response = $client->get($sub_url);
+
+    return $response;
+});
+
+$app->get('/backorders', function (Request $request, Response $response, array $args) {
+
+    $username = 'apiuser';
+    $password = '1234';
     $client = new Client([
         //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
@@ -347,14 +389,68 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
         'verify' => false
     ]);
 
-    $invoiceObj = ['IVNUM' => $invoiceId];
+    $sub_url = '/odata/Priority/tabula.ini/efk/B2B_BACKORDERS';
+    // print_r($sub_url);die;
+    $response = $client->get($sub_url);
 
-    $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APINVOS', $invoiceObj);
+    return $response;
+});
 
-    $body = (string) $response->getBody();
-    // return $data;
+$app->get('/backorder-products', function (Request $request, Response $response, array $args) {
+    $order_id = $request->getQueryParams('order_id')['order_id'];
+    $username = 'apiuser';
+    $password = '1234';
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+    $sub_url = '/odata/Priority/tabula.ini/efk/B2B_ORDERS(ORDNAME=\'' . $order_id . '\')?$expand=B2B_ORDERITEMS_SUBFORM';
+    // print_r($sub_url);die;
+    $response = $client->get($sub_url);
 
-    return $body;
+    return $response;
+});
+
+$app->get('/return-policy', function (Request $request, Response $response, array $args) {
+    $order_id = $request->getQueryParams('product_id')['product_id'];
+    $username = 'apiuser';
+    $password = '1234';
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=PARTNAME eq \'' . $order_id . '\'';
+    // print_r($sub_url);die;
+    $response = $client->get($sub_url);
+
+    return $response;
+});
+
+$app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
+    $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+    $username = 'apiuser';
+    $password = '1234';
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\'';
+    // print_r($sub_url);die;
+    $response = $client->get($sub_url);
+
+    return $response;
 });
 
 $app->run();

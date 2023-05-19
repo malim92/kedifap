@@ -56,17 +56,19 @@ const OrdersTable = () => {
 
     const username = "apiuser";
     const password = "1234";
-    const url = `https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS(ORDNAME='${orderId}')?$expand=B2B_ORDERITEMS_SUBFORM`;
-    const auth = {
-      username: username,
-      password: password,
-    };
+    
+    
+    const url = new URL(`${process.env.REACT_APP_API_URL}/backorder-products?order_id=${orderId}`);
+    console.log(url, "url backorders");
+
     try {
-      const response = await axios.get(url, { auth: auth });
+      const response = await axios.get(url);
+      console.log(response.data.value, "fetchOrderProducts 1");
       const ordersList = response.data.B2B_ORDERITEMS_SUBFORM;
       setProductShow(!productShow);
       setPopupModalProduct({ ordersList });
       console.log(ordersList, "ordersList ");
+
     } catch (error) {
       console.error(error);
     }

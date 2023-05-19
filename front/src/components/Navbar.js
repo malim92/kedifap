@@ -42,6 +42,9 @@ export default function Navbar() {
                             <li>
                                 <Link to='/app/vendors'>Vendors</Link>
                             </li>
+                            <li>
+                                <Link to='/app/return-policy'>Return policy</Link>
+                            </li>
                             
                         </ul>
                     </div>

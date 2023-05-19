@@ -11,17 +11,14 @@ export const FetchOrdersData = async (
   setRowCount,
   setIsError
 ) => {
-  const userId = Cookies.get("userId");
-  const url = new URL(
-    `https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq '${userId}'`
-  );
+  let userId = Cookies.get("userId");
+
+  userId =='C1001-01' ? userId = 'C1001' : userId = userId;
+  
+  const url = new URL(`${process.env.REACT_APP_API_URL}/fetch-orders?customer_id=${userId}`);
+
   try {
-    const response = await axios.get(url, {
-      auth: {
-        username: "apiuser",
-        password: "1234",
-      },
-    });
+    const response = await axios.get(url);
 
     //const json = await response.json();
     const ordersData = response.data.value.map((item) => ({

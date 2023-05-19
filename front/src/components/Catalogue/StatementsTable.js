@@ -45,7 +45,7 @@ const StatementsTable = () => {
     const pdflink = statement.original.APIPATH;
       window.open(pdflink, '_blank');
   };
-
+  
   return (
     <>
       <MaterialReactTable

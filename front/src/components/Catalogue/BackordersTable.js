@@ -2,9 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
 import { BACKORDERS_COLUMNS } from "./columns-backorders";
 import { FetchBackordersData } from "./backorderApi";
-import OrderProductsModal from './ProductsModal';
+import OrderProductsModal from "./ProductsModal";
 import axios from "axios";
-
 
 const BackordersTable = () => {
   //data and fetching state
@@ -52,15 +51,12 @@ const BackordersTable = () => {
   const fetchOrderProducts = async (order) => {
     const orderId = order.original.ORDNAME;
 
-    const username = "apiuser";
-    const password = "1234";
-    const url = `https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS(ORDNAME='${orderId}')?$expand=B2B_ORDERITEMS_SUBFORM`;
-    const auth = {
-      username: username,
-      password: password,
-    };
+    const url = new URL(`${process.env.REACT_APP_API_URL}/backorder-products?order_id=${orderId}`);
+    console.log(url, "url backorders");
+
     try {
-      const response = await axios.get(url, { auth: auth });
+      const response = await axios.get(url);
+      console.log(response.data.value, "fetchOrderProducts 1");
       const ordersList = response.data.B2B_ORDERITEMS_SUBFORM;
       setProductShow(!productShow);
       setPopupModalProduct({ ordersList });
@@ -72,7 +68,7 @@ const BackordersTable = () => {
 
   return (
     <>
-    <OrderProductsModal
+      <OrderProductsModal
         show={productShow}
         popupModalProduct={popupModalProduct}
         handleClose={handleProductClose}
@@ -108,20 +104,20 @@ const BackordersTable = () => {
         }}
         enableRowActions
         renderRowActions={({ row }) => (
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  fetchOrderProducts(row);
-                }}
-                style={{
-                  fontSize: "15px",
-                }}
-              >
-                Products Details
-              </button>
-            </div>
-          )}
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                fetchOrderProducts(row);
+              }}
+              style={{
+                fontSize: "15px",
+              }}
+            >
+              Products Details
+            </button>
+          </div>
+        )}
       />
     </>
   );

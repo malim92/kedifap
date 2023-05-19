@@ -5,7 +5,7 @@ import "./Vendors.css";
 
 const fetchVendors = async () => {
   const url = new URL(
-    `https://kedifap-portal.com2go.co/vendors`
+    `${process.env.REACT_APP_API_URL}/vendors`
   );
   console.log(url, "url vend xx xx");
 

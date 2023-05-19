@@ -87,7 +87,7 @@ const Cart = (props) => {
     console.log(productsinOrder, "productsinOrder");
 
     const orderObject = {
-      CUSTNAME: userId,
+      CUSTNAME: 'C1001',
       CDES: "ERACLEOUS PHARMACY LTD",
       CURDATE: "2023-04-21T00:00:00+02:00",
       DEXT_SUPPNAME: "V1239",
@@ -106,23 +106,14 @@ const Cart = (props) => {
     //send order
 
     //const url = "http://localhost:8000/order";
-    const url =
-      "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS";
     //const url = "https://kedifap-portal.com2go.co/order";
+    const url = new URL(
+      `${process.env.REACT_APP_API_URL}/order`
+    );
 
-    let axiosConfig = {
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8",
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    
     try {
-      const response = await axios.post(url, orderObject, {
-        auth: {
-          username: "apiuser",
-          password: "1234",
-        },
-      });
+      const response = await axios.post(url, orderObject);
       console.log(response, "response");
       alert("Order Sent Successfully, Thank you!!");
     } catch (error) {

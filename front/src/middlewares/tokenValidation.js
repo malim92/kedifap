@@ -13,7 +13,7 @@ function withAuth(Component) {
         };
         axios
           //.post("http://localhost:8000/validate-token", 'data', config)
-          .post("https://kedifap-portal.com2go.co/validate-token", config)
+          .post(`${process.env.REACT_APP_API_URL}/validate-token`, config)
           .then((response) => {
             console.log(response.data.isTokenValid,'hert 1');
             setIsAuthenticated(response.data.isTokenValid);

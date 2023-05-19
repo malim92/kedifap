@@ -13,7 +13,7 @@ export const FetchInvoiceData = async (
   ) => {
     const userId = Cookies.get("userId");
     const url = new URL(
-      `https://kedifap-portal.com2go.co/invoices`
+      `${process.env.REACT_APP_API_URL}/invoices`
     );
     console.log(url, "url invoices");
   

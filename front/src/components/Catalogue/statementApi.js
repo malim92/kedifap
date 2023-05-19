@@ -1,6 +1,5 @@
 import Cookies from "js-cookie";
 import axios from "axios";
-import moment from "moment";
 
 export const FetchStatementsData = async (
   sorting,
@@ -13,30 +12,15 @@ export const FetchStatementsData = async (
 ) => {
   const userId = Cookies.get("userId");
 
-  const todayDate = moment().format("YYYY-MM-DD");
-  const lastYearDate = moment().subtract(1, "year").format("YYYY-MM-DD");
-
-  const url = new URL(
-    `https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ${lastYearDate} and TODATE le ${todayDate} and CUSTNAME eq '${userId}'`
-  );
-  console.log(url, "statementsData url");
+  const url = new URL(`${process.env.REACT_APP_API_URL}/statements`);
+  console.log(url, "url invoices");
 
   try {
-    const response = await axios.get(url, {
-      auth: {
-        username: "apiuser",
-        password: "1234",
-      },
-    });
+    const response = await axios.get(url);
+    console.log(response, "response invoices");
 
-    const statementsData = response.data.value.map((item) => ({
-      ...item,
-      TIMESTAMP: moment(item.TIMESTAMP).format("DD-MM-YYYY"),
-    }));
-    console.log(statementsData, "statementsData 1");
-
-    setData(statementsData);
-    setRowCount(statementsData.length);
+    setData(response.data.value);
+    setRowCount(response.data.value.length);
   } catch (error) {
     console.error(error);
   }
