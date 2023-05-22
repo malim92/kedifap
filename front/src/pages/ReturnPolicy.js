@@ -12,7 +12,7 @@ function ReturnPolicy() {
     event.preventDefault();
 
     const url = new URL(
-      `${process.env.REACT_APP_API_URL}/return-policy?product_id=${id}`
+      `${process.env.REACT_APP_API_URL}/return-policy?barcode=${id}`
     );
     try {
       const response = await axios.get(url, { id });
@@ -59,7 +59,7 @@ function ReturnPolicy() {
         <h1 className="text-2xl py-4">Get product return policy</h1>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="idInput">ID Number:</label>
+            <label htmlFor="idInput">Barcode:</label>
             <input
               type="text"
               className="form-control"

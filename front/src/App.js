@@ -23,7 +23,7 @@ import ReturnPolicy from "./pages/ReturnPolicy";
 //import router from "./Routes/routes";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);  
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   console.log(isAuthenticated, "isAuthenticated tesst");
   const router = createBrowserRouter(
@@ -33,9 +33,9 @@ function App() {
           path="/"
           element={<Login setIsAuthenticated={setIsAuthenticated} />}
         />
-        <Route
-          element={<PrivateRoutes isAuthenticated={isAuthenticated} />}
-        >
+        <Route path="/contact" element={<Contact />} />
+
+        <Route element={<PrivateRoutes isAuthenticated={isAuthenticated} />}>
           <Route element={<Navbar />}>
             <Route path="/app" element={<Home />} />
             <Route path="/app/catalogue" element={<ProductsTable />} />
@@ -43,12 +43,13 @@ function App() {
             <Route path="/app/invoices" element={<Invoices />} />
             <Route path="/app/customer-statements" element={<Statements />} />
             <Route path="/app/general-information" element={<Information />} />
-            <Route path="/app/contact" element={<Contact />} />
-            <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/vendors" element={<Vendors />} />
             <Route path="/app/backorders" element={<Backorders />} />
             <Route path="/app/return-policy" element={<ReturnPolicy />} />
+            <Route path="/app/profile" element={<Profile />} />
+            <Route path="/app/contact" element={<Contact />} />
+
           </Route>
         </Route>
       </>

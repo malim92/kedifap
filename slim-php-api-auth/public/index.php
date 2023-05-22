@@ -416,7 +416,7 @@ $app->get('/backorder-products', function (Request $request, Response $response,
 });
 
 $app->get('/return-policy', function (Request $request, Response $response, array $args) {
-    $order_id = $request->getQueryParams('product_id')['product_id'];
+    $order_id = $request->getQueryParams('barcode')['barcode'];
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
@@ -427,7 +427,7 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
         ],
         'verify' => false
     ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=PARTNAME eq \'' . $order_id . '\'';
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=BARCODE eq \'' . $order_id . '\'';
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
 

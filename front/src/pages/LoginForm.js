@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate   } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -24,18 +24,21 @@ function LoginForm({ setIsAuthenticated }) {
     try {
       const loginCredentials = {
         username: username,
-        password: password
-      }
+        password: password,
+      };
 
       const url = `${process.env.REACT_APP_API_URL}/authenticate`; //not correct
       //const url = "http://localhost:8000/authenticate";
       const response = await axios.post(url, loginCredentials);
-      console.log( response,'response xxx' );
-      Cookies.set('userId', username)
+      console.log(response, "response xxx");
+      const userId = response.data.user.CUSTNAME;
+      const userDesc = response.data.user.FIRM;
+      Cookies.set("userId", userId);
+      Cookies.set("userDesc", userDesc);
 
-      setIsAuthenticated(true); 
+      setIsAuthenticated(true);
       return navigate({
-        pathname: '/app',
+        pathname: "/app",
         //search: `?userId=${username}`,
       });
     } catch (error) {
@@ -72,7 +75,10 @@ function LoginForm({ setIsAuthenticated }) {
         />
       </div>
 
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <div
+        className="form-group"
+        style={{ display: "flex", alignItems: "center" }}
+      >
         <button
           style={{
             background: "#82b78d",
@@ -97,6 +103,19 @@ function LoginForm({ setIsAuthenticated }) {
             top: "10px",
           }}
         />
+      </div>
+      <div
+        className="form-group"
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <a href="http://">Forgot Password</a>
+      </div>
+      <div
+        className="form-group d-flex justify-content-start"
+        style={{ display: "flex", alignItems: "center" }}
+      >
+        <input  type="checkbox" name="" id="" />
+        <p style={{ padding: "5px" }}>Remember me</p>
       </div>
     </form>
   );

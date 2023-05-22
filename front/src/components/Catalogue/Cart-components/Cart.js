@@ -24,6 +24,7 @@ const Cart = (props) => {
   } = props;
 
   const [productQuantity, setProductQuantity] = useState({});
+  console.log(Object.values(productQuantity), "str productQuantity");
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
@@ -48,7 +49,6 @@ const Cart = (props) => {
 
     const cartFlatTotal = caluclateFlatTotal(updatedItems);
     const totalDiscountAmount = caluclateDiscount(updatedItems);
-    console.log(totalDiscountAmount, "totalDiscountAmount 2");
     setTotal(cartFlatTotal - totalDiscountAmount);
   };
 
@@ -75,6 +75,7 @@ const Cart = (props) => {
 
   const sendOrder = async (order, cartTotal) => {
     const userId = Cookies.get("userId");
+    const userDesc = Cookies.get("userDesc");
     const productsinOrder = order.map((obj) => ({
       PARTNAME: obj.PARTNAME,
       PDES: obj.PARTDES,
@@ -87,9 +88,9 @@ const Cart = (props) => {
     console.log(productsinOrder, "productsinOrder");
 
     const orderObject = {
-      CUSTNAME: 'C1001',
-      CDES: "ERACLEOUS PHARMACY LTD",
-      CURDATE: "2023-04-21T00:00:00+02:00",
+      CUSTNAME: userId,
+      CDES: userDesc,
+      CURDATE: "2023-05-22T00:00:00+02:00",
       DEXT_SUPPNAME: "V1239",
       DEXT_SUPPDES: "4MORE LTD 2",
       DCODE: null,
@@ -107,11 +108,8 @@ const Cart = (props) => {
 
     //const url = "http://localhost:8000/order";
     //const url = "https://kedifap-portal.com2go.co/order";
-    const url = new URL(
-      `${process.env.REACT_APP_API_URL}/order`
-    );
+    const url = new URL(`${process.env.REACT_APP_API_URL}/order`);
 
-    
     try {
       const response = await axios.post(url, orderObject);
       console.log(response, "response");
@@ -193,6 +191,14 @@ const Cart = (props) => {
               </li>
             ))}
           </ul>
+
+          <div class="cart-item-details">
+            Number of items :{" "}
+            {Object.values(productQuantity).reduce(
+              (total, value) => total + parseInt(value),
+              0
+            )}
+          </div>
 
           <div className="total-container">
             <p className="total-text">Total: {total.toFixed(2)}</p>

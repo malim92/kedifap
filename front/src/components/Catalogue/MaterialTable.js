@@ -7,6 +7,7 @@ import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown, FaImage } from "react-icons/fa";
 import { BiCartDownload } from "react-icons/bi";
+import Viewer from "react-viewer";
 
 import { COLUMNS } from "./columns-material";
 import { FetchPartsData } from "./partsApi";
@@ -143,6 +144,9 @@ const MaterialTable = () => {
   const [popupModalData, setPopupModalData] = useState({});
   const [cartPopupModalData, setCartPopupModalData] = useState({});
   const [popupModalDiscount, setPopupModalDiscount] = useState({});
+  const [visible, setVisible] = useState("false");
+  const [activeIndex, setActiveIndex] = useState("0");
+
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
   const handleCartTemplateClose = () => setCartTemplateShow(false);
@@ -209,7 +213,7 @@ const MaterialTable = () => {
     let sumPrice = 0;
     let applicableDiscount = null;
     productsInCart.forEach((singleCartItem) => {
-    let applicableDiscount = null;
+      let applicableDiscount = null;
       if (singleCartItem.discounts) {
         singleCartItem.discounts.forEach((discount) => {
           //check if product quantity more than discount quantity
@@ -221,21 +225,31 @@ const MaterialTable = () => {
             applicableDiscount = discount;
           }
         });
-        if (applicableDiscount !== null )  {
+        if (applicableDiscount !== null) {
           let addedDiscountedUnit =
-            singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT / 100 * parseInt(singleCartItem.quantity) ;
-            console.log(addedDiscountedUnit, "addedDiscountedUnit test");
+            ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
+            parseInt(singleCartItem.quantity);
+          console.log(addedDiscountedUnit, "addedDiscountedUnit test");
           //if there's applicable discount apply it
           console.log(applicableDiscount, "applicableDiscount 1x");
-          totalDiscount += addedDiscountedUnit
-          
+          totalDiscount += addedDiscountedUnit;
         } else {
-          
         }
       }
     });
     return totalDiscount;
   }
+
+  let images = [
+    {
+      src: "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+      title: "image title 1"
+    },
+    {
+      src: "https://images.unsplash.com/photo-1534628526458-a8de087b1123",
+      title: "image title 2"
+    }
+  ];
 
   return (
     <>
@@ -406,13 +420,26 @@ const MaterialTable = () => {
                   cursor: "pointer",
                   fontSize: "35px",
                 }}
-                onClick={() => {
-                  console.log(row.original, "row.original.IMGFILENAM");
+                // onClick={() => {
+                //   console.log(row.original, "row.original.IMGFILENAM");
 
-                  window.open(row.original.IMGFILENAME, "_blank");
+                //   // window.open(row.original.IMGFILENAME, "_blank");
+                // }}
+                onClick={() => {
+                  setVisible(true);
+                  console.log(row.original.IMGFILENAME, "image visible");
                 }}
-              ></FaImage>
+              >
+                <Viewer
+                  visible={visible}
+                  onClose={() => {
+                    setVisible(false);
+                  }}
+                  images={images}
+                />
+              </FaImage>
             )}
+            
           </div>
         )}
       />

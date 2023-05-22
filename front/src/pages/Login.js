@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Navigation, Pagination, Scrollbar, A11y } from "swiper";
+import { useState, useEffect } from "react";
+import { Pagination, Scrollbar, A11y, Autoplay } from "swiper";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -9,8 +9,11 @@ import LoginForm from "./LoginForm";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import "swiper/css/autoplay";
 import "swiper/css/scrollbar";
-import Slide from "../assets/slide1.jpg";
+import slider1 from "../assets/1.jpg";
+import slider2 from "../assets/2.jpg";
+import slider3 from "../assets/3.jpg";
 import logo from "../assets/kedi logo.png";
 import leafe from "../assets/leafe.png";
 import "./login.css";
@@ -20,45 +23,56 @@ export default ({ setIsAuthenticated }) => {
 
   useEffect(() => {
     function handleResize() {
-      setSwiperHeight(window.innerHeight - 100); // subtracting any additional padding/margin
+      setSwiperHeight(window.innerHeight); // subtracting any additional padding/margin
     }
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
     <>
-      <div className="container" style={{ padding: "50px" }}>
+      <div className="container">
         <Container>
           <Row>
             <Col sm={6}>
               <Swiper
                 // className="shadowed"
-                modules={[Navigation, Scrollbar, A11y]}
-                navigation={true}
+                modules={[Scrollbar, A11y, Autoplay]}
+                autoplay={true}
                 style={{ height: `${swiperHeight}px` }}
                 scrollbar={{ draggable: true }}
               >
                 <SwiperSlide>
                   <img
                     className="w-full img-slider"
-                    src={Slide}
+                    src={slider1}
                     style={{
                       objectFit: "cover",
-                      width: "400px",
-                      height: `${swiperHeight}px`
+                      width: "600px",
+                      height: `${swiperHeight}px`,
                     }}
                   />
                 </SwiperSlide>
                 <SwiperSlide>
                   <img
                     className="w-full img-slider"
-                    src={Slide}
+                    src={slider2}
                     style={{
                       objectFit: "cover",
-                      width: "400px",
-                      height: `${swiperHeight}px`
+                      width: "600px",
+                      height: `${swiperHeight}px`,
+                    }}
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    className="w-full img-slider"
+                    src={slider3}
+                    style={{
+                      objectFit: "cover",
+                      width: "600px",
+                      height: `${swiperHeight}px`,
                     }}
                   />
                 </SwiperSlide>
@@ -66,15 +80,14 @@ export default ({ setIsAuthenticated }) => {
               </Swiper>
             </Col>
             <Col sm={6}>
-              <div className="container">
+              <div className="container" style={{ padding: "20px" }}>
+              <div class="top-bar d-flex justify-content-between">
+        <a href="/contact">Contact us</a>
+          </div>
                 <img className="logo-login-top" src={logo} alt="" />
-                <div className='form-header'>
+                <div className="form-header">
                   <h3>Καλώς ήρθατε στο Web Portal της ΚΕΔΙΦΑΠ</h3>
-                  <img
-                  className='form-img'
-                    src={leafe}
-                    alt="placeholder"
-                  />
+                  <img className="form-img" src={leafe} alt="placeholder" />
                 </div>
 
                 <LoginForm setIsAuthenticated={setIsAuthenticated} />
