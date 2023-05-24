@@ -1,4 +1,5 @@
 import VENDORS from "./VENDORS_DATA.json";
+import moment from "moment";
 
 export const FetchPartsData = async (
   sorting,
@@ -114,46 +115,47 @@ export const FetchPartsData = async (
         return acc;
       }, 0);
 
-      return { ...item, stock: total };
+      const expiryDateCol = stockData.reduce((acc, curr) => {
+        if (curr.PARTNAME === item.PARTNAME) {
+          acc = moment(curr.EXPIRYDATE).format("DD-MM-YYYY");
+        }
+        return acc;
+      }, 0);
+
+      return { ...item, stock: total, expiry: expiryDateCol };
     });
 
     //replace return policy code with description
     let returnPolicyArray = updatedArray.map((item) => {
-
-      if ( item.DEXT_SUPPOLICYCODE == '6M') {
+      if (item.DEXT_SUPPOLICYCODE == "6M") {
         return {
           ...item,
-          DEXT_SUPPOLICYCODE: 'Ο Προμηθευτής Δέχεται μόνο Ληξιπρόθεσμα 6Μ',
+          DEXT_SUPPOLICYCODE: "Ο Προμηθευτής Δέχεται μόνο Ληξιπρόθεσμα 6Μ",
         };
-      }
-      else if ( item.DEXT_SUPPOLICYCODE == '6M/EXP') {
+      } else if (item.DEXT_SUPPOLICYCODE == "6M/EXP") {
         return {
           ...item,
-          DEXT_SUPPOLICYCODE: 'Ο Προμηθευτής Δέχεται Ληγμένα & Ληξιπρόθεσμα 6M',
+          DEXT_SUPPOLICYCODE: "Ο Προμηθευτής Δέχεται Ληγμένα & Ληξιπρόθεσμα 6M",
         };
-      }
-      else if ( item.DEXT_SUPPOLICYCODE == 'ALL') {
+      } else if (item.DEXT_SUPPOLICYCODE == "ALL") {
         return {
           ...item,
-          DEXT_SUPPOLICYCODE: 'Ο Προμηθευτής Δέχεται Όλες τις Επιστροφές',
+          DEXT_SUPPOLICYCODE: "Ο Προμηθευτής Δέχεται Όλες τις Επιστροφές",
         };
-      }
-      else if ( item.DEXT_SUPPOLICYCODE == 'EXP') {
+      } else if (item.DEXT_SUPPOLICYCODE == "EXP") {
         return {
           ...item,
-          DEXT_SUPPOLICYCODE: 'Ο Προμηθευτής Δέχεται μόνο Ληγμένα',
+          DEXT_SUPPOLICYCODE: "Ο Προμηθευτής Δέχεται μόνο Ληγμένα",
         };
-      }
-      else if ( item.DEXT_SUPPOLICYCODE == 'NONE') {
+      } else if (item.DEXT_SUPPOLICYCODE == "NONE") {
         return {
           ...item,
-          DEXT_SUPPOLICYCODE: 'Ο Προμηθευτής ΔΕΝ Δέχεται Επιστροφές',
+          DEXT_SUPPOLICYCODE: "Ο Προμηθευτής ΔΕΝ Δέχεται Επιστροφές",
         };
-      }
-      else if ( item.DEXT_SUPPOLICYCODE == 'SPECIAL') {
+      } else if (item.DEXT_SUPPOLICYCODE == "SPECIAL") {
         return {
           ...item,
-          DEXT_SUPPOLICYCODE: 'Ειδική Συμφωνία',
+          DEXT_SUPPOLICYCODE: "Ειδική Συμφωνία",
         };
       }
       return item;

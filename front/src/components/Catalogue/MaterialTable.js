@@ -46,6 +46,7 @@ const MaterialTable = () => {
   const [supValue, setSupValue] = useState("");
   const [activeIngValue, setActiveIngValue] = useState("");
   const [quantityInputValue, setQuantityInputValue] = useState({});
+  const [productQuantity, setProductQuantity] = useState({});
 
   const handleBarcodeChange = (event) => {
     setBarcodeValue(event.target.value);
@@ -119,7 +120,13 @@ const MaterialTable = () => {
 
   const [total, setTotal] = useState(0);
 
-  const handleAddToCart = (product, total, setQuantityInputValue) => {
+  const handleAddToCart = (
+    product,
+    total,
+    setQuantityInputValue,
+    setProductQuantity,
+    productQuantity
+  ) => {
     let cartTotalPrice = total;
     const { PARTNAME, WSPLPRICE } = product.original;
     product.original.quantity = 1;
@@ -132,11 +139,13 @@ const MaterialTable = () => {
       setCartItems([...cartItems, product.original]);
       setShowCart(true);
       setQuantityInputValue({ ...quantityInputValue, [PARTNAME]: 1 });
+
+      setProductQuantity({
+        ...quantityInputValue,
+        [PARTNAME]: 1,
+      });
     }
   };
-
-  //const [productQuantity, setProductQuantity] = useState(1);
-  //const [productQuantity, setProductQuantity] = useState({});
 
   const [show, setShow] = useState(false);
   const [discountShow, setDiscountShow] = useState(false);
@@ -209,6 +218,7 @@ const MaterialTable = () => {
 
   function caluclateDiscount(productsInCart) {
     let totalDiscount = 0;
+    let discountLabel = "";
     console.log(productsInCart, "productsInCart in discount");
     let sumPrice = 0;
     let applicableDiscount = null;
@@ -229,26 +239,28 @@ const MaterialTable = () => {
           let addedDiscountedUnit =
             ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
             parseInt(singleCartItem.quantity);
-          console.log(addedDiscountedUnit, "addedDiscountedUnit test");
           //if there's applicable discount apply it
           console.log(applicableDiscount, "applicableDiscount 1x");
           totalDiscount += addedDiscountedUnit;
+          discountLabel = {[singleCartItem.PARTNAME] : applicableDiscount.OFFERDES};
         } else {
         }
       }
     });
-    return totalDiscount;
+    console.log(discountLabel, "discountLabel in table 1x");
+
+    return { totalDiscount: totalDiscount, discountLabel: discountLabel };
   }
 
   let images = [
     {
       src: "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
-      title: "image title 1"
+      title: "image title 1",
     },
     {
       src: "https://images.unsplash.com/photo-1534628526458-a8de087b1123",
-      title: "image title 2"
-    }
+      title: "image title 2",
+    },
   ];
 
   return (
@@ -374,7 +386,13 @@ const MaterialTable = () => {
               <button
                 className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                 onClick={() => {
-                  handleAddToCart(row, total, setQuantityInputValue);
+                  handleAddToCart(
+                    row,
+                    total,
+                    setQuantityInputValue,
+                    setProductQuantity,
+                    productQuantity
+                  );
                 }}
                 style={{
                   width: "30px",
@@ -439,7 +457,6 @@ const MaterialTable = () => {
                 />
               </FaImage>
             )}
-            
           </div>
         )}
       />
@@ -473,6 +490,8 @@ const MaterialTable = () => {
         setQuantityInputValue={setQuantityInputValue}
         caluclateFlatTotal={caluclateFlatTotal}
         caluclateDiscount={caluclateDiscount}
+        productQuantity={productQuantity}
+        setProductQuantity={setProductQuantity}
       />
       <Cart
         showCart={showCart}
@@ -489,6 +508,8 @@ const MaterialTable = () => {
         setQuantityInputValue={setQuantityInputValue}
         caluclateFlatTotal={caluclateFlatTotal}
         caluclateDiscount={caluclateDiscount}
+        productQuantity={productQuantity}
+        setProductQuantity={setProductQuantity}
       />
     </>
   );

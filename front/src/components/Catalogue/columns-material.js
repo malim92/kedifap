@@ -50,4 +50,10 @@ export const COLUMNS = [
         header: "Κατηγορία",
         accessorKey: 'SPEC19',
     },
+    {
+        header: "Expiration Date",
+        accessorKey: 'expiry',
+        enableColumnFilter: false,
+        enableSorting: false,
+    },
 ];

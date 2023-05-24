@@ -47,7 +47,6 @@ const OrdersTable = () => {
     pagination.pageSize,
     sorting,
   ]);
-  console.log(data, "typeof data");
 
   const columns = useMemo(() => ORDERS_COLUMNS, []);
 

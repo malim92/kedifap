@@ -7,18 +7,25 @@ export const VENDORS_COLUMNS = [
     {
         header: 'Address',
         accessorKey: 'ADDRESS',
-        enableSorting: true,
+        enableColumnFilter: false,
+        enableSorting: false,
     },
     {
         header: "District",
         accessorKey: 'STATEA',
+        enableColumnFilter: false,
+        enableSorting: false,
     },
     {
         header: "Country",
         accessorKey: 'COUNTRYNAME',
+        enableColumnFilter: false,
+        enableSorting: false,
     },
     {
         header: "Phone",
         accessorKey: 'PHONE',
+        enableColumnFilter: false,
+        enableSorting: false,
     },
 ];

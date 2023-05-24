@@ -75,7 +75,7 @@ function ReturnPolicy() {
                 marginBottom: "10px",
               }}
             >
-              Request Invoice
+              Request return policy
             </button>
           </div>
         </form>

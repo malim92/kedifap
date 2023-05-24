@@ -17,7 +17,9 @@ const getDiscount = async (
   quantityInputValue,
   setQuantityInputValue,
   caluclateFlatTotal,
-  caluclateDiscount
+  caluclateDiscount,
+  productQuantity,
+  setProductQuantity
 ) => {
   setShowCart(true);
   const found = cartItems.find(
@@ -27,15 +29,13 @@ const getDiscount = async (
     alert("Product is already in the cart!");
   } else {
     product.quantity = discountSelection.OFFERQTY;
-    console.log(cartItems, "cartItems in disc ");
+    // console.log(cartItems, "cartItems in disc ");
     setCartItems([...cartItems, product]);
     cartItems.push(product);
     const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
     const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
-    console.log(cartFlatTotalInDiscount, "cartFlatTotal in disc ");
-    console.log(cartDiscountTotalInDiscount, "quantityInputValue in disc ");
 
-    setTotal(cartFlatTotalInDiscount - cartDiscountTotalInDiscount);
+    setTotal(cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount);
     // setTotal(
     //   cartItems.reduce(
     //     (acc, item) => acc + parseFloat(item.WSPLPRICE) * item.quantity,
@@ -48,11 +48,16 @@ const getDiscount = async (
     //     )
     //   )
     // );
+    
     setQuantityInputValue({
       ...quantityInputValue,
       [product.PARTNAME]: product.quantity,
     });
 
+    setProductQuantity({
+      ...productQuantity,
+      [product.PARTNAME]: product.quantity,
+    });
   }
 };
 
@@ -70,7 +75,9 @@ function ProductDiscountModal(props) {
     quantityInputValue,
     setQuantityInputValue,
     caluclateFlatTotal,
-  caluclateDiscount
+    caluclateDiscount,
+    productQuantity,
+    setProductQuantity,
   } = props;
 
   const { rowSearch } = popupModalDiscount;
@@ -107,7 +114,9 @@ function ProductDiscountModal(props) {
                             quantityInputValue,
                             setQuantityInputValue,
                             caluclateFlatTotal,
-                            caluclateDiscount
+                            caluclateDiscount,
+                            productQuantity,
+                            setProductQuantity
                           )
                         }
                         style={{

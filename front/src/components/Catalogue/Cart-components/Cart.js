@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -21,10 +21,11 @@ const Cart = (props) => {
     setQuantityInputValue,
     caluclateFlatTotal,
     caluclateDiscount,
+    productQuantity,
+    setProductQuantity,
   } = props;
 
-  const [productQuantity, setProductQuantity] = useState({});
-  console.log(Object.values(productQuantity), "str productQuantity");
+  const [discountLabel, setDiscountLabel] = useState({});
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
@@ -49,7 +50,13 @@ const Cart = (props) => {
 
     const cartFlatTotal = caluclateFlatTotal(updatedItems);
     const totalDiscountAmount = caluclateDiscount(updatedItems);
-    setTotal(cartFlatTotal - totalDiscountAmount);
+
+    setTotal(cartFlatTotal - totalDiscountAmount.totalDiscount);
+    console.log(totalDiscountAmount.discountLabel, "discountLabel in x");
+
+    setDiscountLabel({
+      [item.PARTNAME]: totalDiscountAmount.discountLabel[item.PARTNAME],
+    });
   };
 
   const removeItem = (product) => {
@@ -57,10 +64,18 @@ const Cart = (props) => {
       (item) => item.PARTNAME !== product.PARTNAME
     );
     setCartItems(updatedCart);
-    setProductQuantity(1);
+    //setProductQuantity(1);
+
+    // setProductQuantity({ ...productQuantity, [product.PARTNAME]: 1 });
+    console.log(productQuantity, "productQuantity in remove 1");
+
+    // productQuantity.splice(product.PARTNAME, 1);
+    delete productQuantity[product.PARTNAME];
+    console.log(productQuantity, "productQuantity in remove 2");
+
     const cartFlatTotal = caluclateFlatTotal(updatedCart);
     const totalDiscountAmount = caluclateDiscount(updatedCart);
-    setTotal(cartFlatTotal - totalDiscountAmount);
+    setTotal(cartFlatTotal - totalDiscountAmount.totalDiscount);
 
     const productId = product.PARTNAME;
     //setQuantityInputValue({ ...quantityInputValue, [productId]: parseInt(event) });
@@ -69,7 +84,7 @@ const Cart = (props) => {
   const clearCart = () => {
     setCartItems([]);
     setTotal(0);
-    setProductQuantity(1);
+    setProductQuantity(0);
     setQuantityInputValue({});
   };
 
@@ -119,16 +134,25 @@ const Cart = (props) => {
     }
     setCartItems([]);
     setTotal(0);
-    setProductQuantity(1);
+    setProductQuantity(0);
   };
   const saveCart = async (cartItems) => {
     setCartTemplate(cartItems);
   };
 
+  console.log(discountLabel, "discountLabel in ali");
+
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
-        Cart
+        <span className="icon">
+          <p>
+            {Object.values(productQuantity).reduce(
+              (total, value) => total + parseInt(value),
+              0
+            )}
+          </p>
+        </span>
       </button>
       {showCart && (
         <div class="cart-container">
@@ -149,6 +173,7 @@ const Cart = (props) => {
                   <p class="cart-item-price">
                     Price: {parseFloat(item.WSPLPRICE)}
                   </p>
+                  {discountLabel !='' && <p class="cart-item-discount">Discount: {discountLabel[item.PARTNAME]}</p>}
                   {/* <p class="cart-item-quantity">Quantity: {item.quantity}</p> */}
                 </div>
                 <div class="cart-item-controls">

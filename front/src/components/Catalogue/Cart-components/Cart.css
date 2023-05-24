@@ -13,9 +13,20 @@
   position: fixed;
   right: 10vw;
   transition: all ease 300ms;
-  text-indent: -999999px;
   width: 72px;
   z-index: 4;
+}
+
+.icon {
+  position: absolute;
+  top: -20px;
+  right: 20px;
+  color: #fff;
+  border-radius: 50%;
+  padding: 4px;
+  width: 30px;
+  font-size: 17px;
+  background-color: #d53232;
 }
 
 .green-box {
@@ -45,13 +56,17 @@
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
-
+.cart-item-discount,
 .cart-item-name,
 .cart-item-price,
 .cart-item-code {
   font-size: 0.8rem;
   font-weight: 500;
   margin: 0;
+}
+
+.cart-item-discount{
+  color: #d53232;
 }
 
 .cart-item-quantity {
