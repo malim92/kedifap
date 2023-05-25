@@ -80,6 +80,7 @@ export const FetchPartsData = async (
                   OFFERQTY: discountObj.OFFERQTY,
                   OFFERNUM: discountObj.OFFERNUM,
                   OFFERDES: discountObj.OFFERDES,
+                  FREEQTY: discountObj.FREEQTY,
                 };
               }
               return null;

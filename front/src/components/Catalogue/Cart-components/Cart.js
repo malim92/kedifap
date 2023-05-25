@@ -23,9 +23,11 @@ const Cart = (props) => {
     caluclateDiscount,
     productQuantity,
     setProductQuantity,
+    discountLabel,
+    setDiscountLabel,
+    freeQuantity,
+    setFreeQuantity,
   } = props;
-
-  const [discountLabel, setDiscountLabel] = useState({});
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
@@ -52,9 +54,9 @@ const Cart = (props) => {
     const totalDiscountAmount = caluclateDiscount(updatedItems);
 
     setTotal(cartFlatTotal - totalDiscountAmount.totalDiscount);
-    console.log(totalDiscountAmount.discountLabel, "discountLabel in x");
 
     setDiscountLabel({
+      ...discountLabel,
       [item.PARTNAME]: totalDiscountAmount.discountLabel[item.PARTNAME],
     });
   };
@@ -67,17 +69,16 @@ const Cart = (props) => {
     //setProductQuantity(1);
 
     // setProductQuantity({ ...productQuantity, [product.PARTNAME]: 1 });
-    console.log(productQuantity, "productQuantity in remove 1");
 
     // productQuantity.splice(product.PARTNAME, 1);
     delete productQuantity[product.PARTNAME];
-    console.log(productQuantity, "productQuantity in remove 2");
 
     const cartFlatTotal = caluclateFlatTotal(updatedCart);
     const totalDiscountAmount = caluclateDiscount(updatedCart);
     setTotal(cartFlatTotal - totalDiscountAmount.totalDiscount);
 
-    const productId = product.PARTNAME;
+    delete freeQuantity[product.PARTNAME];
+    setFreeQuantity(freeQuantity);
     //setQuantityInputValue({ ...quantityInputValue, [productId]: parseInt(event) });
   };
 
@@ -86,6 +87,7 @@ const Cart = (props) => {
     setTotal(0);
     setProductQuantity(0);
     setQuantityInputValue({});
+    setFreeQuantity({});
   };
 
   const sendOrder = async (order, cartTotal) => {
@@ -140,8 +142,11 @@ const Cart = (props) => {
     setCartTemplate(cartItems);
   };
 
-  console.log(discountLabel, "discountLabel in ali");
-
+  console.log(freeQuantity, "freeQuantity in ali");
+  let totalFreeQuantities = 0;
+  for (const value of Object.values(freeQuantity)) {
+    totalFreeQuantities += value;
+  }
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
@@ -173,7 +178,11 @@ const Cart = (props) => {
                   <p class="cart-item-price">
                     Price: {parseFloat(item.WSPLPRICE)}
                   </p>
-                  {discountLabel !='' && <p class="cart-item-discount">Discount: {discountLabel[item.PARTNAME]}</p>}
+                  {discountLabel[item.PARTNAME] !== undefined && (
+                    <p class="cart-item-discount">
+                      Discount: {discountLabel[item.PARTNAME]}
+                    </p>
+                  )}
                   {/* <p class="cart-item-quantity">Quantity: {item.quantity}</p> */}
                 </div>
                 <div class="cart-item-controls">
@@ -223,6 +232,7 @@ const Cart = (props) => {
               (total, value) => total + parseInt(value),
               0
             )}
+            {totalFreeQuantities > 0 && <span>+ {totalFreeQuantities} Free items</span>}
           </div>
 
           <div className="total-container">

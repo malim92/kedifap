@@ -155,6 +155,8 @@ const MaterialTable = () => {
   const [popupModalDiscount, setPopupModalDiscount] = useState({});
   const [visible, setVisible] = useState("false");
   const [activeIndex, setActiveIndex] = useState("0");
+  const [discountLabel, setDiscountLabel] = useState({});
+  const [freeQuantity, setFreeQuantity] = useState({});
 
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
@@ -218,12 +220,13 @@ const MaterialTable = () => {
 
   function caluclateDiscount(productsInCart) {
     let totalDiscount = 0;
-    let discountLabel = "";
+    let freeItems = [];
+    let discountLabel = [];
     console.log(productsInCart, "productsInCart in discount");
-    let sumPrice = 0;
     let applicableDiscount = null;
     productsInCart.forEach((singleCartItem) => {
       let applicableDiscount = null;
+      //check if product has discount property
       if (singleCartItem.discounts) {
         singleCartItem.discounts.forEach((discount) => {
           //check if product quantity more than discount quantity
@@ -235,21 +238,32 @@ const MaterialTable = () => {
             applicableDiscount = discount;
           }
         });
+        //caluclating discount
         if (applicableDiscount !== null) {
-          let addedDiscountedUnit =
-            ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
-            parseInt(singleCartItem.quantity);
-          //if there's applicable discount apply it
-          console.log(applicableDiscount, "applicableDiscount 1x");
-          totalDiscount += addedDiscountedUnit;
-          discountLabel = {[singleCartItem.PARTNAME] : applicableDiscount.OFFERDES};
+          if (applicableDiscount.FREEQTY > 0) {
+            freeItems = {
+              ...freeItems,
+              [singleCartItem.PARTNAME]: applicableDiscount.FREEQTY};
+          } else {
+            let addedDiscountedUnit =
+              ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
+              parseInt(singleCartItem.quantity);
+            //if there's applicable discount apply it
+            console.log(applicableDiscount, "applicableDiscount 1x");
+            totalDiscount += addedDiscountedUnit;
+          }
+          discountLabel = {
+            ...discountLabel,
+            [singleCartItem.PARTNAME]: applicableDiscount.OFFERDES,
+          };
+          console.log(applicableDiscount, "applicableDiscount 2x");
         } else {
         }
       }
     });
     console.log(discountLabel, "discountLabel in table 1x");
 
-    return { totalDiscount: totalDiscount, discountLabel: discountLabel };
+    return { totalDiscount: totalDiscount, discountLabel: discountLabel, freeItems:freeItems };
   }
 
   let images = [
@@ -492,6 +506,10 @@ const MaterialTable = () => {
         caluclateDiscount={caluclateDiscount}
         productQuantity={productQuantity}
         setProductQuantity={setProductQuantity}
+        discountLabel={discountLabel}
+        setDiscountLabel={setDiscountLabel}
+        freeQuantity={freeQuantity}
+        setFreeQuantity={setFreeQuantity}
       />
       <Cart
         showCart={showCart}
@@ -510,6 +528,10 @@ const MaterialTable = () => {
         caluclateDiscount={caluclateDiscount}
         productQuantity={productQuantity}
         setProductQuantity={setProductQuantity}
+        discountLabel={discountLabel}
+        setDiscountLabel={setDiscountLabel}
+        freeQuantity={freeQuantity}
+        setFreeQuantity={setFreeQuantity}
       />
     </>
   );

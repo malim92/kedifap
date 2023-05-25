@@ -19,7 +19,11 @@ const getDiscount = async (
   caluclateFlatTotal,
   caluclateDiscount,
   productQuantity,
-  setProductQuantity
+  setProductQuantity,
+  discountLabel,
+  setDiscountLabel,
+  freeQuantity,
+  setFreeQuantity
 ) => {
   setShowCart(true);
   const found = cartItems.find(
@@ -34,29 +38,42 @@ const getDiscount = async (
     cartItems.push(product);
     const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
     const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
+    console.log(
+      cartDiscountTotalInDiscount,
+      "cartDiscountTotalInDiscount in discount"
+    );
 
-    setTotal(cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount);
-    // setTotal(
-    //   cartItems.reduce(
-    //     (acc, item) => acc + parseFloat(item.WSPLPRICE) * item.quantity,
-    //     parseFloat(
-    //       product.WSPLPRICE * product.quantity -
-    //         (product.WSPLPRICE *
-    //           product.quantity *
-    //           discountSelection.DISCOUNT) /
-    //           100
-    //     )
-    //   )
-    // );
-    
+    cartDiscountTotalInDiscount.freeItems[product.PARTNAME] > 0
+      ? setFreeQuantity({
+        ...freeQuantity,
+        [product.PARTNAME]:
+        cartDiscountTotalInDiscount.freeItems[product.PARTNAME],
+      }) : setFreeQuantity({
+        ...freeQuantity,
+        [product.PARTNAME]:
+        0,
+      });
+
+    console.log(freeQuantity, "freeQuantity 2x");
+
+    setTotal(
+      cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
+    );
+
     setQuantityInputValue({
       ...quantityInputValue,
-      [product.PARTNAME]: product.quantity,
+      [product.PARTNAME]: parseInt(product.quantity),
     });
 
     setProductQuantity({
       ...productQuantity,
       [product.PARTNAME]: product.quantity,
+    });
+
+    setDiscountLabel({
+      ...discountLabel,
+      [product.PARTNAME]:
+        cartDiscountTotalInDiscount.discountLabel[product.PARTNAME],
     });
   }
 };
@@ -78,6 +95,10 @@ function ProductDiscountModal(props) {
     caluclateDiscount,
     productQuantity,
     setProductQuantity,
+    discountLabel,
+    setDiscountLabel,
+    freeQuantity,
+    setFreeQuantity,
   } = props;
 
   const { rowSearch } = popupModalDiscount;
@@ -116,7 +137,11 @@ function ProductDiscountModal(props) {
                             caluclateFlatTotal,
                             caluclateDiscount,
                             productQuantity,
-                            setProductQuantity
+                            setProductQuantity,
+                            discountLabel,
+                            setDiscountLabel,
+                            freeQuantity,
+                            setFreeQuantity
                           )
                         }
                         style={{
