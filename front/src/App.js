@@ -36,7 +36,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
 
         <Route element={<PrivateRoutes isAuthenticated={isAuthenticated} />}>
-          <Route element={<Navbar />}>
+          <Route element={<Navbar setIsAuthenticated={setIsAuthenticated} />}>
             <Route path="/app" element={<Home />} />
             <Route path="/app/catalogue" element={<ProductsTable />} />
             <Route path="/app/orders" element={<Orders />} />

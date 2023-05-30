@@ -32,10 +32,9 @@ export default ({ setIsAuthenticated }) => {
 
   return (
     <>
-      <div className="container">
-        <Container>
+        <Container fluid>
           <Row>
-            <Col sm={6}>
+            <Col style={{ paddingLeft: 0, paddingRight: 0 }} sm={6}>
               <Swiper
                 // className="shadowed"
                 modules={[Scrollbar, A11y, Autoplay]}
@@ -49,7 +48,7 @@ export default ({ setIsAuthenticated }) => {
                     src={slider1}
                     style={{
                       objectFit: "cover",
-                      width: "600px",
+                      width: "960px",
                       height: `${swiperHeight}px`,
                     }}
                   />
@@ -60,7 +59,7 @@ export default ({ setIsAuthenticated }) => {
                     src={slider2}
                     style={{
                       objectFit: "cover",
-                      width: "600px",
+                      width: "960px",
                       height: `${swiperHeight}px`,
                     }}
                   />
@@ -71,7 +70,7 @@ export default ({ setIsAuthenticated }) => {
                     src={slider3}
                     style={{
                       objectFit: "cover",
-                      width: "600px",
+                      width: "960px",
                       height: `${swiperHeight}px`,
                     }}
                   />
@@ -81,7 +80,7 @@ export default ({ setIsAuthenticated }) => {
             </Col>
             <Col sm={6}>
               <div className="container" style={{ padding: "20px" }}>
-              <div class="top-bar d-flex justify-content-between">
+              <div class="top-bar d-flex justify-content-end">
         <a href="/contact">Contact us</a>
           </div>
                 <img className="logo-login-top" src={logo} alt="" />
@@ -95,7 +94,6 @@ export default ({ setIsAuthenticated }) => {
             </Col>
           </Row>
         </Container>
-      </div>
     </>
   );
 };

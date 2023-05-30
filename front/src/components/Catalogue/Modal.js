@@ -23,7 +23,7 @@ function ProductModal(props) {
         <p>Διαθέσιμο Απόθεμα: {popupModalData.stock}</p>
         <p>Χονδρική τιμή: {popupModalData.price}</p>
         <p>Λιανική Τιμή: {popupModalData.priceVat}</p>
-        <p>Φ.Π.Α %: {popupModalData.vat}</p>
+        {/* <p>Φ.Π.Α %: {popupModalData.vat}</p> */}
         <p>Διανομέα: {popupModalData.distributer}</p>
         <p>Barcode Συσκευασίας: {popupModalData.barcode}</p>
         <p>Κωδικός Φ.Υ: {popupModalData.pharmaCode}</p>

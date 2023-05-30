@@ -56,7 +56,7 @@ function ReturnPolicy() {
   return (
     <>
       <div className="container">
-        <h1 className="text-2xl py-4">Get product return policy</h1>
+        <h1 className="text-2xl py-4">Πολιτική επιστροφών</h1>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="idInput">Barcode:</label>
@@ -75,7 +75,7 @@ function ReturnPolicy() {
                 marginBottom: "10px",
               }}
             >
-              Request return policy
+              Request Πολιτική επιστροφών
             </button>
           </div>
         </form>
