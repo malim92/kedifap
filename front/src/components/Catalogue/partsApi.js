@@ -15,8 +15,12 @@ export const FetchPartsData = async (
   barcodeValue,
   supValue,
   activeIngValue,
-  discountedProducts
+  discountedProducts,
+  isVendorName
 ) => {
+
+  // if (isVendorName.startsWith('V')) userTest = isVendorName;
+
   try {
     //const url = new URL("/parts/", "http://localhost:8000");
     const url = new URL("/parts/", `${process.env.REACT_APP_API_URL}`);
@@ -26,6 +30,8 @@ export const FetchPartsData = async (
     url.searchParams.set("globalFilter", globalFilter ?? "");
     url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
     if (barcodeValue !== "" && barcodeValue !== undefined) {
+      console.log(barcodeValue, "barcodeValue in api");
+
       url.searchParams.set(
         "customFilters",
         JSON.stringify([{ id: "BARCODE", value: barcodeValue }])
@@ -41,20 +47,34 @@ export const FetchPartsData = async (
         JSON.stringify([{ id: "SPEC1", value: activeIngValue }])
       );
     } else url.searchParams.set("customFilters", "");
-
-    //show discounted
-    if (discountedProducts !== "" && discountedProducts !== undefined) {
+    //if user is a vendor
+    
+    if (isVendorName) {
       url.searchParams.set(
-        "discountFilter",
-        JSON.stringify([{ id: "DISCOUNTED", value: discountedProducts }])
+        "isVendor",
+        JSON.stringify([{ value: isVendorName }])
       );
     }
+    //if discount switch is on
+    // if (discountedProducts !== "" && discountedProducts !== undefined) {
+    //   console.log("test1", discountedProducts);
+    //   url.searchParams.set(
+    //     "discountFilter",
+    //     JSON.stringify([{ id: "discountFilter", value: discountedProducts }])
+    //   );
+    // }
+    //show discounted
+    // if (discountedProducts !== "" && discountedProducts !== undefined) {
+    //   url.searchParams.set(
+    //     "discountFilter",
+    //     JSON.stringify([{ id: "DISCOUNTED", value: discountedProducts }])
+    //   );
+    // }
     ///parts/?page=0&size=20&filters=%5B%7B%22id%22%3A%22PARTNAME%22%2C%22value%22%3A%22sa%22%7D%5D&globalFilter=&sorting=%5B%5D
     console.log(url, "url");
     const response = await fetch(url.href);
-    console.log(response, "response here");
     const json = await response.json();
-    console.log(json, "json here");
+    console.log(response, "response test");
 
     //replace supplier and importer code with name
     let supplierUpdatedArray = json.data.map((item) => {
@@ -73,19 +93,18 @@ export const FetchPartsData = async (
       }
       return item;
     });
-    //try {
-      //const url = new URL("/parts/", "http://localhost:8000");
-      // const discountUrl = new URL(
-      //   "/discount/",
-      //   `${process.env.REACT_APP_API_URL}`
-      // );
-      // console.log(discountUrl, "discountUrl");
+    // try {
+    //   const url = new URL("/discount/", "http://localhost:8000");
+    //   const discountUrl = new URL(
+    //     "/discount/",
+    //     `${process.env.REACT_APP_API_URL}`
+    //   );
+    //   console.log(discountUrl, "discountUrl");
 
-      // const discountResponse = await fetch(discountUrl.href);
-      // const discountJson = await discountResponse.json();
-      // console.log(discountJson, "discountJson");
-    //} 
-    // catch (error) {
+    //   const discountResponse = await fetch(discountUrl.href);
+    //   const discountJson = await discountResponse.json();
+    //   console.log(discountJson, "discountJson");
+    // } catch (error) {
     //   setIsError(true);
     //   console.error(error);
     //   return;

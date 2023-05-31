@@ -5,6 +5,8 @@ import {
   RouterProvider,
   useNavigate,
 } from "react-router-dom";
+import Cookies from "js-cookie";
+
 import { useState, useEffect } from "react";
 import PrivateRoutes from "./pages/Routes/PrivateRoutes";
 import Navbar from "./components/Navbar";
@@ -24,6 +26,7 @@ import ReturnPolicy from "./pages/ReturnPolicy";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isVendorName, setIsVendorName] = useState("");
 
   console.log(isAuthenticated, "isAuthenticated tesst");
   const router = createBrowserRouter(
@@ -31,14 +34,14 @@ function App() {
       <>
         <Route
           path="/"
-          element={<Login setIsAuthenticated={setIsAuthenticated} />}
+          element={<Login setIsVendorName={setIsVendorName} setIsAuthenticated={setIsAuthenticated} />}
         />
         <Route path="/contact" element={<Contact />} />
 
         <Route element={<PrivateRoutes isAuthenticated={isAuthenticated} />}>
-          <Route element={<Navbar setIsAuthenticated={setIsAuthenticated} />}>
+          <Route element={<Navbar isVendorName={isVendorName} setIsAuthenticated={setIsAuthenticated} />}>
             <Route path="/app" element={<Home />} />
-            <Route path="/app/catalogue" element={<ProductsTable />} />
+            <Route path="/app/catalogue" element={<ProductsTable isVendorName={isVendorName}/>} />
             <Route path="/app/orders" element={<Orders />} />
             <Route path="/app/invoices" element={<Invoices />} />
             <Route path="/app/customer-statements" element={<Statements />} />

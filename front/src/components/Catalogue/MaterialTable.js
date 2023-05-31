@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
-import axios from "axios";
+import Cookies from "js-cookie";
 import { Info } from "@mui/icons-material";
 import PopupModal from "./Modal";
 import CartPopupModal from "./CartPopupModal";
@@ -32,7 +32,7 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const MaterialTable = () => {
+const MaterialTable = ({ isVendorName }) => {
   //data and fetching state
   const [data, setData] = useState([]);
   const [isError, setIsError] = useState(false);
@@ -97,7 +97,8 @@ const MaterialTable = () => {
         barcodeValue,
         supValue,
         activeIngValue,
-        discountedProducts
+        discountedProducts,
+        isVendorName
       );
     }, 1000);
 
@@ -113,7 +114,7 @@ const MaterialTable = () => {
     barcodeValue,
     supValue,
     activeIngValue,
-    discountedProducts
+    discountedProducts,
   ]);
 
   useEffect(() => {
@@ -127,7 +128,12 @@ const MaterialTable = () => {
       setIconDisplay,
       setData,
       setRowCount,
-      setIsError
+      setIsError,
+      barcodeValue,
+      supValue,
+      activeIngValue,
+      discountedProducts,
+      isVendorName
     );
   }, [
     columnFilters,
@@ -489,15 +495,15 @@ const MaterialTable = () => {
                   cursor: "pointer",
                   fontSize: "35px",
                 }}
-                // onClick={() => {
-                //   console.log(row.original, "row.original.IMGFILENAM");
-
-                //   // window.open(row.original.IMGFILENAME, "_blank");
-                // }}
                 onClick={() => {
-                  setVisible(true);
-                  console.log(row.original.IMGFILENAME, "image visible");
+                  console.log(row.original, "row.original.IMGFILENAM");
+
+                  window.open(row.original.IMGFILENAME, "_blank");
                 }}
+                // onClick={() => {
+                //   setVisible(true);
+                //   console.log(row.original.IMGFILENAME, "image visible");
+                // }}
               >
                 <Viewer
                   visible={visible}
@@ -569,6 +575,7 @@ const MaterialTable = () => {
         setDiscountLabel={setDiscountLabel}
         freeQuantity={freeQuantity}
         setFreeQuantity={setFreeQuantity}
+        isVendorName={isVendorName}
       />
     </>
   );

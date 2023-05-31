@@ -3,13 +3,17 @@ import { Link, Outlet } from "react-router-dom";
 import Banners from "./Banners";
 import Button from "react-bootstrap/Button";
 
-import './Navbar.css';
+import "./Navbar.css";
 
-export default function Navbar({ setIsAuthenticated }) {
+export default function Navbar({ setIsAuthenticated, isVendorName }) {
+  
 
   function logout() {
-  setIsAuthenticated(false);
+    setIsAuthenticated(false);
   }
+
+  console.log(isVendorName, "isVendorName in nav");
+
 
   return (
     <>
@@ -29,31 +33,38 @@ export default function Navbar({ setIsAuthenticated }) {
               <li className="nav-link-txt">
                 <Link to="/app/orders">Παραγγελίες</Link>
               </li>
-              <li className="nav-link-txt">
-                <Link to="/app/invoices">Τιμολόγια</Link>
-              </li>
-              <li className="nav-link-txt">
-                <Link to="/app/customer-statements">Κατάσταση λογαριασμού</Link>
-              </li>
+              {isVendorName =='' && (
+                <>
+                  <li className="nav-link-txt">
+                    <Link to="/app/invoices">Τιμολόγια</Link>
+                  </li>
+                  <li className="nav-link-txt">
+                    <Link to="/app/customer-statements">
+                      Κατάσταση λογαριασμού
+                    </Link>
+                  </li>
+                  <li className="nav-link-txt">
+                    <Link to="/app/vendors">Αντιπρόσωποι</Link>
+                  </li>
+                  <li className="nav-link-txt">
+                    <Link to="/app/return-policy">Πολιτική επιστροφών</Link>
+                  </li>
+                  {/* <li className="nav-link-txt">
+                    <Link to="/app/profile">Το προφίλ μου</Link>
+                  </li> */}
+                </>
+              )}
               <li className="nav-link-txt">
                 <Link to="/app/backorders">Backorders</Link>
               </li>
-              <li className="nav-link-txt">
-                <Link to="/app/vendors">Αντιπρόσωποι</Link>
-              </li>
-              <li className="nav-link-txt">
-                <Link to="/app/return-policy">Πολιτική επιστροφών</Link>
-              </li>
-              <li className="nav-link-txt">
-                <Link to="/app/profile">Το προφίλ μου</Link>
-              </li>
+
               <li className="nav-link-txt">
                 <Link to="/app/contact">Επικοινωνία</Link>
               </li>
               <li className="nav-link-txt">
                 <Button
                   variant="danger border-0"
-                  style={{ color: "red", bottom: "5px", position:"relative" }}
+                  style={{ color: "red", bottom: "5px", position: "relative" }}
                   onClick={logout}
                 >
                   Aποσύνδεση

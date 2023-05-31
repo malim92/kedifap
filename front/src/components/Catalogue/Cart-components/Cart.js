@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 
 import "./Cart.css";
 import { FaCartArrowDown } from "react-icons/fa";
@@ -27,6 +31,7 @@ const Cart = (props) => {
     setDiscountLabel,
     freeQuantity,
     setFreeQuantity,
+    isVendorName,
   } = props;
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
@@ -142,11 +147,21 @@ const Cart = (props) => {
     setCartTemplate(cartItems);
   };
 
-  console.log(freeQuantity, "freeQuantity in ali");
   let totalFreeQuantities = 0;
   for (const value of Object.values(freeQuantity)) {
     totalFreeQuantities += value;
   }
+
+  const [orderButtonStatus, setOrderButtonStatus] = useState("");
+
+  const handleOrderButton = (event) => {
+    console.log(event.target.value, "handleOrderButton");
+    if (event.target.value =='') 
+      setOrderButtonStatus("disabled")
+
+  }
+  console.log(orderButtonStatus, "orderButtonStatus");
+
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
@@ -232,12 +247,39 @@ const Cart = (props) => {
               (total, value) => total + parseInt(value),
               0
             )}
-            {totalFreeQuantities > 0 && <span>+ {totalFreeQuantities} Free items</span>}
+            {totalFreeQuantities > 0 && (
+              <span>+ {totalFreeQuantities} Free items</span>
+            )}
           </div>
 
           <div className="total-container">
             <p className="total-text">Total: {total.toFixed(2)}</p>
           </div>
+
+            {isVendorName !=='' && (
+            <FormControl sx={{ marginTop: 1, marginBottom: 1, minWidth: 150 }}>
+              <InputLabel id="demo-simple-select-autowidth-label">
+              Pharmacy
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-autowidth-label"
+                id="demo-simple-select-autowidth"
+                autoWidth
+                label="Pharmacy"
+                onChange={handleOrderButton}
+              >
+                <MenuItem value="">
+                </MenuItem>
+                <em style={{height:"40px"}}></em>
+                <MenuItem value={'C1298'}>YIAN.NI HEALTH PLUS PHARMACY LTD</MenuItem>
+                <MenuItem value={'C1298'}>A. A HEALTH CORNER PHARMACY LTD.</MenuItem>
+                <MenuItem value={22}>CONSTANTOPOULOS COSTAS PHARMAKIA LTD</MenuItem>
+                <MenuItem value={23}>A.N. 24EVEXIA CARE  LTD</MenuItem>
+                <MenuItem value={24}>FARMAKEIO ZENON & GEORGIA ZENONOS LTD</MenuItem>
+                <MenuItem value={25}>FARMAKIO IRAKLIS CHRISTOFOROU LTD</MenuItem>
+              </Select>
+            </FormControl>
+            )}
 
           <div class="d-flex justify-content-between">
             <button
@@ -249,18 +291,19 @@ const Cart = (props) => {
             <button
               onClick={() => sendOrder(cartItems, total)}
               class="btn btn-primary"
+              
             >
               Send order
             </button>
           </div>
-          <div class="cart-template">
+          {/* <div class="cart-template">
             <button
               onClick={() => saveCart(cartItems)}
               class="btn btn-secondary"
             >
               Save Cart
             </button>
-          </div>
+          </div> */}
         </div>
       )}
     </div>
