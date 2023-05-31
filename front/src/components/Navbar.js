@@ -14,7 +14,7 @@ export default function Navbar({ setIsAuthenticated }) {
   return (
     <>
       <nav className="py-5 bg-gray-200">
-        <div className="w-4/5 flex items-center justify-start mx-auto gap-x-12">
+        <div className="w-4/5 flex items-center justify-start mx-auto gap-x-11">
           <div className="basis-2/14">
             <img className="w-full" src={logo} alt="" />
           </div>

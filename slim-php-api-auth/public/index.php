@@ -166,6 +166,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     $sorting = $request->getQueryParams('sorting')['sorting'];
     $columnFilter = $request->getQueryParams('filters')['filters'];
     $customColumnFilter = $request->getQueryParams('customFilters')['customFilters'];
+    $discountedFilter = $request->getQueryParams('discountFilter')['discountFilter'];
     $globalFilter = $request->getQueryParams('globalFilter')['globalFilter'];
     $page *= 100;
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
@@ -202,7 +203,14 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         $customFilterQuery = "WHERE $columnId LIKE :customFilterValue";
     }
 
-    $sql = "SELECT * FROM parts $filterQuery $customFilterQuery $sortingQuery LIMIT :size OFFSET :page";
+    if (!empty(json_decode($discountedFilter))) {
+        $$discountedFilterArray = json_decode($discountedFilter);
+        $columnId = $discountedFilterArray[0]->id;
+        $discountedFilterValue = $discountedFilterArray[0]->value;
+        $discountedFilterQuery = " AND $columnId LIKE :discountedFilterValue";
+    }
+
+    $sql = "SELECT * FROM parts $filterQuery $customFilterQuery $discountedFilterQuery $sortingQuery LIMIT :size OFFSET :page";
 
     if ($globalFilter !== '' && $globalFilter !== null) {
         $sql = "SELECT * FROM parts WHERE PARTNAME OR PARTDES LIKE :globalFilter " . $sortingQuery;
@@ -228,6 +236,9 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         }
         if (!empty(json_decode($customColumnFilter)) && !empty($customColumnFilter)) {
             $stmt->bindValue(':customFilterValue', '%' . $custonFilterValue . '%', PDO::PARAM_STR);
+        }
+        if (!empty(json_decode($discountedFilter))) {
+            $stmt->bindValue(':discountedFilterValue', '%' . $discountedFilterValue . '%', PDO::PARAM_STR);
         }
 
         //user search
@@ -452,5 +463,24 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
 
     return $response;
 });
+
+// $app->get('/discount', function (Request $request, Response $response, array $args) {
+
+//     $sql = "SELECT * FROM discount";
+
+//     try {
+//         // Get DB Object
+//         $db = new db();
+//         // Connect
+//         $db = $db->connect();
+
+//         $stmt = $db->prepare($sql);
+//         $stmt->execute();
+//         $discounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+//         return $response->withStatus(200)->withJson($discounts);
+//     } catch (PDOException $e) {
+//         echo '{"error": {"text": ' . $e->getMessage() . '}';
+//     }
+// });
 
 $app->run();

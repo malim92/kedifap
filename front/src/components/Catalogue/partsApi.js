@@ -14,7 +14,8 @@ export const FetchPartsData = async (
   setIsError,
   barcodeValue,
   supValue,
-  activeIngValue
+  activeIngValue,
+  discountedProducts
 ) => {
   try {
     //const url = new URL("/parts/", "http://localhost:8000");
@@ -40,10 +41,20 @@ export const FetchPartsData = async (
         JSON.stringify([{ id: "SPEC1", value: activeIngValue }])
       );
     } else url.searchParams.set("customFilters", "");
+
+    //show discounted
+    if (discountedProducts !== "" && discountedProducts !== undefined) {
+      url.searchParams.set(
+        "discountFilter",
+        JSON.stringify([{ id: "DISCOUNTED", value: discountedProducts }])
+      );
+    }
     ///parts/?page=0&size=20&filters=%5B%7B%22id%22%3A%22PARTNAME%22%2C%22value%22%3A%22sa%22%7D%5D&globalFilter=&sorting=%5B%5D
     console.log(url, "url");
     const response = await fetch(url.href);
+    console.log(response, "response here");
     const json = await response.json();
+    console.log(json, "json here");
 
     //replace supplier and importer code with name
     let supplierUpdatedArray = json.data.map((item) => {
@@ -62,7 +73,23 @@ export const FetchPartsData = async (
       }
       return item;
     });
+    //try {
+      //const url = new URL("/parts/", "http://localhost:8000");
+      // const discountUrl = new URL(
+      //   "/discount/",
+      //   `${process.env.REACT_APP_API_URL}`
+      // );
+      // console.log(discountUrl, "discountUrl");
 
+      // const discountResponse = await fetch(discountUrl.href);
+      // const discountJson = await discountResponse.json();
+      // console.log(discountJson, "discountJson");
+    //} 
+    // catch (error) {
+    //   setIsError(true);
+    //   console.error(error);
+    //   return;
+    // }
     let updatedArray = supplierUpdatedArray.map((item) => {
       const discountObjs = discountData.filter(
         (discountItem) => discountItem.DEXT_OFFERPARTNAME === item.PARTNAME

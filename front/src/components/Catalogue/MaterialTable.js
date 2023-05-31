@@ -8,13 +8,29 @@ import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown, FaImage } from "react-icons/fa";
 import { BiCartDownload } from "react-icons/bi";
 import Viewer from "react-viewer";
-
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import { COLUMNS } from "./columns-material";
 import { FetchPartsData } from "./partsApi";
 import DATA from "./data.json";
 import STOCK from "./stock.json";
 import Cart from "./Cart-components/Cart";
 import "./MaterialTable.css";
+
+import { red } from "@mui/material/colors";
+import { alpha, styled } from "@mui/material/styles";
+
+const MaterialUISwitch = styled(Switch)(({ theme }) => ({
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: red[900],
+    "&:hover": {
+      backgroundColor: alpha(red[900], theme.palette.action.hoverOpacity),
+    },
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: red[900],
+  },
+}));
 
 const MaterialTable = () => {
   //data and fetching state
@@ -43,6 +59,7 @@ const MaterialTable = () => {
   const [iconDisplay, setIconDisplay] = useState(["none"]);
 
   const [barcodeValue, setBarcodeValue] = useState("");
+  const [discountedProducts, setDiscountedProducts] = useState("");
   const [supValue, setSupValue] = useState("");
   const [activeIngValue, setActiveIngValue] = useState("");
   const [quantityInputValue, setQuantityInputValue] = useState({});
@@ -50,6 +67,10 @@ const MaterialTable = () => {
 
   const handleBarcodeChange = (event) => {
     setBarcodeValue(event.target.value);
+  };
+
+  const showDiscounted = (event) => {
+    setDiscountedProducts(event.target.checked);
   };
 
   const handleSupplierChange = (event) => {
@@ -75,7 +96,8 @@ const MaterialTable = () => {
         setIsError,
         barcodeValue,
         supValue,
-        activeIngValue
+        activeIngValue,
+        discountedProducts
       );
     }, 1000);
 
@@ -91,6 +113,7 @@ const MaterialTable = () => {
     barcodeValue,
     supValue,
     activeIngValue,
+    discountedProducts
   ]);
 
   useEffect(() => {
@@ -243,7 +266,8 @@ const MaterialTable = () => {
           if (applicableDiscount.FREEQTY > 0) {
             freeItems = {
               ...freeItems,
-              [singleCartItem.PARTNAME]: applicableDiscount.FREEQTY};
+              [singleCartItem.PARTNAME]: applicableDiscount.FREEQTY,
+            };
           } else {
             let addedDiscountedUnit =
               ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
@@ -263,7 +287,11 @@ const MaterialTable = () => {
     });
     console.log(discountLabel, "discountLabel in table 1x");
 
-    return { totalDiscount: totalDiscount, discountLabel: discountLabel, freeItems:freeItems };
+    return {
+      totalDiscount: totalDiscount,
+      discountLabel: discountLabel,
+      freeItems: freeItems,
+    };
   }
 
   let images = [
@@ -279,32 +307,41 @@ const MaterialTable = () => {
 
   return (
     <>
-      <div class="cart-template-row">
-        <h4>
-          Cart Templates
-          <BiCartDownload
-            style={{
-              color: "#1f79d5",
-              cursor: "pointer",
-              fontSize: "40px",
-              margin: "auto",
-            }}
-            onClick={() => {
-              console.log(JSON.stringify(cartTemplate), " cartTemplate here");
-              cartTemplatePopup(cartTemplate);
-            }}
-          ></BiCartDownload>
-        </h4>
-      </div>
       <div class="custom-filters">
-        <input
+        {/* <input
           type="text"
           id="filterInput"
           value={barcodeValue || ""}
           onChange={handleBarcodeChange}
           placeholder="Search for barcode..."
+        /> */}
+        {/* <div class="cart-template-row">
+          <h4>
+            Cart Templates
+            <BiCartDownload
+              style={{
+                color: "#1f79d5",
+                cursor: "pointer",
+                fontSize: "40px",
+                margin: "auto",
+              }}
+              onClick={() => {
+                console.log(JSON.stringify(cartTemplate), " cartTemplate here");
+                cartTemplatePopup(cartTemplate);
+              }}
+            ></BiCartDownload>
+          </h4>
+        </div> */}
+        <FormControlLabel
+          control={
+            <MaterialUISwitch
+              sx={{ m: 1 }}
+              defaultUnchecked
+              onChange={showDiscounted}
+            />
+          }
+          label="Discounted products"
         />
-
         <input
           type="text"
           id="filterInput"
