@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import axios from "axios";
+import moment from "moment";
 
 export const FetchStatementsData = async (
   sorting,
@@ -10,7 +11,6 @@ export const FetchStatementsData = async (
   setRowCount,
   setIsError
 ) => {
-  const userId = Cookies.get("userId");
 
   const url = new URL(`${process.env.REACT_APP_API_URL}/statements`);
   console.log(url, "url invoices");
@@ -19,8 +19,14 @@ export const FetchStatementsData = async (
     const response = await axios.get(url);
     console.log(response, "response invoices");
 
-    setData(response.data.value);
-    setRowCount(response.data.value.length);
+    const statementData = response.data.value.map((item) => ({
+      ...item,
+      TIMESTAMP: moment(item.TIMESTAMP).format(
+        "DD-MM-YYYY"
+      ),
+    }));
+    setData(statementData);
+    setRowCount(statementData.length);
   } catch (error) {
     console.error(error);
   }

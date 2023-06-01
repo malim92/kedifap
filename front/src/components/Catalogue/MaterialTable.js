@@ -7,12 +7,13 @@ import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown, FaImage } from "react-icons/fa";
 import { BiCartDownload } from "react-icons/bi";
-import Viewer from "react-viewer";
+import "lightbox.js-react/dist/index.css";
+import { SlideshowLightbox, initLightboxJS } from "lightbox.js-react";
+
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { COLUMNS } from "./columns-material";
 import { FetchPartsData } from "./partsApi";
-import DATA from "./data.json";
 import STOCK from "./stock.json";
 import Cart from "./Cart-components/Cart";
 import "./MaterialTable.css";
@@ -53,7 +54,6 @@ const MaterialTable = ({ isVendorName }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartTemplate, setCartTemplate] = useState([]);
 
-  const discountData = useMemo(() => DATA, []);
   const stockData = useMemo(() => STOCK, []);
 
   const [iconDisplay, setIconDisplay] = useState(["none"]);
@@ -88,7 +88,6 @@ const MaterialTable = ({ isVendorName }) => {
         globalFilter,
         columnFilters,
         pagination,
-        discountData,
         stockData,
         setIconDisplay,
         setData,
@@ -123,7 +122,6 @@ const MaterialTable = ({ isVendorName }) => {
       globalFilter,
       columnFilters,
       pagination,
-      discountData,
       stockData,
       setIconDisplay,
       setData,
@@ -176,6 +174,7 @@ const MaterialTable = ({ isVendorName }) => {
     }
   };
 
+  //custom state
   const [show, setShow] = useState(false);
   const [discountShow, setDiscountShow] = useState(false);
   const [cartTemplateShow, setCartTemplateShow] = useState(false);
@@ -186,6 +185,16 @@ const MaterialTable = ({ isVendorName }) => {
   const [activeIndex, setActiveIndex] = useState("0");
   const [discountLabel, setDiscountLabel] = useState({});
   const [freeQuantity, setFreeQuantity] = useState({});
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openLightbox = () => {
+    setIsOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setIsOpen(false);
+  };
 
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
@@ -489,30 +498,36 @@ const MaterialTable = ({ isVendorName }) => {
               }}
             ></Info>
             {row.original.IMGFILENAME !== null && (
-              <FaImage
-                style={{
-                  color: "#1f79d5",
-                  cursor: "pointer",
-                  fontSize: "35px",
-                }}
-                onClick={() => {
-                  console.log(row.original, "row.original.IMGFILENAM");
-
-                  window.open(row.original.IMGFILENAME, "_blank");
-                }}
-                // onClick={() => {
-                //   setVisible(true);
-                //   console.log(row.original.IMGFILENAME, "image visible");
-                // }}
-              >
-                <Viewer
-                  visible={visible}
-                  onClose={() => {
-                    setVisible(false);
+              <>
+                {/* <FaImage
+                  style={{
+                    color: "#1f79d5",
+                    cursor: "pointer",
+                    fontSize: "35px",
                   }}
-                  images={images}
-                />
-              </FaImage>
+                  onClick={openLightbox}
+                  // onClick={() => {
+                  //   console.log(row.original, "row.original.IMGFILENAM");
+
+                  //   window.open(row.original.IMGFILENAME, "_blank");
+                  // }}
+                  // onClick={() => {
+                  //   setVisible(true);
+                  //   console.log(row.original.IMGFILENAME, "image visible");
+                  // }}
+                >
+                  
+                </FaImage> */}
+                {/* {isOpen && ( */}
+                  <SlideshowLightbox className="container grid grid-cols-3 gap-2 mx-auto img-col" 
+                  >
+                    <img
+                      className="w-full rounded"
+                      src={encodeURI(row.original.IMGFILENAME)}
+                    />
+                  </SlideshowLightbox>
+                  {/* )} */}
+              </>
             )}
           </div>
         )}

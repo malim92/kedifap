@@ -21,8 +21,15 @@ export const FetchInvoiceData = async (
       const response = await axios.get(url);
     console.log(response, "response invoices");
 
-      setData(response.data.value);
-      setRowCount(response.data.value.length);
+    const InvoiceData = response.data.value.map((item) => ({
+      ...item,
+      IVDATE: moment(item.IVDATE).format(
+        "DD-MM-YYYY"
+      ),
+    }));
+
+      setData(InvoiceData);
+      setRowCount(InvoiceData.length);
     } catch (error) {
       console.error(error);
     }

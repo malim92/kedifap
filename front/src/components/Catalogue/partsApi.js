@@ -6,7 +6,6 @@ export const FetchPartsData = async (
   globalFilter,
   columnFilters,
   pagination,
-  discountData,
   stockData,
   setIconDisplay,
   setData,
@@ -56,21 +55,15 @@ export const FetchPartsData = async (
       );
     }
     //if discount switch is on
-    // if (discountedProducts !== "" && discountedProducts !== undefined) {
-    //   console.log("test1", discountedProducts);
-    //   url.searchParams.set(
-    //     "discountFilter",
-    //     JSON.stringify([{ id: "discountFilter", value: discountedProducts }])
-    //   );
-    // }
-    //show discounted
-    // if (discountedProducts !== "" && discountedProducts !== undefined) {
-    //   url.searchParams.set(
-    //     "discountFilter",
-    //     JSON.stringify([{ id: "DISCOUNTED", value: discountedProducts }])
-    //   );
-    // }
-    ///parts/?page=0&size=20&filters=%5B%7B%22id%22%3A%22PARTNAME%22%2C%22value%22%3A%22sa%22%7D%5D&globalFilter=&sorting=%5B%5D
+    if (discountedProducts !== "" && discountedProducts !== undefined && discountedProducts !== false ) {
+      console.log("test1", discountedProducts);
+      url.searchParams.set(
+        "discountFilter",
+        JSON.stringify([{ id: "discountFilter", value: discountedProducts }])
+      );
+    }
+    // show discounted
+    
     console.log(url, "url");
     const response = await fetch(url.href);
     const json = await response.json();
@@ -93,24 +86,25 @@ export const FetchPartsData = async (
       }
       return item;
     });
-    // try {
-    //   const url = new URL("/discount/", "http://localhost:8000");
-    //   const discountUrl = new URL(
-    //     "/discount/",
-    //     `${process.env.REACT_APP_API_URL}`
-    //   );
-    //   console.log(discountUrl, "discountUrl");
+    let discountJson;
+    try {
+      const url = new URL("/discount", `${process.env.REACT_APP_API_URL}`);
+      const discountUrl = new URL(
+        "/discount/",
+        `${process.env.REACT_APP_API_URL}`
+      );
+      console.log(discountUrl, "discountUrl");
 
-    //   const discountResponse = await fetch(discountUrl.href);
-    //   const discountJson = await discountResponse.json();
-    //   console.log(discountJson, "discountJson");
-    // } catch (error) {
-    //   setIsError(true);
-    //   console.error(error);
-    //   return;
-    // }
+      const discountResponse = await fetch(discountUrl.href);
+      discountJson = await discountResponse.json();
+      console.log(discountJson, "discountJson");
+    } catch (error) {
+      setIsError(true);
+      console.error(error);
+      return;
+    }
     let updatedArray = supplierUpdatedArray.map((item) => {
-      const discountObjs = discountData.filter(
+      const discountObjs = discountJson.filter(
         (discountItem) => discountItem.DEXT_OFFERPARTNAME === item.PARTNAME
       );
 
