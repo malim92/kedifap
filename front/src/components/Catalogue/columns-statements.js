@@ -14,6 +14,8 @@ export const STATEMENTS_COLUMNS = [
     {
         header: "Date",
         accessorKey: 'TIMESTAMP',
+        enableColumnFilter: false
+
     },
     // {
     //     header: "PDF",

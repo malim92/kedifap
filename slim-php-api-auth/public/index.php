@@ -414,6 +414,7 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
 
 
 $app->get('/invoices', function (Request $request, Response $response, array $args) {
+    $date = date('Y-m-d',strtotime(date("Y-m-d", strtotime("-30 day"))));
 
     $username = 'apiuser';
     $password = '1234';
@@ -427,7 +428,7 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
         'verify' => false
     ]);
 
-    $response = $client->get('/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq \'C1001\' and STATDES eq \'Final\'', []);
+    $response = $client->get('/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq \'C1001\' and STATDES eq \'Final\' and IVDATE ge ' .$date, []);
 
     $body = (string) $response->getBody();
     // return $data;
@@ -481,6 +482,7 @@ $app->get('/statements', function (Request $request, Response $response, array $
 });
 
 $app->get('/backorders', function (Request $request, Response $response, array $args) {
+    $date = date('Y-m-d',strtotime(date("Y-m-d", strtotime("-5 day"))));
 
     $username = 'apiuser';
     $password = '1234';
@@ -493,7 +495,7 @@ $app->get('/backorders', function (Request $request, Response $response, array $
         'verify' => false
     ]);
 
-    $sub_url = '/odata/Priority/tabula.ini/efk/B2B_BACKORDERS';
+    $sub_url = '/odata/Priority/tabula.ini/efk/B2B_BACKORDERS?$filter=CUSTNAME eq \'C1001\' and DEXT_SUBMISSIONDATE ge ' .$date;
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
 
@@ -539,6 +541,7 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
 });
 
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
+    $date = date('Y-m-d',strtotime(date("Y-m-d", strtotime("-5 day"))));
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
     $username = 'apiuser';
     $password = '1234';
@@ -550,7 +553,7 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
         ],
         'verify' => false
     ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\'';
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ge ' .$date ;
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
 
@@ -574,6 +577,25 @@ $app->get('/discount/', function (Request $request, Response $response, array $a
     } catch (PDOException $e) {
         echo '{"error": {"text": ' . $e->getMessage() . '}';
     }
+});
+
+$app->get('/pharmacies', function (Request $request, Response $response, array $args) {
+
+    $username = 'apiuser';
+    $password = '1234';
+    $client = new Client([
+        //'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'headers' => [
+            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+        ],
+        'verify' => false
+    ]);
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHCUSTONE?$filter=ACTIVEFLAG eq \'Y\'' ;
+    // print_r($sub_url);die;
+    $response = $client->get($sub_url);
+    // echo count($response['value']);die;
+    return $response;
 });
 
 $app->run();

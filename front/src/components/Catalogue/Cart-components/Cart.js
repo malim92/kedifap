@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-
+import TextField from '@mui/material/TextField';
+import Autocomplete from "@mui/material/Autocomplete";
+import { FetchPharmacies } from "./pharmaciesApi";
 import "./Cart.css";
-import { FaCartArrowDown } from "react-icons/fa";
 
 const Cart = (props) => {
   const {
@@ -156,12 +153,35 @@ const Cart = (props) => {
 
   const handleOrderButton = (event) => {
     console.log(event.target.value, "handleOrderButton");
-    if (event.target.value =='') 
-      setOrderButtonStatus("disabled")
-
-  }
+    if (event.target.value == "") setOrderButtonStatus("disabled");
+  };
   console.log(orderButtonStatus, "orderButtonStatus");
 
+  const [pharmacies, setPharmacies] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await FetchPharmacies();
+        setPharmacies(result);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  console.log(pharmacies, "pharmacies 3");
+  const top100Films = [
+    { label: 'The Shawshank Redemption', year: 1994 },
+    { label: 'The Godfather', year: 1972 },
+    { label: 'The Godfather: Part II', year: 1974 },
+    { label: 'The Dark Knight', year: 2008 },
+    { label: '12 Angry Men', year: 1957 },
+    { label: "Schindler's List", year: 1993 },
+    { label: 'Pulp Fiction', year: 1994 }
+  ]
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
@@ -256,30 +276,17 @@ const Cart = (props) => {
             <p className="total-text">Total: {total.toFixed(2)}</p>
           </div>
 
-            {isVendorName !=='' && (
-            <FormControl sx={{ marginTop: 1, marginBottom: 1, minWidth: 150 }}>
-              <InputLabel id="demo-simple-select-autowidth-label">
-              Pharmacy
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-autowidth-label"
-                id="demo-simple-select-autowidth"
-                autoWidth
-                label="Pharmacy"
-                onChange={handleOrderButton}
-              >
-                <MenuItem value="">
-                </MenuItem>
-                <em style={{height:"40px"}}></em>
-                <MenuItem value={'C1298'}>YIAN.NI HEALTH PLUS PHARMACY LTD</MenuItem>
-                <MenuItem value={'C1298'}>A. A HEALTH CORNER PHARMACY LTD.</MenuItem>
-                <MenuItem value={22}>CONSTANTOPOULOS COSTAS PHARMAKIA LTD</MenuItem>
-                <MenuItem value={23}>A.N. 24EVEXIA CARE  LTD</MenuItem>
-                <MenuItem value={24}>FARMAKEIO ZENON & GEORGIA ZENONOS LTD</MenuItem>
-                <MenuItem value={25}>FARMAKIO IRAKLIS CHRISTOFOROU LTD</MenuItem>
-              </Select>
-            </FormControl>
-            )}
+          {isVendorName !== "" && (
+            <Autocomplete
+            className="pharmacy-box"
+              disablePortal
+              id="combo-box-demo"
+              options={pharmacies}
+              getOptionLabel={(option) => option.Code}
+              sx={{ width: 300 }}
+              renderInput={(params) => <TextField {...params} label="Pharmacy" />}
+            />
+          )}
 
           <div class="d-flex justify-content-between">
             <button
@@ -291,7 +298,6 @@ const Cart = (props) => {
             <button
               onClick={() => sendOrder(cartItems, total)}
               class="btn btn-primary"
-              
             >
               Send order
             </button>

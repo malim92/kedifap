@@ -7,13 +7,17 @@ export const BACKORDERS_COLUMNS = [
     {
         header: "Submission Date",
         accessorKey: 'DEXT_SUBMISSIONDATE',
+        enableColumnFilter: false
     },
     {
         header: "Total Amount",
         accessorKey: 'TOTPRICE',
+        enableColumnFilter: false
     },
     {
         header: "Quantity",
         accessorKey: 'TOTQUANT',
+        enableColumnFilter: false
+
     },
 ];

@@ -23,7 +23,7 @@ class db
         $this->dbuser = $dotenv_vars['DB_USER'];
         $this->dbpass = $dotenv_vars['DB_PASS'];
         $this->dbname = $dotenv_vars['DB_NAME'];
-
+        
         $mysql_connect_str = "mysql:host=$this->dbhost;dbname=$this->dbname";
         $dbConnection = new PDO($mysql_connect_str, $this->dbuser, $this->dbpass);
         $dbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

@@ -519,14 +519,16 @@ const MaterialTable = ({ isVendorName }) => {
                   
                 </FaImage> */}
                 {/* {isOpen && ( */}
-                  <SlideshowLightbox className="container grid grid-cols-3 gap-2 mx-auto img-col" 
-                  >
+                <div class="thumbnail">
+                  <SlideshowLightbox >
                     <img
                       className="w-full rounded"
                       src={encodeURI(row.original.IMGFILENAME)}
+                      style={{ maxWidth: "100%", maxHeight: "100%"}}
                     />
                   </SlideshowLightbox>
-                  {/* )} */}
+                </div>
+                {/* )} */}
               </>
             )}
           </div>
