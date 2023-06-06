@@ -17,7 +17,6 @@ export const FetchPartsData = async (
   discountedProducts,
   isVendorName
 ) => {
-
   // if (isVendorName.startsWith('V')) userTest = isVendorName;
 
   try {
@@ -35,19 +34,21 @@ export const FetchPartsData = async (
         "customFilters",
         JSON.stringify([{ id: "BARCODE", value: barcodeValue }])
       );
-    } else if (supValue !== "" && supValue !== undefined) {
-      url.searchParams.set(
-        "customFilters",
-        JSON.stringify([{ id: "SUPNAME", value: supValue }])
-      );
-    } else if (activeIngValue !== "" && activeIngValue !== undefined) {
+    }
+    // else if (supValue !== "" && supValue !== undefined) {
+    //   url.searchParams.set(
+    //     "customFilters",
+    //     JSON.stringify([{ id: "SUPNAME", value: supValue }])
+    //   );
+    // }
+    else if (activeIngValue !== "" && activeIngValue !== undefined) {
       url.searchParams.set(
         "customFilters",
         JSON.stringify([{ id: "SPEC1", value: activeIngValue }])
       );
     } else url.searchParams.set("customFilters", "");
     //if user is a vendor
-    
+
     if (isVendorName) {
       url.searchParams.set(
         "isVendor",
@@ -55,7 +56,11 @@ export const FetchPartsData = async (
       );
     }
     //if discount switch is on
-    if (discountedProducts !== "" && discountedProducts !== undefined && discountedProducts !== false ) {
+    if (
+      discountedProducts !== "" &&
+      discountedProducts !== undefined &&
+      discountedProducts !== false
+    ) {
       console.log("test1", discountedProducts);
       url.searchParams.set(
         "discountFilter",
@@ -63,7 +68,7 @@ export const FetchPartsData = async (
       );
     }
     // show discounted
-    
+
     console.log(url, "url");
     const response = await fetch(url.href);
     const json = await response.json();
@@ -86,6 +91,14 @@ export const FetchPartsData = async (
       }
       return item;
     });
+
+    if (supValue !== "") {
+      supplierUpdatedArray = supplierUpdatedArray.filter(
+        (supplierNameInArray) =>
+          supplierNameInArray.SUPNAME.toLowerCase().includes(supValue)
+      );
+    }
+
     let discountJson;
     try {
       const url = new URL("/discount", `${process.env.REACT_APP_API_URL}`);
@@ -93,11 +106,9 @@ export const FetchPartsData = async (
         "/discount/",
         `${process.env.REACT_APP_API_URL}`
       );
-      console.log(discountUrl, "discountUrl");
 
       const discountResponse = await fetch(discountUrl.href);
       discountJson = await discountResponse.json();
-      console.log(discountJson, "discountJson");
     } catch (error) {
       setIsError(true);
       console.error(error);

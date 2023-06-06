@@ -156,21 +156,36 @@ const MaterialTable = ({ isVendorName }) => {
   ) => {
     let cartTotalPrice = total;
     const { PARTNAME, WSPLPRICE } = product.original;
-    product.original.quantity = 1;
+    console.log(product.original, "product.original 2");
+    //
     const found = cartItems.find((element) => element.PARTNAME == PARTNAME);
     if (found) {
       alert("Product is already in the cart!");
     } else {
-      cartTotalPrice += parseFloat(WSPLPRICE);
+      if (parseInt(product.original.DEXT_LOWSTOCKQTY) > 0) {
+        product.original.quantity = product.original.DEXT_LOWSTOCKQTY;
+        setQuantityInputValue({
+          ...quantityInputValue,
+          [PARTNAME]: product.original.DEXT_LOWSTOCKQTY,
+        });
+        setProductQuantity({
+          ...quantityInputValue,
+          [PARTNAME]: product.original.DEXT_LOWSTOCKQTY,
+        });
+      } else {
+        product.original.quantity = 1;
+        setQuantityInputValue({ ...quantityInputValue, [PARTNAME]: 1 });
+        setProductQuantity({
+          ...quantityInputValue,
+          [PARTNAME]: 1,
+        });
+      }
+
+      cartTotalPrice +=
+        parseFloat(WSPLPRICE) * parseInt(product.original.quantity);
       setTotal(cartTotalPrice);
       setCartItems([...cartItems, product.original]);
       setShowCart(true);
-      setQuantityInputValue({ ...quantityInputValue, [PARTNAME]: 1 });
-
-      setProductQuantity({
-        ...quantityInputValue,
-        [PARTNAME]: 1,
-      });
     }
   };
 
@@ -181,20 +196,8 @@ const MaterialTable = ({ isVendorName }) => {
   const [popupModalData, setPopupModalData] = useState({});
   const [cartPopupModalData, setCartPopupModalData] = useState({});
   const [popupModalDiscount, setPopupModalDiscount] = useState({});
-  const [visible, setVisible] = useState("false");
-  const [activeIndex, setActiveIndex] = useState("0");
   const [discountLabel, setDiscountLabel] = useState({});
   const [freeQuantity, setFreeQuantity] = useState({});
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const openLightbox = () => {
-    setIsOpen(true);
-  };
-
-  const closeLightbox = () => {
-    setIsOpen(false);
-  };
 
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
@@ -425,30 +428,33 @@ const MaterialTable = ({ isVendorName }) => {
         enableRowActions
         renderRowActions={({ row }) => (
           <div style={{ display: "flex", alignItems: "center" }}>
-            {row.original.hasOwnProperty("discounts") && (
-              <button
-                className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                onClick={() => {
-                  discountPopup(data, row.original);
-                }}
-                style={{
-                  backgroundColor: "#db2d2d",
-                  width: "30px",
-                  fontSize: "15px",
-                  height: "30px",
-                }}
-              >
-                <FaCartArrowDown
-                  style={{
-                    right: "8px",
-                    bottom: "8px",
-                    position: "relative",
+            {row.original.hasOwnProperty("discounts") &&
+              row.original.discounts.length > 0 && (
+                <button
+                  className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                  onClick={() => {
+                    discountPopup(data, row.original);
                   }}
-                />
-              </button>
-            )}
+                  style={{
+                    backgroundColor: "#db2d2d",
+                    width: "30px",
+                    fontSize: "15px",
+                    height: "30px",
+                  }}
+                >
+                  <FaCartArrowDown
+                    style={{
+                      right: "8px",
+                      bottom: "8px",
+                      position: "relative",
+                    }}
+                  />
+                </button>
+              )}
             {/* else */}
-            {!row.original.hasOwnProperty("discounts") && (
+            {/* if no discount exist */}
+            {(!row.original.hasOwnProperty("discounts") ||
+              row.original.discounts.length === 0) && (
               <button
                 className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                 onClick={() => {
@@ -520,11 +526,11 @@ const MaterialTable = ({ isVendorName }) => {
                 </FaImage> */}
                 {/* {isOpen && ( */}
                 <div class="thumbnail">
-                  <SlideshowLightbox >
+                  <SlideshowLightbox>
                     <img
                       className="w-full rounded"
                       src={encodeURI(row.original.IMGFILENAME)}
-                      style={{ maxWidth: "100%", maxHeight: "100%"}}
+                      style={{ maxWidth: "100%", maxHeight: "100%" }}
                     />
                   </SlideshowLightbox>
                 </div>

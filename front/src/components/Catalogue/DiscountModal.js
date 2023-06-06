@@ -175,7 +175,8 @@ function ProductDiscountModal(props) {
                     handleAddToCart(
                       productOriginal,
                       total,
-                      setQuantityInputValue
+                      setQuantityInputValue,
+                      setProductQuantity
                     );
                   }}
                   style={{

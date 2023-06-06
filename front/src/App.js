@@ -25,7 +25,7 @@ import ReturnPolicy from "./pages/ReturnPolicy";
 //import router from "./Routes/routes";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [isVendorName, setIsVendorName] = useState("");
 
   console.log(isAuthenticated, "isAuthenticated tesst");

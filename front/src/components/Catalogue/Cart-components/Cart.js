@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import TextField from '@mui/material/TextField';
+import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { FetchPharmacies } from "./pharmaciesApi";
+import moment from "moment";
 import "./Cart.css";
 
 const Cart = (props) => {
@@ -105,16 +106,17 @@ const Cart = (props) => {
     }));
 
     console.log(productsinOrder, "productsinOrder");
+    let today = moment().format();
 
     const orderObject = {
       CUSTNAME: userId,
       CDES: userDesc,
-      CURDATE: "2023-05-22T00:00:00+02:00",
+      CURDATE: today,
       DEXT_SUPPNAME: "V1239",
       DEXT_SUPPDES: "4MORE LTD 2",
       DCODE: null,
       DETAILS: "Test from API",
-      DEXT_SUBMISSIONDATE: "2023-04-26T14:30:00+02:00",
+      DEXT_SUBMISSIONDATE: today,
       PAYCODE: "20",
       DEXT_B2CONTACT: 9,
       B2B_ORDERITEMS_SUBFORM: productsinOrder,
@@ -149,13 +151,12 @@ const Cart = (props) => {
     totalFreeQuantities += value;
   }
 
-  const [orderButtonStatus, setOrderButtonStatus] = useState("");
+  const [orderButtonStatus, setOrderButtonStatus] = useState("enabled");
+  const [pharmacyValue, setPharmacyValue] = useState("");
 
   const handleOrderButton = (event) => {
     console.log(event.target.value, "handleOrderButton");
-    if (event.target.value == "") setOrderButtonStatus("disabled");
   };
-  console.log(orderButtonStatus, "orderButtonStatus");
 
   const [pharmacies, setPharmacies] = useState([]);
 
@@ -172,16 +173,6 @@ const Cart = (props) => {
     fetchData();
   }, []);
 
-  console.log(pharmacies, "pharmacies 3");
-  const top100Films = [
-    { label: 'The Shawshank Redemption', year: 1994 },
-    { label: 'The Godfather', year: 1972 },
-    { label: 'The Godfather: Part II', year: 1974 },
-    { label: 'The Dark Knight', year: 2008 },
-    { label: '12 Angry Men', year: 1957 },
-    { label: "Schindler's List", year: 1993 },
-    { label: 'Pulp Fiction', year: 1994 }
-  ]
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
@@ -230,7 +221,11 @@ const Cart = (props) => {
                   <input
                     type="number"
                     value={quantityInputValue[item.PARTNAME] || 1}
-                    min={1}
+                    min={
+                      parseInt(item.DEXT_LOWSTOCKQTY) > 0
+                        ? item.DEXT_LOWSTOCKQTY
+                        : 1
+                    }
                     max={item.stock}
                     onChange={(e) =>
                       handleQuantityChange(
@@ -278,13 +273,21 @@ const Cart = (props) => {
 
           {isVendorName !== "" && (
             <Autocomplete
-            className="pharmacy-box"
+              className="pharmacy-box"
               disablePortal
               id="combo-box-demo"
               options={pharmacies}
-              getOptionLabel={(option) => option.Code}
+              // getOptionLabel={(option) => option.Code}
               sx={{ width: 300 }}
-              renderInput={(params) => <TextField {...params} label="Pharmacy" />}
+              renderInput={(params) => (
+                <TextField {...params} label="Pharmacy" />
+              )}
+              onChange={(event, newValue) => {
+                setPharmacyValue(newValue);
+                console.log(newValue, "newValue 1");
+                if (!newValue) setOrderButtonStatus("disabled");
+                else setOrderButtonStatus("enabled");
+              }}
             />
           )}
 
@@ -297,7 +300,8 @@ const Cart = (props) => {
             </button>
             <button
               onClick={() => sendOrder(cartItems, total)}
-              class="btn btn-primary"
+              class="btn btn-primary "
+              disabled={orderButtonStatus === "disabled"}
             >
               Send order
             </button>

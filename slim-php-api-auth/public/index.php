@@ -248,6 +248,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     if ($filterQuery == '' && $customFilterQuery !== '') {
         $and = '';
         $and2 = ' AND ';
+        if ($isVendorQuery == '') $and2 = '';
     }
     if ($filterQuery !== '' && $customFilterQuery == '') {
         if ($isVendorQuery !== '') {
