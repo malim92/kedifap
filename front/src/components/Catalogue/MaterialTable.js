@@ -6,7 +6,6 @@ import PopupModal from "./Modal";
 import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown, FaImage } from "react-icons/fa";
-import { BiCartDownload } from "react-icons/bi";
 import "lightbox.js-react/dist/index.css";
 import { SlideshowLightbox, initLightboxJS } from "lightbox.js-react";
 
@@ -18,7 +17,7 @@ import STOCK from "./stock.json";
 import Cart from "./Cart-components/Cart";
 import "./MaterialTable.css";
 
-import { red } from "@mui/material/colors";
+import { pink, red } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
 
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
@@ -26,6 +25,17 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
     color: red[900],
     "&:hover": {
       backgroundColor: alpha(red[900], theme.palette.action.hoverOpacity),
+    },
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: red[900],
+  },
+}));
+const MaterialUISwitchQuota = styled(Switch)(({ theme }) => ({
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: pink['A200'],
+    "&:hover": {
+      backgroundColor: alpha(pink['A200'], theme.palette.action.hoverOpacity),
     },
   },
   "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
@@ -60,6 +70,7 @@ const MaterialTable = ({ isVendorName }) => {
 
   const [barcodeValue, setBarcodeValue] = useState("");
   const [discountedProducts, setDiscountedProducts] = useState("");
+  const [quotaProducts, setQuotaProducts] = useState("");
   const [supValue, setSupValue] = useState("");
   const [activeIngValue, setActiveIngValue] = useState("");
   const [quantityInputValue, setQuantityInputValue] = useState({});
@@ -71,6 +82,10 @@ const MaterialTable = ({ isVendorName }) => {
 
   const showDiscounted = (event) => {
     setDiscountedProducts(event.target.checked);
+  };
+
+  const showQuota = (event) => {
+    setQuotaProducts(event.target.checked);
   };
 
   const handleSupplierChange = (event) => {
@@ -97,6 +112,7 @@ const MaterialTable = ({ isVendorName }) => {
         supValue,
         activeIngValue,
         discountedProducts,
+        quotaProducts,
         isVendorName
       );
     }, 1000);
@@ -114,6 +130,7 @@ const MaterialTable = ({ isVendorName }) => {
     supValue,
     activeIngValue,
     discountedProducts,
+    quotaProducts
   ]);
 
   useEffect(() => {
@@ -131,6 +148,7 @@ const MaterialTable = ({ isVendorName }) => {
       supValue,
       activeIngValue,
       discountedProducts,
+      quotaProducts,
       isVendorName
     );
   }, [
@@ -360,12 +378,22 @@ const MaterialTable = ({ isVendorName }) => {
           }
           label="Discounted products"
         />
+        <FormControlLabel
+          control={
+            <MaterialUISwitchQuota
+              sx={{ m: 1 }}
+              defaultUnchecked
+              onChange={showQuota}
+            />
+          }
+          label="Products with quota"
+        />
         <input
           type="text"
           id="filterInput"
           value={supValue || ""}
           onChange={handleSupplierChange}
-          placeholder="Search by supplier code..."
+          placeholder="Search by importer name..."
         />
         <input
           type="text"

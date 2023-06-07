@@ -15,6 +15,7 @@ export const FetchPartsData = async (
   supValue,
   activeIngValue,
   discountedProducts,
+  quotaProducts,
   isVendorName
 ) => {
   // if (isVendorName.startsWith('V')) userTest = isVendorName;
@@ -35,12 +36,12 @@ export const FetchPartsData = async (
         JSON.stringify([{ id: "BARCODE", value: barcodeValue }])
       );
     }
-    // else if (supValue !== "" && supValue !== undefined) {
-    //   url.searchParams.set(
-    //     "customFilters",
-    //     JSON.stringify([{ id: "SUPNAME", value: supValue }])
-    //   );
-    // }
+    else if (supValue !== "" && supValue !== undefined) {
+      url.searchParams.set(
+        "customFilters",
+        JSON.stringify([{ id: "vendors.SUPDES", value: supValue }])
+      );
+    }
     else if (activeIngValue !== "" && activeIngValue !== undefined) {
       url.searchParams.set(
         "customFilters",
@@ -61,13 +62,22 @@ export const FetchPartsData = async (
       discountedProducts !== undefined &&
       discountedProducts !== false
     ) {
-      console.log("test1", discountedProducts);
       url.searchParams.set(
         "discountFilter",
         JSON.stringify([{ id: "discountFilter", value: discountedProducts }])
       );
     }
-    // show discounted
+    //if quota switch is on
+    if (
+      quotaProducts !== "" &&
+      quotaProducts !== undefined &&
+      quotaProducts !== false
+    ) {
+      url.searchParams.set(
+        "quotaFilter",
+        JSON.stringify([{ id: "quotaFilter", value: quotaProducts }])
+      );
+    }
 
     console.log(url, "url");
     const response = await fetch(url.href);
@@ -82,7 +92,9 @@ export const FetchPartsData = async (
       const distributerName = VENDORS.value.find(
         (dName) => dName.SUPNAME === item.DEXT_IMPORTERNAME
       );
-      if (distributerName || supplierName) {
+      if (distributerName !== null || supplierName !== null) {
+        console.log(distributerName, "distributerName test 1");
+
         return {
           ...item,
           SUPNAME: supplierName.SUPDES,
@@ -92,12 +104,14 @@ export const FetchPartsData = async (
       return item;
     });
 
-    if (supValue !== "") {
-      supplierUpdatedArray = supplierUpdatedArray.filter(
-        (supplierNameInArray) =>
-          supplierNameInArray.SUPNAME.toLowerCase().includes(supValue)
-      );
-    }
+    // if (supValue !== "") {
+    // console.log(supValue, "supValue");
+    //   supValue = supValue.toLowerCase();
+    //   supplierUpdatedArray = supplierUpdatedArray.filter(
+    //     (supplierNameInArray) =>
+    //       supplierNameInArray.DEXT_IMPORTERNAME.toLowerCase().includes(supValue)
+    //   );
+    // }
 
     let discountJson;
     try {
@@ -121,23 +135,22 @@ export const FetchPartsData = async (
 
       if (discountObjs.length > 0) {
         setIconDisplay("inline-block");
-        return {
-          ...item,
-          discounts: discountObjs
-            .map((discountObj) => {
-              if (discountObj.OFFERDES.startsWith("SO")) {
-                return {
-                  DISCOUNT: discountObj.DISCOUNT,
-                  OFFERQTY: discountObj.OFFERQTY,
-                  OFFERNUM: discountObj.OFFERNUM,
-                  OFFERDES: discountObj.OFFERDES,
-                  FREEQTY: discountObj.FREEQTY,
-                };
-              }
-              return null;
-            })
-            .filter((discount) => discount !== null),
-        };
+        const filteredDiscounts = discountObjs
+          .filter((discountObj) => discountObj.OFFERDES.startsWith("SO"))
+          .map((discountObj) => ({
+            DISCOUNT: discountObj.DISCOUNT,
+            OFFERQTY: discountObj.OFFERQTY,
+            OFFERNUM: discountObj.OFFERNUM,
+            OFFERDES: discountObj.OFFERDES,
+            FREEQTY: discountObj.FREEQTY,
+          }));
+          
+        if (filteredDiscounts.length > 0) {
+          return {
+            ...item,
+            discounts: filteredDiscounts,
+          };
+        }
       }
       return item;
     });
@@ -213,7 +226,7 @@ export const FetchPartsData = async (
       return item;
     });
 
-    console.log(returnPolicyArray, "result");
+    console.log(returnPolicyArray, "result 2");
     //console.log(stockData, "stockData");
 
     // const stockUrl = new URL( "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_PARTBAL?$filter=PARTNAME%20eq%20%27LP01059%27");

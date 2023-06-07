@@ -177,12 +177,16 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     $customColumnFilter = $request->getQueryParams('customFilters')['customFilters'];
     $isVendor = '';
     $discountedFilter = '';
+    $quotaFilter = '';
 
     if (isset($request->getQueryParams('isVendor')['isVendor']))
         $isVendor = $request->getQueryParams('isVendor')['isVendor'];
 
     if (isset($request->getQueryParams('discountFilter')['discountFilter']))
         $discountedFilter = $request->getQueryParams('discountFilter')['discountFilter'];
+
+    if (isset($request->getQueryParams('quotaFilter')['quotaFilter']))
+        $quotaFilter = $request->getQueryParams('quotaFilter')['quotaFilter'];
 
     $globalFilter = $request->getQueryParams('globalFilter')['globalFilter'];
     $page *= 100;
@@ -193,11 +197,13 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     $sortingQuery = '';
     $filterQuery = '';
     $customFilterQuery = '';
-    $discountedFilterQuery = '';
+    $quotaFilterQuery = '';
     $isVendorQuery = '';
     $globalFilterDiscount = '';
     $and = '';
     $where = '';
+    $where2 = '';
+    $vendorSubQuery = '';
 
 
     if (!empty(json_decode($sorting))) {
@@ -217,15 +223,20 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         $where = ' WHERE ';
         $filterQuery = "$columnId LIKE :filterValue";
         $and = ' AND ';
-        // print_r($columnId);
+        // print_r($columnId);die;
     }
     if (!empty(json_decode($customColumnFilter)) && !empty($customColumnFilter)) {
         $customColumnFilterArray = json_decode($customColumnFilter);
         $columnId = $customColumnFilterArray[0]->id;
         $custonFilterValue = $customColumnFilterArray[0]->value;
-        $where = ' WHERE ';
-        $customFilterQuery = "$columnId LIKE :customFilterValue";
+        // var_dump($custonFilterValue);die;
         $and = ' AND ';
+        $where = ' WHERE ';
+        if ($columnId == 'vendors.SUPDES') {
+            $vendorSubQuery = ' INNER JOIN vendors on vendors.SUPNAME = parts.DEXT_IMPORTERNAME WHERE vendors.SUPDES LIKE :customFilterValue';
+            $where = ' ';
+        } else
+            $customFilterQuery = " $columnId LIKE :customFilterValue";
     }
 
     if (!empty(json_decode($isVendor)) && !empty($isVendor)) {
@@ -233,10 +244,11 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         $isVendorValue = $isVendorArray[0]->value;
         // print_r($isVendorValue) ; die;
         $where = ' WHERE ';
-        $isVendorQuery = "SUPNAME LIKE :isVendor";
+        $isVendorQuery = "parts.SUPNAME LIKE :isVendor";
     }
 
     $and2 = '';
+    $and3 = '';
     // if ($customFilterQuery !== '') $and2 = ' AND ';
     // else $and = '';
     // if ($filterQuery == '') $and = '';
@@ -264,35 +276,67 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
             $and2 = ' AND ';
         } else $and2 = '';
     }
+    if ($filterQuery !== '' && $vendorSubQuery !== '') {
+        $where = ' AND ';
+    }
+
+    if (!empty(json_decode($quotaFilter)) && !empty($quotaFilter)) {
+        if ($isVendorQuery == '' && $customFilterQuery == '' && $filterQuery == '') {
+            $where2 = ' WHERE ';
+            $and3 = '';
+        } else {
+            $where2 = '';
+            $and3 = ' AND ';
+        }
+        if ($vendorSubQuery !== '' && $filterQuery == '')
+            $where2 = ' AND ';
+        $quotaFilterQuery = ' DEXT_LOWSTOCKQTY > 0 ';
+    }
+    if ($isVendorQuery !== '' && $quotaFilterQuery !== '') {
+        if ($vendorSubQuery !== '')
+            $where = ' AND ';
+        else $where = ' WHERE ';
+        $where2 = '';
+    }
+    if ($isVendorQuery !== '' && $quotaFilterQuery == '' && $vendorSubQuery !== '')
+        $where = ' AND ';
 
     // $and = '' ? $filterQuery == '' :
-    $sql = "SELECT * FROM parts $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $sortingQuery LIMIT :size OFFSET :page";
-    $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery";
+    $sql = "SELECT * FROM parts $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery $sortingQuery LIMIT :size OFFSET :page";
+    $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery";
 
-    // echo $sql;die;
+    // echo $sql;
+    // die;
 
     if (!empty(json_decode($discountedFilter)) && !empty($discountedFilter)) {
-        $discountedFilterArray = json_decode($discountedFilter);
-        $discountedFilterValue = $discountedFilterArray[0]->value;
         $and2 = '';
         if ($customFilterQuery !== '') $and2 = ' AND ';
-        $sql = "SELECT * FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $sortingQuery LIMIT :size OFFSET :page";
-        $globalFilterDiscount = " INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME ";
-        $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery";
-        // var_dump($sql);die;
 
+        $sql = "SELECT * FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery $sortingQuery LIMIT :size OFFSET :page";
+
+        $globalFilterDiscount = " INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME ";
+
+        $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery";
+        // var_dump($vendorSubQuery);die;
     }
+
     //global search
     if ($globalFilter !== '' && $globalFilter !== null) {
         if ($isVendorQuery !== '') $and = ' AND ';
         else $and = '';
         if ($filterQuery !== '') $and2 = ' AND ';
         else $and2 = '';
-        $sql = "SELECT * FROM parts $globalFilterDiscount WHERE PARTNAME OR PARTDES LIKE :globalFilter $and $isVendorQuery $and2 $filterQuery $sortingQuery";
-        $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts $globalFilterDiscount WHERE PARTNAME OR PARTDES LIKE :globalFilter $and $isVendorQuery $and2 $filterQuery";
+        $and3 = '';
+        if ($quotaFilterQuery !== '') $and3 = ' AND ';
+
+        $sql = "SELECT * FROM parts $globalFilterDiscount WHERE PARTNAME OR PARTDES LIKE :globalFilter $and $isVendorQuery $and2 $filterQuery $and3 $quotaFilterQuery $sortingQuery";
+
+        $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts $globalFilterDiscount WHERE PARTNAME OR PARTDES LIKE :globalFilter $and $isVendorQuery $and2 $filterQuery $and3 $quotaFilterQuery";
+        // var_dump($isVendorQuery);die;
     }
 
     try {
+        // var_dump($sql);die;
         // Get DB Object
         $db = new db();
         // Connect
@@ -327,7 +371,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         if ($globalFilter !== '' && $globalFilter !== null) {
             $stmt->bindValue(':globalFilter', '%' . $globalFilter . '%', PDO::PARAM_STR);
             $countStmt->bindValue(':globalFilter', '%' . $globalFilter . '%', PDO::PARAM_STR);
-            if (isset($filterValue) ) {
+            if (isset($filterValue)) {
                 $stmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
                 $countStmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
             }
@@ -337,7 +381,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
             // print_r($size);die;
         }
         // print_r($globalFilter);die;
-        // $countStmt->debugDumpParams();
+        // $stmt->debugDumpParams();
         // die;
         // $stmt->execute();
         $stmt->execute();
@@ -415,7 +459,7 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
 
 
 $app->get('/invoices', function (Request $request, Response $response, array $args) {
-    $date = date('Y-m-d',strtotime(date("Y-m-d", strtotime("-30 day"))));
+    $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-30 day"))));
 
     $username = 'apiuser';
     $password = '1234';
@@ -429,7 +473,7 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
         'verify' => false
     ]);
 
-    $response = $client->get('/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq \'C1001\' and STATDES eq \'Final\' and IVDATE ge ' .$date, []);
+    $response = $client->get('/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq \'C1001\' and STATDES eq \'Final\' and IVDATE ge ' . $date, []);
 
     $body = (string) $response->getBody();
     // return $data;
@@ -483,7 +527,7 @@ $app->get('/statements', function (Request $request, Response $response, array $
 });
 
 $app->get('/backorders', function (Request $request, Response $response, array $args) {
-    $date = date('Y-m-d',strtotime(date("Y-m-d", strtotime("-5 day"))));
+    $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
 
     $username = 'apiuser';
     $password = '1234';
@@ -496,7 +540,7 @@ $app->get('/backorders', function (Request $request, Response $response, array $
         'verify' => false
     ]);
 
-    $sub_url = '/odata/Priority/tabula.ini/efk/B2B_BACKORDERS?$filter=CUSTNAME eq \'C1001\' and DEXT_SUBMISSIONDATE ge ' .$date;
+    $sub_url = '/odata/Priority/tabula.ini/efk/B2B_BACKORDERS?$filter=CUSTNAME eq \'C1001\' and DEXT_SUBMISSIONDATE ge ' . $date;
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
 
@@ -542,7 +586,7 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
 });
 
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
-    $date = date('Y-m-d',strtotime(date("Y-m-d", strtotime("-5 day"))));
+    $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
     $username = 'apiuser';
     $password = '1234';
@@ -554,7 +598,7 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
         ],
         'verify' => false
     ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ge ' .$date ;
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ge ' . $date;
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
 
@@ -592,7 +636,7 @@ $app->get('/pharmacies', function (Request $request, Response $response, array $
         ],
         'verify' => false
     ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHCUSTONE?$filter=ACTIVEFLAG eq \'Y\'' ;
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHCUSTONE?$filter=ACTIVEFLAG eq \'Y\'';
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
     // echo count($response['value']);die;
