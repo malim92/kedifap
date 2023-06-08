@@ -34,7 +34,7 @@ const Cart = (props) => {
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
-
+    console.log(event, "event quan");
     const productId = item.PARTNAME;
 
     setQuantityInputValue({

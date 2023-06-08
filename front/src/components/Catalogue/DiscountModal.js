@@ -33,48 +33,64 @@ const getDiscount = async (
     alert("Product is already in the cart!");
   } else {
     product.quantity = discountSelection.OFFERQTY;
-    // console.log(cartItems, "cartItems in disc ");
+    console.log(discountSelection, "discountSelection  ");
     setCartItems([...cartItems, product]);
     cartItems.push(product);
     const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
-    const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
-    console.log(
-      cartDiscountTotalInDiscount,
-      "cartDiscountTotalInDiscount in discount"
-    );
+    // price discount
+    if (discountSelection.DEXT_OFFERCODE == "2") {
+      const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
+      console.log(
+        cartDiscountTotalInDiscount,
+        "cartDiscountTotalInDiscount in discount"
+      );
 
-    cartDiscountTotalInDiscount.freeItems[product.PARTNAME] > 0
-      ? setFreeQuantity({
-        ...freeQuantity,
-        [product.PARTNAME]:
-        cartDiscountTotalInDiscount.freeItems[product.PARTNAME],
-      }) : setFreeQuantity({
-        ...freeQuantity,
-        [product.PARTNAME]:
-        0,
+      setTotal(
+        cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
+      );
+
+      setQuantityInputValue({
+        ...quantityInputValue,
+        [product.PARTNAME]: parseInt(product.quantity),
       });
 
-    console.log(freeQuantity, "freeQuantity 2x");
+      setProductQuantity({
+        ...productQuantity,
+        [product.PARTNAME]: product.quantity,
+      });
 
-    setTotal(
-      cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
-    );
+      setDiscountLabel({
+        ...discountLabel,
+        [product.PARTNAME]:
+          cartDiscountTotalInDiscount.discountLabel[product.PARTNAME],
+      });
+      //free quantity items
+    } else if (discountSelection.DEXT_OFFERCODE == "1") {
+      setTotal(cartFlatTotalInDiscount);
 
-    setQuantityInputValue({
-      ...quantityInputValue,
-      [product.PARTNAME]: parseInt(product.quantity),
-    });
+      setQuantityInputValue({
+        ...quantityInputValue,
+        [product.PARTNAME]: parseInt(product.quantity),
+      });
 
-    setProductQuantity({
-      ...productQuantity,
-      [product.PARTNAME]: product.quantity,
-    });
+      setProductQuantity({
+        ...productQuantity,
+        [product.PARTNAME]: product.quantity,
+      });
 
-    setDiscountLabel({
-      ...discountLabel,
-      [product.PARTNAME]:
-        cartDiscountTotalInDiscount.discountLabel[product.PARTNAME],
-    });
+      setFreeQuantity({
+        ...freeQuantity,
+        [product.PARTNAME]: parseInt(discountSelection.FREEQTY),
+      });
+
+      setDiscountLabel({
+        ...discountLabel,
+        [product.PARTNAME]: discountSelection.OFFERDES,
+      });
+    }
+    if (discountSelection.DEXT_OFFERCODE == "4") {
+
+    }
   }
 };
 

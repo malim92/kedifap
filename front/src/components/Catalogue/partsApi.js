@@ -35,14 +35,12 @@ export const FetchPartsData = async (
         "customFilters",
         JSON.stringify([{ id: "BARCODE", value: barcodeValue }])
       );
-    }
-    else if (supValue !== "" && supValue !== undefined) {
+    } else if (supValue !== "" && supValue !== undefined) {
       url.searchParams.set(
         "customFilters",
         JSON.stringify([{ id: "vendors.SUPDES", value: supValue }])
       );
-    }
-    else if (activeIngValue !== "" && activeIngValue !== undefined) {
+    } else if (activeIngValue !== "" && activeIngValue !== undefined) {
       url.searchParams.set(
         "customFilters",
         JSON.stringify([{ id: "SPEC1", value: activeIngValue }])
@@ -82,19 +80,17 @@ export const FetchPartsData = async (
     console.log(url, "url");
     const response = await fetch(url.href);
     const json = await response.json();
-    console.log(response, "response test");
+    // console.log(response, "response test");
 
     //replace supplier and importer code with name
     let supplierUpdatedArray = json.data.map((item) => {
-      const supplierName = VENDORS.value.find(
+      let supplierName = VENDORS.value.find(
         (vName) => vName.SUPNAME === item.SUPNAME
       );
-      const distributerName = VENDORS.value.find(
+      let distributerName = VENDORS.value.find(
         (dName) => dName.SUPNAME === item.DEXT_IMPORTERNAME
       );
-      if (distributerName !== null || supplierName !== null) {
-        console.log(distributerName, "distributerName test 1");
-
+      if (distributerName && supplierName) {
         return {
           ...item,
           SUPNAME: supplierName.SUPDES,
@@ -136,15 +132,18 @@ export const FetchPartsData = async (
       if (discountObjs.length > 0) {
         setIconDisplay("inline-block");
         const filteredDiscounts = discountObjs
-          .filter((discountObj) => discountObj.OFFERDES.startsWith("SO"))
+          //.filter((discountObj) => discountObj.OFFERDES.SALES == 'Y')
           .map((discountObj) => ({
             DISCOUNT: discountObj.DISCOUNT,
             OFFERQTY: discountObj.OFFERQTY,
             OFFERNUM: discountObj.OFFERNUM,
             OFFERDES: discountObj.OFFERDES,
             FREEQTY: discountObj.FREEQTY,
+            SALES: discountObj.SALES,
+            OFFERID: discountObj.OFFERID,
+            DEXT_OFFERCODE: discountObj.DEXT_OFFERCODE,
           }));
-          
+
         if (filteredDiscounts.length > 0) {
           return {
             ...item,
@@ -154,6 +153,10 @@ export const FetchPartsData = async (
       }
       return item;
     });
+
+    updatedArray = [...new Set(updatedArray.map((item) => item.PARTNAME))].map(
+      (partName) => updatedArray.find((item) => item.PARTNAME === partName)
+    );
 
     // let stockupdatedArray = json.data.map((item) => {
     //     const sotckObjs = stockData.filter(

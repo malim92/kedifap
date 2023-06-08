@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
-import Cookies from "js-cookie";
 import { Info } from "@mui/icons-material";
 import PopupModal from "./Modal";
 import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
-import { FaCartArrowDown, FaImage } from "react-icons/fa";
+import { FaCartArrowDown } from "react-icons/fa";
 import "lightbox.js-react/dist/index.css";
 import { SlideshowLightbox, initLightboxJS } from "lightbox.js-react";
 
@@ -304,6 +303,8 @@ const MaterialTable = ({ isVendorName }) => {
               ...freeItems,
               [singleCartItem.PARTNAME]: applicableDiscount.FREEQTY,
             };
+            console.log(freeItems, "FREEQTY > 0 ");
+
           } else {
             let addedDiscountedUnit =
               ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
@@ -329,17 +330,6 @@ const MaterialTable = ({ isVendorName }) => {
       freeItems: freeItems,
     };
   }
-
-  let images = [
-    {
-      src: "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
-      title: "image title 1",
-    },
-    {
-      src: "https://images.unsplash.com/photo-1534628526458-a8de087b1123",
-      title: "image title 2",
-    },
-  ];
 
   return (
     <>
