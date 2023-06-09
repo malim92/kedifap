@@ -441,7 +441,6 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
     $password = '1234';
 
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -465,7 +464,6 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
     $password = '1234';
 
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -486,7 +484,6 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -509,7 +506,6 @@ $app->get('/statements', function (Request $request, Response $response, array $
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -532,7 +528,6 @@ $app->get('/backorders', function (Request $request, Response $response, array $
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -552,7 +547,6 @@ $app->get('/backorder-products', function (Request $request, Response $response,
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -571,7 +565,6 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -591,7 +584,6 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -629,7 +621,6 @@ $app->get('/pharmacies', function (Request $request, Response $response, array $
     $username = 'apiuser';
     $password = '1234';
     $client = new Client([
-        //'base_uri' => 'https://ked.priority-software.com.cy/',
         'base_uri' => 'https://ked.priority-software.com.cy/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -640,6 +631,35 @@ $app->get('/pharmacies', function (Request $request, Response $response, array $
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
     // echo count($response['value']);die;
+    return $response;
+});
+
+$app->get('/fetch-offer', function (Request $request, Response $response, array $args) {
+    $offer_id = $request->getQueryParams('offer_id')['offer_id'];
+    // echo $offer_id;die;
+    $sql = "SELECT parts.PARTNAME, parts.PARTDES, parts.SUPNAME, parts.DEXT_IMPORTERNAME, parts.VATPRICE, parts.WSPLPRICE, parts.IMGFILENAME, parts.DEXT_LOWSTOCKQTY, discount.DISCOUNT, discount.OFFERQTY, discount.OFFERDES, discount.OFFERID, discount.DEXT_OFFERCODE, stock.TBALANCE FROM `discount` INNER JOIN parts on discount.DEXT_OFFERPARTNAME = parts.PARTNAME INNER JOIN stock ON discount.DEXT_OFFERPARTNAME = stock.PARTNAME WHERE discount.OFFERID = :offerId";
+    
+    try {
+        // Get DB Object
+        $db = new db();
+        // Connect
+        $db = $db->connect();
+
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':offerId', $offer_id, PDO::PARAM_INT);
+        // $stmt->debugDumpParams();
+        // die;
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // print_r($result );die;
+        return $response->withStatus(200)->withJson($result);
+    } catch (PDOException $e) {
+        echo '{"error": {"text": ' . $e->getMessage() . '}';
+    }
+
+
+    // print_r($response);die;
+
     return $response;
 });
 
