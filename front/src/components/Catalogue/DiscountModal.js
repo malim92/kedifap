@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef   } from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 
@@ -28,7 +28,8 @@ const getDiscount = async (
   discountLabel,
   setDiscountLabel,
   freeQuantity,
-  setFreeQuantity
+  setFreeQuantity,
+  caluclateMixMatch
 ) => {
   setShowCart(true);
   const found = cartItems.find(
@@ -93,7 +94,17 @@ const getDiscount = async (
         [product.PARTNAME]: discountSelection.OFFERDES,
       });
     }
-    if (discountSelection.DEXT_OFFERCODE == "4") {
+    else if (discountSelection.DEXT_OFFERCODE == "4") {
+      console.log('apply mixmatych');
+      const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
+      // console.log(
+      //   cartDiscountTotalInDiscount,
+      //   "cartDiscountTotalInDiscount in mixmatch"
+      // );
+
+      // setTotal(
+      //   cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
+      // );
     }
   }
 };
@@ -124,13 +135,12 @@ function ProductDiscountModal(props) {
   const [open, setOpen] = useState(false);
   const [currentBody, setCurrentBody] = useState(1);
   const [mixMatch, setMixMatch] = useState([]);
+  const [discountQuantityInputValue, setDiscountQuantityInputValue] = useState({});
+  const modalRef = useRef();
 
-  const handleOpenModal = () => {
-    setOpen(true);
-  };
-
+  
   const handleCloseModal = () => {
-    setOpen(false);
+    handleClose();
     setCurrentBody(1);
   };
 
@@ -185,9 +195,10 @@ function ProductDiscountModal(props) {
     let cartTotalPrice = total;
 
     console.log(product, "product.original 2");
-    console.log(productQuantity, "productQuantity in addti cart 2");
 
-    const found = cartItems.find((element) => element.PARTNAME == product.PARTNAME);
+    const found = cartItems.find(
+      (element) => element.PARTNAME == product.PARTNAME
+    );
     if (found) {
       alert("Product is already in the cart!");
     } else {
@@ -204,6 +215,9 @@ function ProductDiscountModal(props) {
       } else {
         product.quantity = 1;
         setQuantityInputValue({ ...quantityInputValue, [product.PARTNAME]: productQuantity[product.PARTNAME] });
+        // productQuantity.length == 0 ? productQuantity[product.PARTNAME] = 1 : productQuantity
+        if (productQuantity.length == 0) productQuantity[product.PARTNAME] = 1;
+        console.log(productQuantity, "productQuantity[product.PARTNAME]");
         setProductQuantity({
           ...quantityInputValue,
           [product.PARTNAME]: productQuantity[product.PARTNAME],
@@ -218,9 +232,33 @@ function ProductDiscountModal(props) {
     }
   };
 
+  //handle user pressing escape button
+  const handleEscape = (event) => {
+    if (event.keyCode === 27) {
+      handleCloseModal();
+    }
+  };
+
+  // Clicked outside the modal
+  const handleClickOutside = (event) => {
+    if (modalRef.current && !modalRef.current.contains(event.target)) {
+      handleCloseModal();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   if (rowSearch !== undefined) {
     return (
-      <Modal show={show} onHide={handleClose} dialogClassName="modal-wide">
+      <Modal show={show} onClick={handleClickOutside} onHide={handleClose} dialogClassName="modal-wide">
+        <div ref={modalRef}>
         <Modal.Header closeButton>
           <Modal.Title>Product Discount Info</Modal.Title>
         </Modal.Header>
@@ -246,8 +284,10 @@ function ProductDiscountModal(props) {
                                   variant="primary"
                                   onClick={() => handleSwipe("left", discount)}
                                 >
-                                  List of Mix&Match
-                                  <ProductionQuantityLimitsIcon />
+                                  <p>
+                                    List of Mix&Match
+                                    <ProductionQuantityLimitsIcon />
+                                  </p>
                                 </Button>
                                 {/* </div> */}
                               </>
@@ -335,16 +375,18 @@ function ProductDiscountModal(props) {
               </Container>
             </>
           )}
-
-          {currentBody === 2 && mixMatch !== null && (
+          {currentBody === 2 && mixMatch.length !== 0 && (
             <>
+              <p>Number of items for this discount : {mixMatch[0].OFFERQTY}</p>
               <Table striped bordered hover>
                 {/* <thead>
                   
                 </thead> */}
                 <thead>
-                <tr >
-                    <th style={{textAlign:"center"}} colspan="6">Mix & Match</th>
+                  <tr>
+                    <th style={{ textAlign: "center" }} colspan="6">
+                      Mix & Match
+                    </th>
                   </tr>
                   <tr>
                     <th>Code</th>
@@ -358,14 +400,22 @@ function ProductDiscountModal(props) {
                   {mixMatch.map((item, index) => (
                     <tr key={index}>
                       <td>{item.PARTNAME}</td>
-                      <td>{item.OFFERDES}</td>
+                      <td>{item.PARTDES}</td>
                       <td>{item.VATPRICE}</td>
                       <td>{item.TBALANCE}</td>
                       <td>
                         <div class="cart-item-controls">
                           <button
                             className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                            onClick={ () => addToCart(item,index, setQuantityInputValue,setProductQuantity, productQuantity)}
+                            onClick={() =>
+                              addToCart(
+                                item,
+                                index,
+                                setQuantityInputValue,
+                                setProductQuantity,
+                                productQuantity
+                              )
+                            }
                             style={{
                               backgroundColor: "#db2d2d",
                               backgroundColor: "#db2d2d",
@@ -416,10 +466,11 @@ function ProductDiscountModal(props) {
                   ))}
                 </tbody>
               </Table>
-              <Button onClick={() => handleSwipe("right")}>Previous</Button>
             </>
           )}
-
+          {currentBody === 2 && mixMatch.length == 0 && (
+            <h2>No matching products available for this offer</h2>
+          )}
           {/* <>
                 {console.log(item, "test item")}
                 
@@ -436,14 +487,24 @@ function ProductDiscountModal(props) {
           {/* </div> */}
         </Modal.Body>
         <Modal.Footer>
+          {currentBody==2 && 
+          <Button
+            variant="secondary"
+            style={{ color: "black" }}
+            onClick={ ()=> handleSwipe("right") }
+          >
+            Back
+          </Button>
+          }
           <Button
             variant="danger"
             style={{ color: "red" }}
-            onClick={handleClose}
+            onClick={handleCloseModal}
           >
             Close
           </Button>
         </Modal.Footer>
+        </div>
       </Modal>
     );
   }

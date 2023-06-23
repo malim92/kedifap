@@ -32,6 +32,7 @@ const Cart = (props) => {
     isVendorName,
   } = props;
 
+
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
     console.log(event, "event quan");
@@ -88,7 +89,7 @@ const Cart = (props) => {
   const clearCart = () => {
     setCartItems([]);
     setTotal(0);
-    setProductQuantity(0);
+    setProductQuantity({});
     setQuantityInputValue({});
     setFreeQuantity({});
   };
@@ -140,14 +141,18 @@ const Cart = (props) => {
     }
     setCartItems([]);
     setTotal(0);
-    setProductQuantity(0);
+    setProductQuantity({});
   };
+
+
   const saveCart = async (cartItems) => {
     setCartTemplate(cartItems);
   };
 
   let totalFreeQuantities = 0;
   for (const value of Object.values(freeQuantity)) {
+    console.log(freeQuantity, "freeQuantity 1");
+    console.log(value, "value tee");
     totalFreeQuantities += value;
   }
 
@@ -263,7 +268,7 @@ const Cart = (props) => {
               0
             )}
             {totalFreeQuantities > 0 && (
-              <span>+ {totalFreeQuantities} Free items</span>
+              <span>+ {parseInt(totalFreeQuantities)} Free items</span>
             )}
           </div>
 

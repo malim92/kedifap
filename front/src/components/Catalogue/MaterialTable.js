@@ -32,9 +32,9 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
 }));
 const MaterialUISwitchQuota = styled(Switch)(({ theme }) => ({
   "& .MuiSwitch-switchBase.Mui-checked": {
-    color: pink['A200'],
+    color: pink["A200"],
     "&:hover": {
-      backgroundColor: alpha(pink['A200'], theme.palette.action.hoverOpacity),
+      backgroundColor: alpha(pink["A200"], theme.palette.action.hoverOpacity),
     },
   },
   "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
@@ -129,7 +129,7 @@ const MaterialTable = ({ isVendorName }) => {
     supValue,
     activeIngValue,
     discountedProducts,
-    quotaProducts
+    quotaProducts,
   ]);
 
   useEffect(() => {
@@ -276,12 +276,24 @@ const MaterialTable = ({ isVendorName }) => {
     return flatTotal;
   }
 
+  function caluclateMixMatch(productsInCart) {
+    productsInCart.forEach((singleCartItem) => {
+      let applicableDiscount = null;
+      if (singleCartItem.discounts) {
+        singleCartItem.discounts.forEach((discount) => {
+          console.log(
+            discount,
+            "discount in mixmatch"
+          );
+        });
+      }
+    });
+  }
+
   function caluclateDiscount(productsInCart) {
     let totalDiscount = 0;
     let freeItems = [];
     let discountLabel = [];
-    console.log(productsInCart, "productsInCart in discount");
-    let applicableDiscount = null;
     productsInCart.forEach((singleCartItem) => {
       let applicableDiscount = null;
       //check if product has discount property
@@ -297,14 +309,13 @@ const MaterialTable = ({ isVendorName }) => {
           }
         });
         //caluclating discount
+        console.log(applicableDiscount, "applicableDiscount dev 2");
         if (applicableDiscount !== null) {
           if (applicableDiscount.FREEQTY > 0) {
             freeItems = {
               ...freeItems,
               [singleCartItem.PARTNAME]: applicableDiscount.FREEQTY,
             };
-            console.log(freeItems, "FREEQTY > 0 ");
-
           } else {
             let addedDiscountedUnit =
               ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
@@ -594,6 +605,7 @@ const MaterialTable = ({ isVendorName }) => {
         setDiscountLabel={setDiscountLabel}
         freeQuantity={freeQuantity}
         setFreeQuantity={setFreeQuantity}
+        caluclateMixMatch={caluclateMixMatch}
       />
       <Cart
         showCart={showCart}
