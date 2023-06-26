@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef   } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 
@@ -32,17 +32,26 @@ const getDiscount = async (
   caluclateMixMatch
 ) => {
   setShowCart(true);
+  console.log(quantityInputValue, "quantityInputValue chcek  ");
+  console.log(product, "product chcek  ");
   const found = cartItems.find(
     (element) => element.PARTNAME == product.PARTNAME
   );
+  
   if (found) {
     alert("Product is already in the cart!");
   } else {
-    product.quantity = discountSelection.OFFERQTY;
+    product.OFFERQTY = discountSelection.OFFERQTY;
     console.log(discountSelection, "discountSelection  ");
     setCartItems([...cartItems, product]);
     cartItems.push(product);
+    const updatedDataMix = cartItems.map(cartItem => ({
+      ...cartItem,
+      quantity: quantityInputValue[cartItem.PARTNAME] || 1
+    }));
+
     const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
+
     // price discount
     if (discountSelection.DEXT_OFFERCODE == "2") {
       const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
@@ -93,14 +102,25 @@ const getDiscount = async (
         ...discountLabel,
         [product.PARTNAME]: discountSelection.OFFERDES,
       });
-    }
-    else if (discountSelection.DEXT_OFFERCODE == "4") {
-      console.log('apply mixmatych');
-      const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
+    } else if (discountSelection.DEXT_OFFERCODE == "4") {
+      const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
+      // const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
       // console.log(
       //   cartDiscountTotalInDiscount,
       //   "cartDiscountTotalInDiscount in mixmatch"
       // );
+
+      setTotal(cartFlatTotalInDiscount);
+
+      // setQuantityInputValue({
+      //   ...quantityInputValue,
+      //   [product.PARTNAME]: parseInt(product.quantity),
+      // });
+
+      // setProductQuantity({
+      //   ...productQuantity,
+      //   [product.PARTNAME]: product.quantity,
+      // });
 
       // setTotal(
       //   cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
@@ -130,28 +150,33 @@ function ProductDiscountModal(props) {
     setDiscountLabel,
     freeQuantity,
     setFreeQuantity,
+    caluclateMixMatch
   } = props;
 
   const [open, setOpen] = useState(false);
   const [currentBody, setCurrentBody] = useState(1);
   const [mixMatch, setMixMatch] = useState([]);
-  const [discountQuantityInputValue, setDiscountQuantityInputValue] = useState({});
+  const [discountQuantityInputValue, setDiscountQuantityInputValue] = useState(
+    {}
+  );
   const modalRef = useRef();
 
-  
   const handleCloseModal = () => {
     handleClose();
     setCurrentBody(1);
   };
 
-  const handleSwipe = async (direction, discount) => {
+  const handleSwipe = async (direction, product) => {
     if (direction === "left") {
       setCurrentBody(currentBody + 1);
     } else if (direction === "right" && currentBody > 1) {
       setCurrentBody(currentBody - 1);
     }
-    let offerResults = await FetchOffer(discount.OFFERID);
+    console.log(product, "product in handleSwipe");
 
+    let offerResults = await FetchOffer(product.OFFERID);
+
+    //add the quantity balance for all same products
     const updatedOfferResults = Object.values(
       offerResults.data.reduce((result, item) => {
         const partname = item.PARTNAME;
@@ -214,20 +239,33 @@ function ProductDiscountModal(props) {
         });
       } else {
         product.quantity = 1;
-        setQuantityInputValue({ ...quantityInputValue, [product.PARTNAME]: productQuantity[product.PARTNAME] });
-        // productQuantity.length == 0 ? productQuantity[product.PARTNAME] = 1 : productQuantity
+        setQuantityInputValue({
+          ...quantityInputValue,
+          [product.PARTNAME]: productQuantity[product.PARTNAME],
+        });
+        // productQuantity.length ==   0 ? productQuantity[product.PARTNAME] = 1 : productQuantity
         if (productQuantity.length == 0) productQuantity[product.PARTNAME] = 1;
-        console.log(productQuantity, "productQuantity[product.PARTNAME]");
         setProductQuantity({
           ...quantityInputValue,
           [product.PARTNAME]: productQuantity[product.PARTNAME],
         });
       }
+      setCartItems([...cartItems, product]);
+      const cartFlatTotal = caluclateFlatTotal(cartItems);
+      console.log(cartFlatTotal, "flat 1");
+
+      // useEffect(() => {
+      //   cartItems.forEach((singleCartItem) => {
+      //     if (singleCartItem.DEXT_OFFERCODE == 4)
+      //       console.log(singleCartItem, "singleCartItem is 4");
+      //   });
+      // }, [cartItems]);
+    
+      
 
       cartTotalPrice +=
         parseFloat(product.WSPLPRICE) * parseInt(product.quantity);
-      setTotal(cartTotalPrice);
-      setCartItems([...cartItems, product]);
+      setTotal(cartTotalPrice + cartFlatTotal);
       setShowCart(true);
     }
   };
@@ -247,231 +285,261 @@ function ProductDiscountModal(props) {
   };
 
   useEffect(() => {
-    document.addEventListener('keydown', handleEscape);
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   if (rowSearch !== undefined) {
     return (
-      <Modal show={show} onClick={handleClickOutside} onHide={handleClose} dialogClassName="modal-wide">
+      <Modal
+        show={show}
+        onClick={handleClickOutside}
+        onHide={handleClose}
+        dialogClassName="modal-wide"
+      >
         <div ref={modalRef}>
-        <Modal.Header closeButton>
-          <Modal.Title>Product Discount Info</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {/* <div className="modal-body"> */}
-          {currentBody === 1 && (
-            <>
-              {rowSearch.hasOwnProperty("discounts") &&
-                rowSearch.discounts.map((discount, index) => (
-                  <>
-                    <Container>
-                      <Row>
-                        <div
-                          class="d-flex justify-content-between px-padding"
-                          key={index}
-                        >
-                          {discount.hasOwnProperty("DEXT_OFFERCODE") &&
-                            discount.DEXT_OFFERCODE == "4" && (
-                              <>
-                                {/* <div class="d-flex justify-content-between px-padding"> */}
-                                <p>Buy: {discount.OFFERDES}</p>
-                                <Button
-                                  variant="primary"
-                                  onClick={() => handleSwipe("left", discount)}
-                                >
-                                  <p>
-                                    List of Mix&Match
-                                    <ProductionQuantityLimitsIcon />
-                                  </p>
-                                </Button>
-                                {/* </div> */}
-                              </>
-                            )}
-                          {discount.hasOwnProperty("DEXT_OFFERCODE") &&
-                            discount.DEXT_OFFERCODE !== "4" && (
-                              <>
-                                <p>Buy: {discount.OFFERDES}</p>
-                                <Button
-                                  variant="primary"
-                                  className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                                  onClick={() =>
-                                    getDiscount(
-                                      rowSearch,
-                                      discount,
-                                      cartItems,
-                                      setCartItems,
-                                      setTotal,
-                                      setShowCart,
-                                      quantityInputValue,
-                                      setQuantityInputValue,
-                                      caluclateFlatTotal,
-                                      caluclateDiscount,
-                                      productQuantity,
-                                      setProductQuantity,
-                                      discountLabel,
-                                      setDiscountLabel,
-                                      freeQuantity,
-                                      setFreeQuantity
-                                    )
-                                  }
-                                  style={{
-                                    backgroundColor: "#db2d2d",
-                                    backgroundColor: "#db2d2d",
-                                    width: "30px",
-                                    fontSize: "15px",
-                                    height: "30px",
-                                  }}
-                                >
-                                  <FaCartArrowDown
+          <Modal.Header closeButton>
+            <Modal.Title>Product Discount Info</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {/* <div className="modal-body"> */}
+            {currentBody === 1 && (
+              <>
+                {rowSearch.hasOwnProperty("discounts") &&
+                  rowSearch.discounts.map((discount, index) => (
+                    <>
+                      <Container>
+                        <Row>
+                          <div
+                            class="d-flex justify-content-between px-padding"
+                            key={index}
+                          >
+                            {discount.hasOwnProperty("DEXT_OFFERCODE") &&
+                              discount.DEXT_OFFERCODE == "4" && (
+                                <>
+                                  {/* <div class="d-flex justify-content-between px-padding"> */}
+                                  <p>Buy: {discount.OFFERDES}</p>
+                                  <Button
+                                    variant="primary"
+                                    onClick={() =>
+                                      handleSwipe("left", rowSearch )
+                                    }
+                                  >
+                                    <p>
+                                      List of Mix&Match
+                                      <ProductionQuantityLimitsIcon />
+                                    </p>
+                                  </Button>
+                                  {/* </div> */}
+                                </>
+                              )}
+                            {discount.hasOwnProperty("DEXT_OFFERCODE") &&
+                              discount.DEXT_OFFERCODE !== "4" && (
+                                <>
+                                  <p>Buy: {discount.OFFERDES}</p>
+                                  <Button
+                                    variant="primary"
+                                    className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                                    onClick={() =>
+                                      getDiscount(
+                                        rowSearch,
+                                        discount,
+                                        cartItems,
+                                        setCartItems,
+                                        setTotal,
+                                        setShowCart,
+                                        quantityInputValue,
+                                        setQuantityInputValue,
+                                        caluclateFlatTotal,
+                                        caluclateDiscount,
+                                        productQuantity,
+                                        setProductQuantity,
+                                        discountLabel,
+                                        setDiscountLabel,
+                                        freeQuantity,
+                                        setFreeQuantity
+                                      )
+                                    }
                                     style={{
-                                      right: "8px",
-                                      bottom: "8px",
-                                      position: "relative",
+                                      backgroundColor: "#db2d2d",
+                                      backgroundColor: "#db2d2d",
+                                      width: "30px",
+                                      fontSize: "15px",
+                                      height: "30px",
                                     }}
-                                  />
-                                </Button>
-                              </>
-                            )}
-                        </div>
-                      </Row>
-                    </Container>
-                  </>
-                ))}
-              <Container>
-                <Row>
-                  <div class="d-flex justify-content-between px-padding">
-                    <p>Add single unit</p>
-                    <Button
-                      className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                      onClick={() => {
-                        handleAddToCart(
-                          productOriginal,
-                          total,
-                          setQuantityInputValue,
-                          setProductQuantity
-                        );
-                      }}
-                      style={{
-                        width: "30px",
-                        fontSize: "15px",
-                        height: "30px",
-                      }}
-                    >
-                      <FaCartArrowDown
-                        style={{
-                          right: "8px",
-                          bottom: "8px",
-                          position: "relative",
+                                  >
+                                    <FaCartArrowDown
+                                      style={{
+                                        right: "8px",
+                                        bottom: "8px",
+                                        position: "relative",
+                                      }}
+                                    />
+                                  </Button>
+                                </>
+                              )}
+                          </div>
+                        </Row>
+                      </Container>
+                    </>
+                  ))}
+                <Container>
+                  <Row>
+                    <div class="d-flex justify-content-between px-padding">
+                      <p>Add single unit</p>
+                      <Button
+                        className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                        onClick={() => {
+                          handleAddToCart(
+                            productOriginal,
+                            total,
+                            setQuantityInputValue,
+                            setProductQuantity
+                          );
                         }}
-                      />
-                    </Button>
-                  </div>
-                </Row>
-              </Container>
-            </>
-          )}
-          {currentBody === 2 && mixMatch.length !== 0 && (
-            <>
-              <p>Number of items for this discount : {mixMatch[0].OFFERQTY}</p>
-              <Table striped bordered hover>
-                {/* <thead>
+                        style={{
+                          width: "30px",
+                          fontSize: "15px",
+                          height: "30px",
+                        }}
+                      >
+                        <FaCartArrowDown
+                          style={{
+                            right: "8px",
+                            bottom: "8px",
+                            position: "relative",
+                          }}
+                        />
+                      </Button>
+                    </div>
+                  </Row>
+                </Container>
+              </>
+            )}
+            {currentBody === 2 && mixMatch.length !== 0 && (
+              <>
+                <p>
+                  Number of items for this discount : {mixMatch[0].OFFERQTY}
+                </p>
+                <Table striped bordered hover>
+                  {/* <thead>
                   
                 </thead> */}
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: "center" }} colspan="6">
-                      Mix & Match
-                    </th>
-                  </tr>
-                  <tr>
-                    <th>Code</th>
-                    <th>Descirption</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Add to cart</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {mixMatch.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.PARTNAME}</td>
-                      <td>{item.PARTDES}</td>
-                      <td>{item.VATPRICE}</td>
-                      <td>{item.TBALANCE}</td>
-                      <td>
-                        <div class="cart-item-controls">
-                          <button
-                            className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                            onClick={() =>
-                              addToCart(
-                                item,
-                                index,
-                                setQuantityInputValue,
-                                setProductQuantity,
-                                productQuantity
-                              )
-                            }
-                            style={{
-                              backgroundColor: "#db2d2d",
-                              backgroundColor: "#db2d2d",
-                              width: "30px",
-                              fontSize: "15px",
-                              height: "30px",
-                            }}
-                          >
-                            <FaCartArrowDown
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: "center" }} colspan="6">
+                        Mix & Match
+                      </th>
+                    </tr>
+                    <tr>
+                      <th>Code</th>
+                      <th>Descirption</th>
+                      <th>Price</th>
+                      <th>Quantity</th>
+                      <th>Add to cart</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mixMatch.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.PARTNAME}</td>
+                        <td>{item.PARTDES}</td>
+                        <td>{item.VATPRICE}</td>
+                        <td>{item.TBALANCE}</td>
+                        <td>
+                          <div class="cart-item-controls">
+                            <button
+                              className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
+                              // onClick={() =>
+                              //   addToCart(
+                              //     item,
+                              //     index,
+                              //     setQuantityInputValue,
+                              //     setProductQuantity,
+                              //     productQuantity
+                              //   )
+                              // }
+                              onClick={() =>
+                                getDiscount(
+                                  item,
+                                  mixMatch[index],
+                                  cartItems,
+                                  setCartItems,
+                                  setTotal,
+                                  setShowCart,
+                                  quantityInputValue,
+                                  setQuantityInputValue,
+                                  caluclateFlatTotal,
+                                  caluclateDiscount,
+                                  productQuantity,
+                                  setProductQuantity,
+                                  discountLabel,
+                                  setDiscountLabel,
+                                  freeQuantity,
+                                  setFreeQuantity,
+                                  caluclateMixMatch
+                                )
+                              }
                               style={{
-                                right: "8px",
-                                bottom: "8px",
-                                position: "relative",
+                                backgroundColor: "#db2d2d",
+                                backgroundColor: "#db2d2d",
+                                width: "30px",
+                                fontSize: "15px",
+                                height: "30px",
+                              }}
+                            >
+                              <FaCartArrowDown
+                                style={{
+                                  right: "8px",
+                                  bottom: "8px",
+                                  position: "relative",
+                                }}
+                              />
+                            </button>
+
+                            <input
+                              type="number"
+                              value={quantityInputValue[item.PARTNAME] || 1}
+                              min={
+                                parseInt(item.DEXT_LOWSTOCKQTY) > 0
+                                  ? item.DEXT_LOWSTOCKQTY
+                                  : 1
+                              }
+                              max={item.stock}
+                              onChange={(e) =>
+                                handleQuantityChange(
+                                  e.target.value,
+                                  item,
+                                  index,
+                                  setQuantityInputValue
+                                )
+                              }
+                              style={{
+                                width: "50px",
+                                marginRight: "10px",
+                                borderRadius: "5px",
+                                border: "1px solid #ccc",
+                                padding: "5px",
+                                fontSize: "1rem",
+                                textAlign: "center",
                               }}
                             />
-                          </button>
-
-                          <input
-                            type="number"
-                            value={quantityInputValue[item.PARTNAME] || 1}
-                            min={
-                              parseInt(item.DEXT_LOWSTOCKQTY) > 0
-                                ? item.DEXT_LOWSTOCKQTY
-                                : 1
-                            }
-                            max={item.stock}
-                            onChange={(e) =>
-                              handleQuantityChange(
-                                e.target.value,
-                                item,
-                                index,
-                                setQuantityInputValue
-                              )
-                            }
-                            style={{
-                              width: "50px",
-                              marginRight: "10px",
-                              borderRadius: "5px",
-                              border: "1px solid #ccc",
-                              padding: "5px",
-                              fontSize: "1rem",
-                              textAlign: "center",
-                            }}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </>
-          )}
-          {currentBody === 2 && mixMatch.length == 0 && (
-            <h2>No matching products available for this offer</h2>
-          )}
-          {/* <>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </>
+            )}
+            {currentBody === 2 && mixMatch.length == 0 && (
+              <h2>No matching products available for this offer</h2>
+            )}
+            {/* <>
                 {console.log(item, "test item")}
                 
                   <tr key={index}>
@@ -484,26 +552,26 @@ function ProductDiscountModal(props) {
               </>
             )) */}
 
-          {/* </div> */}
-        </Modal.Body>
-        <Modal.Footer>
-          {currentBody==2 && 
-          <Button
-            variant="secondary"
-            style={{ color: "black" }}
-            onClick={ ()=> handleSwipe("right") }
-          >
-            Back
-          </Button>
-          }
-          <Button
-            variant="danger"
-            style={{ color: "red" }}
-            onClick={handleCloseModal}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
+            {/* </div> */}
+          </Modal.Body>
+          <Modal.Footer>
+            {currentBody == 2 && (
+              <Button
+                variant="secondary"
+                style={{ color: "black" }}
+                onClick={() => handleSwipe("right")}
+              >
+                Back
+              </Button>
+            )}
+            <Button
+              variant="danger"
+              style={{ color: "red" }}
+              onClick={handleCloseModal}
+            >
+              Close
+            </Button>
+          </Modal.Footer>
         </div>
       </Modal>
     );

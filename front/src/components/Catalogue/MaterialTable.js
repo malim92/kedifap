@@ -279,8 +279,9 @@ const MaterialTable = ({ isVendorName }) => {
   function caluclateMixMatch(productsInCart) {
     productsInCart.forEach((singleCartItem) => {
       let applicableDiscount = null;
-      if (singleCartItem.discounts) {
-        singleCartItem.discounts.forEach((discount) => {
+    console.log(singleCartItem, "apply singleCartItem 1");
+      if (singleCartItem) {
+        singleCartItem.forEach((discount) => {
           console.log(
             discount,
             "discount in mixmatch"
