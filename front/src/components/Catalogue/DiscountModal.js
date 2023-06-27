@@ -103,14 +103,29 @@ const getDiscount = async (
         [product.PARTNAME]: discountSelection.OFFERDES,
       });
     } else if (discountSelection.DEXT_OFFERCODE == "4") {
+      
       const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
       // const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
-      // console.log(
-      //   cartDiscountTotalInDiscount,
-      //   "cartDiscountTotalInDiscount in mixmatch"
-      // );
+      
+      //create an array that has the total amount of quantities for each offer
+      
 
-      setTotal(cartFlatTotalInDiscount);
+      // updatedDataMix.forEach(item => {
+      //   if (item.MIX_MATCH_DISCOUNTED == true)
+      //     console.log(item, 'item that is mixed');
+      // });
+      const mixMatchDiscount = caluclateMixMatch(updatedDataMix);
+
+      console.log(
+        mixMatchDiscount,
+        "cal in mixmatch"
+      );
+      console.log(
+        cartFlatTotalInDiscount,
+        "cartFlatTotalInDiscount in mixmatch"
+      );
+      
+      setTotal(cartFlatTotalInDiscount - mixMatchDiscount);
 
       // setQuantityInputValue({
       //   ...quantityInputValue,
@@ -172,7 +187,6 @@ function ProductDiscountModal(props) {
     } else if (direction === "right" && currentBody > 1) {
       setCurrentBody(currentBody - 1);
     }
-    console.log(product, "product in handleSwipe");
 
     let offerResults = await FetchOffer(product.OFFERID);
 
@@ -448,7 +462,7 @@ function ProductDiscountModal(props) {
                       <tr key={index}>
                         <td>{item.PARTNAME}</td>
                         <td>{item.PARTDES}</td>
-                        <td>{item.VATPRICE}</td>
+                        <td>{item.WSPLPRICE}</td>
                         <td>{item.TBALANCE}</td>
                         <td>
                           <div class="cart-item-controls">

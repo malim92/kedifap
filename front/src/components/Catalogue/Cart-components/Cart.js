@@ -30,12 +30,12 @@ const Cart = (props) => {
     freeQuantity,
     setFreeQuantity,
     isVendorName,
+    caluclateMixMatch,
+    discountAmount,
   } = props;
-
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
-    console.log(event, "event quan");
     const productId = item.PARTNAME;
 
     setQuantityInputValue({
@@ -45,19 +45,26 @@ const Cart = (props) => {
 
     const updatedItems = [...cartItems];
 
-    updatedItems[index] = { ...updatedItems[index], quantity: event };
-    setCartItems(updatedItems);
-    // let sumPrice = 0;
-    // updatedItems.forEach((singleCartItem) => {
-    //   sumPrice +=
-    //     parseInt(singleCartItem.quantity) *
-    //     parseFloat(singleCartItem.WSPLPRICE);
-    // });
+    const updatedItemsQuantity = updatedItems.map((item) => ({
+      ...item,
+      quantity: productQuantity[item.PARTNAME] || 1,
+    }));
 
-    const cartFlatTotal = caluclateFlatTotal(updatedItems);
-    const totalDiscountAmount = caluclateDiscount(updatedItems);
+    updatedItems[index] = { ...updatedItemsQuantity[index], quantity: event };
+    updatedItemsQuantity[index] = {
+      ...updatedItemsQuantity[index],
+      quantity: event,
+    };
 
-    setTotal(cartFlatTotal - totalDiscountAmount.totalDiscount);
+    setCartItems(updatedItemsQuantity);
+
+    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
+    const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
+    const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
+
+    setTotal(
+      cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
+    );
 
     setDiscountLabel({
       ...discountLabel,
@@ -69,17 +76,20 @@ const Cart = (props) => {
     const updatedCart = cartItems.filter(
       (item) => item.PARTNAME !== product.PARTNAME
     );
+
     setCartItems(updatedCart);
-    //setProductQuantity(1);
 
-    // setProductQuantity({ ...productQuantity, [product.PARTNAME]: 1 });
-
-    // productQuantity.splice(product.PARTNAME, 1);
     delete productQuantity[product.PARTNAME];
+
+    console.log("updatedCart in remove 2", updatedCart);
 
     const cartFlatTotal = caluclateFlatTotal(updatedCart);
     const totalDiscountAmount = caluclateDiscount(updatedCart);
-    setTotal(cartFlatTotal - totalDiscountAmount.totalDiscount);
+    const mixMatchDiscount = caluclateMixMatch(updatedCart);
+
+    setTotal(
+      cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
+    );
 
     delete freeQuantity[product.PARTNAME];
     setFreeQuantity(freeQuantity);
@@ -143,7 +153,6 @@ const Cart = (props) => {
     setTotal(0);
     setProductQuantity({});
   };
-
 
   const saveCart = async (cartItems) => {
     setCartTemplate(cartItems);
@@ -273,6 +282,7 @@ const Cart = (props) => {
           </div>
 
           <div className="total-container">
+            <p className="total-text">Discount: {discountAmount.toFixed(2)}</p>
             <p className="total-text">Total: {total.toFixed(2)}</p>
           </div>
 

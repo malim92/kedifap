@@ -215,6 +215,7 @@ const MaterialTable = ({ isVendorName }) => {
   const [popupModalDiscount, setPopupModalDiscount] = useState({});
   const [discountLabel, setDiscountLabel] = useState({});
   const [freeQuantity, setFreeQuantity] = useState({});
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
@@ -277,18 +278,36 @@ const MaterialTable = ({ isVendorName }) => {
   }
 
   function caluclateMixMatch(productsInCart) {
-    productsInCart.forEach((singleCartItem) => {
-      let applicableDiscount = null;
-    console.log(singleCartItem, "apply singleCartItem 1");
-      if (singleCartItem) {
-        singleCartItem.forEach((discount) => {
-          console.log(
-            discount,
-            "discount in mixmatch"
-          );
-        });
+    console.log('productsInCart in mixx', productsInCart);
+    let discountedAmount=0;
+
+    const offerIdQuantities = productsInCart.reduce((quantities, item) => {
+      const offerId = item.OFFERID;
+      const quantity = item.quantity;
+    
+      if (!quantities[offerId]) {
+        quantities[offerId] = 0;
+      }
+    
+      quantities[offerId] += parseInt(quantity);
+    
+      return quantities;
+    }, {});
+
+    //checl if the total quantities accumalted are bigger than the offer quantity
+    productsInCart.forEach(item => {
+      const offerId = item.OFFERID;
+      const offerQty = parseInt(item.OFFERQTY);
+
+      if (offerIdQuantities[offerId] >= offerQty) {
+        // item.MIX_MATCH_DISCOUNTED = true;
+        console.log(item, 'item that is mixed');
+        discountedAmount += parseFloat(item.DISCOUNT) / 100 * parseFloat(item.WSPLPRICE) * parseInt(item.quantity);
       }
     });
+
+    setDiscountAmount(discountedAmount);
+    return discountedAmount;
   }
 
   function caluclateDiscount(productsInCart) {
@@ -630,6 +649,8 @@ const MaterialTable = ({ isVendorName }) => {
         freeQuantity={freeQuantity}
         setFreeQuantity={setFreeQuantity}
         isVendorName={isVendorName}
+        caluclateMixMatch={caluclateMixMatch}
+        discountAmount={discountAmount}
       />
     </>
   );
