@@ -5,15 +5,12 @@ import Button from "react-bootstrap/Button";
 
 import "./Navbar.css";
 
-export default function Navbar({ setIsAuthenticated, isVendorName }) {
-  
+export default function Navbar({ setIsAuthenticated, isVendorName, setToken }) {
 
   function logout() {
+    setToken('');
     setIsAuthenticated(false);
   }
-
-  console.log(isVendorName, "isVendorName in nav");
-
 
   return (
     <>

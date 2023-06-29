@@ -59,7 +59,7 @@ $app->get('/', function (Request $request, Response $response, $args) {
     return $response;
 });
 
-// Authenticate
+// Authenticate login
 $app->post('/authenticate', function (Request $request, Response $response) {
     session_start();
 
@@ -72,39 +72,91 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     $name = $params['username'] ?? '';
     $pass = $params['password'] ?? '';
     //echo $name;die;
-    $sql = "SELECT * FROM customers WHERE DEXT_USERLOGIN = '$name'";    //echo $name;die;
+    $sql = "SELECT * FROM customers WHERE DEXT_USERLOGIN = :user_id";
     try {
         // Get DB Object
         $db = new db();
         // Connect
         $db = $db->connect();
 
-        $stmt = $db->query($sql);
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':user_id', $name, PDO::PARAM_STR);
+        $stmt->execute();
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $data["success"] = false;
         $data["token"] = null;
         $status = 404;
         foreach ($users as $user) {
-            //print_r($user['CUSTNAME']) ;
-
+            //user does exist
             if ($user['DEXT_USERLOGIN'] === $name && $user['DEXT_PASSWORD'] === $pass) {
-
+                $roleCheck = substr($name, 0, 1);
+                $userRole = 'customer';
+                $roleCheck == 'V' ? $userRole == 'vendor' : $userRole == 'customer';
                 $MyJWT = $this->JWT;
                 $now = new DateTime();
-                $future = new DateTime("now +20 minutes");
+                $future = new DateTime("now +30 days");
                 $server = $request->getParams();
                 $payload = [
                     "iat" => $now->getTimeStamp(),
                     "exp" => $future->getTimeStamp(),
                     "sub" => $server,
+                    "role" => $userRole
                 ];
                 $secret = $dotenv_vars['SECRET'];
 
-
                 $token = $MyJWT->encode($payload, $secret, "HS512");
-                $data["success"] = true;
-                $data["token"] = $token;
-                $data["user"] = $user;
+
+                $sqlTokenCheck = "SELECT * FROM usr_token WHERE user_id = :user_id";
+                $token_stmt = $db->prepare($sqlTokenCheck);
+                $token_stmt->bindParam(':user_id', $name, PDO::PARAM_STR);
+                $token_stmt->execute();
+                $userToken = $token_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (empty($userToken)) {
+                    $sqlTokenInsertQuery = "INSERT INTO usr_token (user_id, token, created_at)
+                    VALUES (:user_id, :token, NOW())";
+                    $stmt = $db->prepare($sqlTokenInsertQuery);
+                    $stmt->bindParam(':user_id', $name, PDO::PARAM_STR);
+                    $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+                    $stmt->execute();
+
+                    // Check if the query was successful
+                    if ($stmt->rowCount() > 0) {
+                        $data["success"] = true;
+                        $data["token"] = $token;
+                        $data["user"] = $user;
+                    } else {
+                        $data["success"] = false;
+                        $data["token"] = null;
+                        $data["user"] = $user;
+                    }
+                } else { //if token exist
+                    $sql = "DELETE FROM usr_token WHERE user_id = :user_id";
+                    $stmt = $db->prepare($sql);
+                    $stmt->bindParam(':user_id', $name, PDO::PARAM_STR);
+                    $stmt->execute();
+                    if ($stmt->rowCount() > 0) {
+                        $sqlTokenInsertQuery = "INSERT INTO usr_token (user_id, token, created_at)
+                    VALUES (:user_id, :token, NOW())";
+                        $stmt = $db->prepare($sqlTokenInsertQuery);
+                        $stmt->bindParam(':user_id', $name, PDO::PARAM_STR);
+                        $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+                        $stmt->execute();
+                        if ($stmt->rowCount() > 0) {
+                            $data["success"] = true;
+                            $data["token"] = $token;
+                            $data["user"] = $user;
+                        } else {
+                            $data["success"] = false;
+                            $data["token"] = null;
+                            $data["user"] = $user;
+                        }
+                    } else {
+                        $data["success"] = false;
+                        $data["token"] = null;
+                        $data["user"] = $user;
+                    }
+                }
 
                 // set the token in a cookie
                 $cookie_lifetime = 60 * 20; // 20 minutes
@@ -125,10 +177,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
 });
 
 $app->post('/validate-token', function ($request, $response, $args) {
-    // $data = array('message' => 'Hello from the backend!');
-    // return $response->withJson($data);
-    $file = '../log.txt'; // path to file
-    file_put_contents($file, 'here 1', FILE_APPEND);
+    
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
@@ -137,32 +186,24 @@ $app->post('/validate-token', function ($request, $response, $args) {
     //$token = json_decode($request->getBody())->token;
     $token_parts = explode(' ', $token);
 
-    file_put_contents($file, 'here 2', FILE_APPEND);
     if ($token_parts[0] === 'Bearer') {
         $token = $token_parts[1];
     }
-    $permissions = 'admin';
-
-
-    $content = 'This is example text.'; // content to write
 
     if (!$token) {
         //return $response->withStatus(202)->withJson(['error' => 'Unauthorized']);
         return $response->withStatus(200)->withJson(['isTokenValid' => false]);
     }
-    file_put_contents($file, 'here 3', FILE_APPEND);
     try {
         $decoded = JWT::decode($token, $dotenv_vars['SECRET'], array('HS512'));
         $data_string = serialize($decoded);
-        //file_put_contents($file, gettype($decoded) , FILE_APPEND);
-        file_put_contents($file, $data_string, FILE_APPEND);
-        //print_r($decoded);
-        //die;
+        //file_put_contents($file, $data_string, FILE_APPEND);
+        
         //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
         return $response->withStatus(200)->withJson(['isTokenValid' => true]);
     } catch (\Throwable $th) {
 
-        return $response->withStatus(404)->withJson(['error' => 'Unauthorized']);
+        return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
     }
 });
 
@@ -597,7 +638,7 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
     return $response;
 });
 
-$app->get('/discount/', function (Request $request, Response $response, array $args) {
+$app->get('/discount', function (Request $request, Response $response, array $args) {
 
     $sql = "SELECT * FROM discount";
 
@@ -638,7 +679,7 @@ $app->get('/fetch-offer', function (Request $request, Response $response, array 
     $offer_id = $request->getQueryParams('offer_id')['offer_id'];
     // echo $offer_id;die;
     $sql = "SELECT parts.PARTNAME, parts.PARTDES, parts.SUPNAME, parts.DEXT_IMPORTERNAME, parts.VATPRICE, parts.WSPLPRICE, parts.IMGFILENAME, parts.DEXT_LOWSTOCKQTY, discount.DISCOUNT, discount.OFFERQTY, discount.OFFERDES, discount.OFFERID, discount.DEXT_OFFERCODE, stock.TBALANCE FROM `discount` INNER JOIN parts on discount.DEXT_OFFERPARTNAME = parts.PARTNAME INNER JOIN stock ON discount.DEXT_OFFERPARTNAME = stock.PARTNAME WHERE discount.OFFERID = :offerId";
-    
+
     try {
         // Get DB Object
         $db = new db();

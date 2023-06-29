@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 
 import pill from "../assets/login img side.png";
 
-function LoginForm({ setIsAuthenticated, setIsVendorName }) {
+function LoginForm({ setIsAuthenticated, setIsVendorName, setToken  }) {
   let navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -30,12 +30,12 @@ function LoginForm({ setIsAuthenticated, setIsVendorName }) {
       const url = `${process.env.REACT_APP_API_URL}/authenticate`; //not correct
       //const url = "http://localhost:8000/authenticate";
       const response = await axios.post(url, loginCredentials);
-      console.log(response, "response xxx");
+      console.log(response, "response xxxG");
       let userId = response.data.user.CUSTNAME;
       const userDesc = response.data.user.FIRM;
       const vendorId = response.data.user.SUPNAME;
       // userId == '' ? userId = vendorId : userId = userId;
-      console.log(userId, "userId 1");
+      setToken(response.data.token);
 
       if (userId == '' || userId ==null) userId = vendorId;
       console.log(vendorId, "vendorId xxx");

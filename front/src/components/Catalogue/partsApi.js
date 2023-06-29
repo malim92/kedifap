@@ -111,9 +111,8 @@ export const FetchPartsData = async (
 
     let discountJson;
     try {
-      const url = new URL("/discount", `${process.env.REACT_APP_API_URL}`);
       const discountUrl = new URL(
-        "/discount/",
+        "/discount",
         `${process.env.REACT_APP_API_URL}`
       );
 
