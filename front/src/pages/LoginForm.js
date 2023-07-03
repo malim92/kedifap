@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 
 import pill from "../assets/login img side.png";
 
-function LoginForm({ setIsAuthenticated, setIsVendorName, setToken  }) {
+function LoginForm({ setIsAuthenticated, setIsVendorName  }) {
   let navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -35,7 +35,7 @@ function LoginForm({ setIsAuthenticated, setIsVendorName, setToken  }) {
       const userDesc = response.data.user.FIRM;
       const vendorId = response.data.user.SUPNAME;
       // userId == '' ? userId = vendorId : userId = userId;
-      setToken(response.data.token);
+      localStorage.setItem('kedTokAuth', response.data.token);
 
       if (userId == '' || userId ==null) userId = vendorId;
       console.log(vendorId, "vendorId xxx");

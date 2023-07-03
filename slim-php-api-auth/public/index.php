@@ -62,7 +62,6 @@ $app->get('/', function (Request $request, Response $response, $args) {
 // Authenticate login
 $app->post('/authenticate', function (Request $request, Response $response) {
     session_start();
-
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
@@ -94,6 +93,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
                 $roleCheck == 'V' ? $userRole == 'vendor' : $userRole == 'customer';
                 $MyJWT = $this->JWT;
                 $now = new DateTime();
+                // $future = new DateTime("now +2 minutes");
                 $future = new DateTime("now +30 days");
                 $server = $request->getParams();
                 $payload = [
@@ -176,12 +176,11 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     }
 });
 
-$app->post('/validate-token', function ($request, $response, $args) {
+$app->get('/validate-token', function (Request $request, Response $response, array $args) {
     
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
-
     $token = $request->getHeader('Authorization')[0];
     //$token = json_decode($request->getBody())->token;
     $token_parts = explode(' ', $token);
@@ -702,6 +701,36 @@ $app->get('/fetch-offer', function (Request $request, Response $response, array 
     // print_r($response);die;
 
     return $response;
+});
+
+
+$app->get('/check-token', function (Request $request, Response $response, array $args) {
+    $dotenv_file = dirname(__DIR__, 1) . '..\.env';
+    $dotenv_contents = file_get_contents($dotenv_file);
+    $dotenv_vars = parse_ini_string($dotenv_contents);
+
+    $token = $request->getQueryParams('token')['token'];
+    $token_parts = explode(' ', $token);
+
+    if ($token_parts[0] === 'Bearer') {
+        $token = $token_parts[1];
+    }
+    if (!$token) {
+        //return $response->withStatus(202)->withJson(['error' => 'Unauthorized']);
+        return $response->withStatus(200)->withJson(['isTokenValid' => false]);
+    }
+    try {
+        $decoded = JWT::decode($token, $dotenv_vars['SECRET'], array('HS512'));
+        $data_string = serialize($decoded);
+        print_r($decoded);die;
+        //file_put_contents($file, $data_string, FILE_APPEND);
+        
+        //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
+        return $response->withStatus(200)->withJson(['isTokenValid' => true, "role" => $decoded->role, "userId" => $decoded->username]);
+    } catch (\Throwable $th) {
+
+        return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
+    }
 });
 
 $app->run();

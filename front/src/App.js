@@ -6,7 +6,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import Cookies from "js-cookie";
-
+import axios from "axios";
 import { useState, useEffect } from "react";
 import PrivateRoutes from "./pages/Routes/PrivateRoutes";
 import Navbar from "./components/Navbar";
@@ -25,33 +25,30 @@ import ReturnPolicy from "./pages/ReturnPolicy";
 //import router from "./Routes/routes";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isVendorName, setIsVendorName] = useState("");
-  const [token, setToken] = useState('');
-  
+  const token = localStorage.getItem('kedTokAuth');
+
   console.log(isAuthenticated, "isAuthenticated tesst");
-  console.log(token, "token tesst");
+
 
   useEffect(() => {
     const validateToken = async () => {
+      
       try {
-        const validateUrl = new URL(
-          "/validate-token",
-          `${process.env.REACT_APP_API_URL}`
-        );
-        // Make a request to your '/authenticate' endpoint
-        const response = await fetch(validateUrl.href, {
-          // Include the token in the request headers
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/check-token?token=${token}`);
+          
+        console.log(response, "response 1");
 
         if (response.status === 200) {
           // Token is valid
+          console.log( "token validated", token);
+          if (response.role == 'vendor')
+            setIsVendorName(response.username)
           setIsAuthenticated(true);
         } else if (response.status === 401) {
-          // Token expired or invalid
+          console.log( "token not valide");
           setIsAuthenticated(false);
         } else {
           // Other error occurred
@@ -72,12 +69,12 @@ function App() {
       <>
         <Route
           path="/"
-          element={<Login setIsVendorName={setIsVendorName} setIsAuthenticated={setIsAuthenticated} setToken={setToken} />}
+          element={<Login setIsVendorName={setIsVendorName} setIsAuthenticated={setIsAuthenticated} />}
         />
         <Route path="/contact" element={<Contact />} />
 
         <Route element={<PrivateRoutes isAuthenticated={isAuthenticated} />}>
-          <Route element={<Navbar isVendorName={isVendorName} setIsAuthenticated={setIsAuthenticated} setToken={setToken} />}>
+          <Route element={<Navbar isVendorName={isVendorName} setIsAuthenticated={setIsAuthenticated} />}>
             <Route path="/app" element={<Home />} />
             <Route path="/app/catalogue" element={<ProductsTable isVendorName={isVendorName}/>} />
             <Route path="/app/orders" element={<Orders />} />
