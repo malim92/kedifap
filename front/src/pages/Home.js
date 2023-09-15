@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 
 import announcements from "../components/Announcements/announcements.json";
 import { GoPrimitiveSquare } from "react-icons/go";
@@ -7,7 +6,7 @@ import { GoPrimitiveSquare } from "react-icons/go";
 function Home() {
   const [welcomeUser, setWelcomeUser] = useState("");
 
-  const userDesc = Cookies.get("userDesc");
+  let userDesc = localStorage.getItem('userDesc');
 
   useEffect(() => {
     setWelcomeUser(userDesc);

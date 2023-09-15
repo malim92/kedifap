@@ -5,13 +5,13 @@ import Button from "react-bootstrap/Button";
 
 import "./Navbar.css";
 
-export default function Navbar({ setIsAuthenticated, isVendorName, setToken }) {
+export default function Navbar({ setIsAuthenticated, isVendorName }) {
 
   function logout() {
-    setToken('');
+    localStorage.removeItem("kedTokAuth");
     setIsAuthenticated(false);
   }
-
+  console.log(isVendorName,'isVendorName');
   return (
     <>
       <nav className="py-5 bg-gray-200">

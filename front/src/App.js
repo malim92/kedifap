@@ -5,7 +5,6 @@ import {
   RouterProvider,
   useNavigate,
 } from "react-router-dom";
-import Cookies from "js-cookie";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import PrivateRoutes from "./pages/Routes/PrivateRoutes";
@@ -24,35 +23,44 @@ import Backorders from "./pages/Backorders";
 import ReturnPolicy from "./pages/ReturnPolicy";
 //import router from "./Routes/routes";
 
+
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isVendorName, setIsVendorName] = useState("");
-  const token = localStorage.getItem('kedTokAuth');
+  const token = localStorage.getItem("kedTokAuth");
 
   console.log(isAuthenticated, "isAuthenticated tesst");
 
-
   useEffect(() => {
     const validateToken = async () => {
-      
+      if (!token) {
+        setIsAuthenticated(false);
+        return;
+      }
       try {
-        
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/check-token?token=${token}`);
-          
-        console.log(response, "response 1");
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/check-token?token=${token}`
+        );
+
+        console.log(response, "response token");
 
         if (response.status === 200) {
           // Token is valid
-          console.log( "token validated", token);
-          if (response.role == 'vendor')
-            setIsVendorName(response.username)
+          console.log("token validated", token);
+          if (response.role == "vendor") setIsVendorName(response.username);
           setIsAuthenticated(true);
+
+          // return navigate({
+          //   pathname: "/app",
+          //   //search: `?userId=${username}`,
+          // });
         } else if (response.status === 401) {
-          console.log( "token not valide");
+          console.log("token not valide");
           setIsAuthenticated(false);
         } else {
           // Other error occurred
-          throw new Error('Failed to authenticate token.');
+          throw new Error("Failed to authenticate token.");
         }
       } catch (error) {
         console.error(error);
@@ -61,22 +69,36 @@ function App() {
     };
 
     validateToken();
-  }, []); // Run the token validation only once when the component mounts
-
+  }, [token]);
 
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
         <Route
           path="/"
-          element={<Login setIsVendorName={setIsVendorName} setIsAuthenticated={setIsAuthenticated} />}
+          element={
+            <Login
+              setIsVendorName={setIsVendorName}
+              setIsAuthenticated={setIsAuthenticated}
+            />
+          }
         />
         <Route path="/contact" element={<Contact />} />
 
         <Route element={<PrivateRoutes isAuthenticated={isAuthenticated} />}>
-          <Route element={<Navbar isVendorName={isVendorName} setIsAuthenticated={setIsAuthenticated} />}>
+          <Route
+            element={
+              <Navbar
+                isVendorName={isVendorName}
+                setIsAuthenticated={setIsAuthenticated}
+              />
+            }
+          >
             <Route path="/app" element={<Home />} />
-            <Route path="/app/catalogue" element={<ProductsTable isVendorName={isVendorName}/>} />
+            <Route
+              path="/app/catalogue"
+              element={<ProductsTable isVendorName={isVendorName} />}
+            />
             <Route path="/app/orders" element={<Orders />} />
             <Route path="/app/invoices" element={<Invoices />} />
             <Route path="/app/customer-statements" element={<Statements />} />
@@ -87,7 +109,6 @@ function App() {
             <Route path="/app/return-policy" element={<ReturnPolicy />} />
             <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/contact" element={<Contact />} />
-
           </Route>
         </Route>
       </>

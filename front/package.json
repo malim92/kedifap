@@ -32,7 +32,7 @@
   },
   "scripts": {
     "start": "cross-env REACT_APP_API_URL=http://localhost:8000 react-scripts start",
-    "build": "cross-env REACT_APP_API_URL=https://kedifap-portal.com2go.co react-scripts build",
+    "build": "cross-env REACT_APP_API_URL=https://portal.kedifap.com react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -25,7 +25,7 @@ $conf = [
 $c = new \Slim\Container($conf);
 $app = new \Slim\App($c);
 
-require '../src/middleware.php';
+// require '../src/middleware.php';
 require '../src/DI.php';
 $container["jwt"] = function ($container) {
     return new StdClass;
@@ -42,24 +42,29 @@ $app->add(function ($req, $res, $next) {
 
 // Display the login page
 $app->get('/', function (Request $request, Response $response, $args) {
-    session_start();
-    $errorParam = $request->getParam('error');
-    if (isset($errorParam)) {
-        $flash = $this->get('flash');
-        $flash->addMessage('error', 'Please login first.');
-    }
-    $flash = $this->get('flash');
-    $messages = $flash->getMessages();
-    if (isset($messages['error'])) {
-        foreach ($messages['error'] as $error) {
-            echo '<div class="alert alert-danger">' . $error . '</div>';
-        }
-    }
-    $response->getBody()->write(file_get_contents(__DIR__ . '/../templates/login.php'));
-    return $response;
+    
+    //for testing
+    // $username = 'api2';
+    // $password = 'api2';
+
+    // $client = new Client([
+    //     'base_uri' => 'https://priority.kedifap.local/',
+    //     // 'base_uri' => 'https://randomfox.ca/',
+    //     'headers' => [
+    //         'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+    //     ],
+    //     'verify' => false
+    // ]);
+    // //priorityappsrv.kedifap.local
+    // //https://randomfox.ca/floof/
+    // $response = $client->get('/odata/Priority/tabula.ini/efk/B2B_SUPPLIERS', []);
+    // // $response = $client->get('/floof', []);
+
+    // return $response;
+    return $response->withHeader('Location', 'https://app.portal.kedifap.com/');
 });
 
-// Authenticate login
+// Authenticate
 $app->post('/authenticate', function (Request $request, Response $response) {
     session_start();
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
@@ -72,6 +77,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     $pass = $params['password'] ?? '';
     //echo $name;die;
     $sql = "SELECT * FROM customers WHERE DEXT_USERLOGIN = :user_id";
+    
     try {
         // Get DB Object
         $db = new db();
@@ -85,16 +91,19 @@ $app->post('/authenticate', function (Request $request, Response $response) {
         $data["success"] = false;
         $data["token"] = null;
         $status = 404;
+        
         foreach ($users as $user) {
-            //user does exist
+            //print_r($user['CUSTNAME']) ;
+
             if ($user['DEXT_USERLOGIN'] === $name && $user['DEXT_PASSWORD'] === $pass) {
+                
                 $roleCheck = substr($name, 0, 1);
                 $userRole = 'customer';
                 $roleCheck == 'V' ? $userRole == 'vendor' : $userRole == 'customer';
                 $MyJWT = $this->JWT;
+                //return print_r($MyJWT);
                 $now = new DateTime();
-                // $future = new DateTime("now +2 minutes");
-                $future = new DateTime("now +30 days");
+                $future = new DateTime("now +20 minutes");
                 $server = $request->getParams();
                 $payload = [
                     "iat" => $now->getTimeStamp(),
@@ -103,15 +112,15 @@ $app->post('/authenticate', function (Request $request, Response $response) {
                     "role" => $userRole
                 ];
                 $secret = $dotenv_vars['SECRET'];
-
+                
                 $token = $MyJWT->encode($payload, $secret, "HS512");
-
+                
                 $sqlTokenCheck = "SELECT * FROM usr_token WHERE user_id = :user_id";
                 $token_stmt = $db->prepare($sqlTokenCheck);
                 $token_stmt->bindParam(':user_id', $name, PDO::PARAM_STR);
                 $token_stmt->execute();
                 $userToken = $token_stmt->fetchAll(PDO::FETCH_ASSOC);
-
+                // return $userToken;
                 if (empty($userToken)) {
                     $sqlTokenInsertQuery = "INSERT INTO usr_token (user_id, token, created_at)
                     VALUES (:user_id, :token, NOW())";
@@ -158,10 +167,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
                     }
                 }
 
-                // set the token in a cookie
-                $cookie_lifetime = 60 * 20; // 20 minutes
-                $cookie_params = session_get_cookie_params();
-                setcookie('jwt_token', $token, time() + $cookie_lifetime, $cookie_params['path'], $cookie_params['domain'], $cookie_params['secure'], $cookie_params['httponly']);
+                
                 $status = 200;
                 //->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co');
                 //return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
@@ -170,34 +176,46 @@ $app->post('/authenticate', function (Request $request, Response $response) {
         }
         return $response->withStatus($status)->withHeader("Content-Type", "application/json")
             ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT))
-            ->withHeader('Access-Control-Allow-Origin', 'https://kedi-app.com2go.co');
+            ->withHeader('Access-Control-Allow-Origin', 'https://app.portal.kedifap.com');
     } catch (PDOException $e) {
         echo '{"error": {"text": ' . $e->getMessage() . '}';
     }
 });
 
 $app->get('/validate-token', function (Request $request, Response $response, array $args) {
-    
+    // $data = array('message' => 'Hello from the backend!');
+    // return $response->withJson($data);
+    $file = '../log.txt'; // path to file
+    file_put_contents($file, 'here 1', FILE_APPEND);
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
+
     $token = $request->getHeader('Authorization')[0];
     //$token = json_decode($request->getBody())->token;
     $token_parts = explode(' ', $token);
 
+    file_put_contents($file, 'here 2', FILE_APPEND);
     if ($token_parts[0] === 'Bearer') {
         $token = $token_parts[1];
     }
+    $permissions = 'admin';
+
+
+    $content = 'This is example text.'; // content to write
 
     if (!$token) {
         //return $response->withStatus(202)->withJson(['error' => 'Unauthorized']);
         return $response->withStatus(200)->withJson(['isTokenValid' => false]);
     }
+    file_put_contents($file, 'here 3', FILE_APPEND);
     try {
         $decoded = JWT::decode($token, $dotenv_vars['SECRET'], array('HS512'));
         $data_string = serialize($decoded);
-        //file_put_contents($file, $data_string, FILE_APPEND);
-        
+        //file_put_contents($file, gettype($decoded) , FILE_APPEND);
+        file_put_contents($file, $data_string, FILE_APPEND);
+        //print_r($decoded);
+        //die;
         //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
         return $response->withStatus(200)->withJson(['isTokenValid' => true]);
     } catch (\Throwable $th) {
@@ -445,14 +463,14 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
 });
 
 $app->post('/order', function (Request $request, Response $response) { {
-        //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS
+        //https://priority.kedifap.local/odata/Priority/tabula.ini/efk/B2B_ORDERS
         $order = $request->getParsedBody();
         // print_r($order);die;
-        $username = 'apiuser';
-        $password = '1234';
+        $username = 'api2';
+        $password = 'api2';
 
         $client = new Client([
-            'base_uri' => 'https://ked.priority-software.com.cy/',
+            'base_uri' => 'https://priority.kedifap.local/',
             //'base_uri' => 'https://webhook.site/    ',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
@@ -477,11 +495,11 @@ $app->post('/order', function (Request $request, Response $response) { {
 
 $app->get('/vendors', function (Request $request, Response $response, array $args) {
 
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
 
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -500,11 +518,11 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
 $app->get('/invoices', function (Request $request, Response $response, array $args) {
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-30 day"))));
 
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
 
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -521,10 +539,10 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
 
 $app->get('/invoice-pdf', function (Request $request, Response $response, array $args) {
     $invoiceId = $request->getQueryParams('invoice_id')['invoice_id'];
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -543,10 +561,10 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
 
 $app->get('/statements', function (Request $request, Response $response, array $args) {
 
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -565,10 +583,10 @@ $app->get('/statements', function (Request $request, Response $response, array $
 $app->get('/backorders', function (Request $request, Response $response, array $args) {
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
 
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -584,10 +602,10 @@ $app->get('/backorders', function (Request $request, Response $response, array $
 
 $app->get('/backorder-products', function (Request $request, Response $response, array $args) {
     $order_id = $request->getQueryParams('order_id')['order_id'];
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -602,10 +620,10 @@ $app->get('/backorder-products', function (Request $request, Response $response,
 
 $app->get('/return-policy', function (Request $request, Response $response, array $args) {
     $order_id = $request->getQueryParams('barcode')['barcode'];
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -621,10 +639,10 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -658,10 +676,10 @@ $app->get('/discount', function (Request $request, Response $response, array $ar
 
 $app->get('/pharmacies', function (Request $request, Response $response, array $args) {
 
-    $username = 'apiuser';
-    $password = '1234';
+    $username = 'api2';
+    $password = 'api2';
     $client = new Client([
-        'base_uri' => 'https://ked.priority-software.com.cy/',
+        'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -678,7 +696,7 @@ $app->get('/fetch-offer', function (Request $request, Response $response, array 
     $offer_id = $request->getQueryParams('offer_id')['offer_id'];
     // echo $offer_id;die;
     $sql = "SELECT parts.PARTNAME, parts.PARTDES, parts.SUPNAME, parts.DEXT_IMPORTERNAME, parts.VATPRICE, parts.WSPLPRICE, parts.IMGFILENAME, parts.DEXT_LOWSTOCKQTY, discount.DISCOUNT, discount.OFFERQTY, discount.OFFERDES, discount.OFFERID, discount.DEXT_OFFERCODE, stock.TBALANCE FROM `discount` INNER JOIN parts on discount.DEXT_OFFERPARTNAME = parts.PARTNAME INNER JOIN stock ON discount.DEXT_OFFERPARTNAME = stock.PARTNAME WHERE discount.OFFERID = :offerId";
-
+    
     try {
         // Get DB Object
         $db = new db();
@@ -722,11 +740,11 @@ $app->get('/check-token', function (Request $request, Response $response, array 
     try {
         $decoded = JWT::decode($token, $dotenv_vars['SECRET'], array('HS512'));
         $data_string = serialize($decoded);
-        print_r($decoded);die;
+        //print_r($decoded->sub->username);die;
         //file_put_contents($file, $data_string, FILE_APPEND);
         
         //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
-        return $response->withStatus(200)->withJson(['isTokenValid' => true, "role" => $decoded->role, "userId" => $decoded->username]);
+        return $response->withStatus(200)->withJson(['isTokenValid' => true, "role" => $decoded->role, "userId" => $decoded->sub->username]);
     } catch (\Throwable $th) {
 
         return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);

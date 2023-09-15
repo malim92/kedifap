@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import axios from "axios";
 import moment from "moment";
 
@@ -11,7 +10,7 @@ export const FetchBackordersData = async (
   setRowCount,
   setIsError
 ) => {
-  const userId = Cookies.get("userId");
+
   const url = new URL(`${process.env.REACT_APP_API_URL}/backorders`);
   console.log(url, "url backorders");
 

@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import axios from "axios";
 import moment from "moment";
 
@@ -11,7 +10,8 @@ export const FetchOrdersData = async (
   setRowCount,
   setIsError
 ) => {
-  let userId = Cookies.get("userId");
+
+  let userId = localStorage.getItem('userId');
 
   userId =='C1001-01' ? userId = 'C1001' : userId = userId;
   

@@ -43,7 +43,7 @@ function withAuth(Component) {
       return <Component {...props} />;
     } else {
       // Redirect the user to a login page or display an error message
-      return window.location.href = "https://kedifap-portal.com2go.co/?error=noToken";
+      return window.location.href = `${process.env.REACT_APP_API_URL}/?error=noToken`;
       //return window.location.href = "http://localhost:8000/?error=noToken";
       //return <p>You are not authorized to access this page.</p>;
     }

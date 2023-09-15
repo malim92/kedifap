@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Cookies from "js-cookie";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { FetchPharmacies } from "./pharmaciesApi";
@@ -23,6 +22,7 @@ const Cart = (props) => {
     setQuantityInputValue,
     caluclateFlatTotal,
     caluclateDiscount,
+    setDiscountAmount,
     productQuantity,
     setProductQuantity,
     discountLabel,
@@ -61,6 +61,7 @@ const Cart = (props) => {
     const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
+    setDiscountAmount(totalDiscountAmount.totalDiscount)
 
     setTotal(
       cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
@@ -87,6 +88,9 @@ const Cart = (props) => {
     const totalDiscountAmount = caluclateDiscount(updatedCart);
     const mixMatchDiscount = caluclateMixMatch(updatedCart);
 
+    setDiscountAmount(totalDiscountAmount.totalDiscount)
+
+
     setTotal(
       cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
     );
@@ -102,11 +106,13 @@ const Cart = (props) => {
     setProductQuantity({});
     setQuantityInputValue({});
     setFreeQuantity({});
+    setDiscountAmount(0);
   };
 
   const sendOrder = async (order, cartTotal) => {
-    const userId = Cookies.get("userId");
-    const userDesc = Cookies.get("userDesc");
+    let userId = localStorage.getItem("userId");
+    let userDesc = localStorage.getItem("userDesc");
+
     const productsinOrder = order.map((obj) => ({
       PARTNAME: obj.PARTNAME,
       PDES: obj.PARTDES,
@@ -218,6 +224,7 @@ const Cart = (props) => {
                   <p class="cart-item-price">
                     Price: {parseFloat(item.WSPLPRICE)}
                   </p>
+                  {console.log(discountLabel, "discountLabel xxx")}
                   {discountLabel[item.PARTNAME] !== undefined && (
                     <p class="cart-item-discount">
                       Discount: {discountLabel[item.PARTNAME]}

@@ -270,6 +270,7 @@ const MaterialTable = ({ isVendorName }) => {
   function caluclateFlatTotal(allCartItems) {
     let flatTotal = 0;
     allCartItems.forEach((singleCartItem) => {
+      console.log(singleCartItem, "singleCartItem ali 1");
       flatTotal +=
         parseInt(singleCartItem.quantity) *
         parseFloat(singleCartItem.WSPLPRICE);
@@ -619,6 +620,7 @@ const MaterialTable = ({ isVendorName }) => {
         setQuantityInputValue={setQuantityInputValue}
         caluclateFlatTotal={caluclateFlatTotal}
         caluclateDiscount={caluclateDiscount}
+        setDiscountAmount={setDiscountAmount}
         productQuantity={productQuantity}
         setProductQuantity={setProductQuantity}
         discountLabel={discountLabel}
@@ -642,6 +644,7 @@ const MaterialTable = ({ isVendorName }) => {
         setQuantityInputValue={setQuantityInputValue}
         caluclateFlatTotal={caluclateFlatTotal}
         caluclateDiscount={caluclateDiscount}
+        setDiscountAmount={setDiscountAmount}
         productQuantity={productQuantity}
         setProductQuantity={setProductQuantity}
         discountLabel={discountLabel}

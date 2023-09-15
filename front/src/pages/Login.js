@@ -14,6 +14,7 @@ import "swiper/css/scrollbar";
 import slider1 from "../assets/1.jpg";
 import slider2 from "../assets/2.jpg";
 import slider3 from "../assets/3.jpg";
+import slider4 from "../assets/4.jpg";
 import logo from "../assets/kedi logo.png";
 import leafe from "../assets/leafe.png";
 import "./login.css";
@@ -68,6 +69,17 @@ export default ({ setIsAuthenticated, setIsVendorName }) => {
                   <img
                     className="w-full img-slider"
                     src={slider3}
+                    style={{
+                      objectFit: "cover",
+                      width: "960px",
+                      height: `${swiperHeight}px`,
+                    }}
+                  />
+                </SwiperSlide>
+                <SwiperSlide>
+                  <img
+                    className="w-full img-slider"
+                    src={slider4}
                     style={{
                       objectFit: "cover",
                       width: "960px",

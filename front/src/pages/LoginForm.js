@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Cookies from "js-cookie";
 
 import pill from "../assets/login img side.png";
 
@@ -21,6 +20,7 @@ function LoginForm({ setIsAuthenticated, setIsVendorName  }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    
     try {
       const loginCredentials = {
         username: username,
@@ -31,20 +31,22 @@ function LoginForm({ setIsAuthenticated, setIsVendorName  }) {
       //const url = "http://localhost:8000/authenticate";
       const response = await axios.post(url, loginCredentials);
       console.log(response, "response xxxG");
+      const token = response.data.token;
       let userId = response.data.user.CUSTNAME;
       const userDesc = response.data.user.FIRM;
       const vendorId = response.data.user.SUPNAME;
       // userId == '' ? userId = vendorId : userId = userId;
-      localStorage.setItem('kedTokAuth', response.data.token);
-
+      
       if (userId == '' || userId ==null) userId = vendorId;
+
+      localStorage.setItem('kedTokAuth', token);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('userDesc', userDesc);
+
       console.log(vendorId, "vendorId xxx");
       console.log(userId, "userId 2");
       if (userId.startsWith("V")) setIsVendorName(userId);
       
-      Cookies.set("userId", userId);
-      Cookies.set("userDesc", userDesc);
-
       setIsAuthenticated(true);
       return navigate({
         pathname: "/app",

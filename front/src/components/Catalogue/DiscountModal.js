@@ -23,6 +23,7 @@ const getDiscount = async (
   setQuantityInputValue,
   caluclateFlatTotal,
   caluclateDiscount,
+  setDiscountAmount,
   productQuantity,
   setProductQuantity,
   discountLabel,
@@ -37,109 +38,113 @@ const getDiscount = async (
   const found = cartItems.find(
     (element) => element.PARTNAME == product.PARTNAME
   );
-  
-  if (found) {
-    alert("Product is already in the cart!");
+
+  if (product.stock < discountSelection.OFFERQTY) {
+    alert(
+      `Sorry for inconvience but the selected product has only ${product.stock} in stock`
+    );
   } else {
-    product.OFFERQTY = discountSelection.OFFERQTY;
-    console.log(discountSelection, "discountSelection  ");
-    setCartItems([...cartItems, product]);
-    cartItems.push(product);
-    const updatedDataMix = cartItems.map(cartItem => ({
-      ...cartItem,
-      quantity: quantityInputValue[cartItem.PARTNAME] || 1
-    }));
+    if (found) {
+      alert("Product is already in the cart!");
+    } else {
+      product.quantity = discountSelection.OFFERQTY;
+      console.log(discountSelection, "discountSelection  ");
+      setCartItems([...cartItems, product]);
+      cartItems.push(product);
+      const updatedDataMix = cartItems.map((cartItem) => ({
+        ...cartItem,
+        quantity: quantityInputValue[cartItem.PARTNAME] || 1,
+      }));
 
-    const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
+      const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
+      console.log(cartFlatTotalInDiscount, "cartFlatTotalInDiscount test  ");
+      // price discount
+      if (discountSelection.DEXT_OFFERCODE == "2") {
+        const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
 
-    // price discount
-    if (discountSelection.DEXT_OFFERCODE == "2") {
-      const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
-      console.log(
-        cartDiscountTotalInDiscount,
-        "cartDiscountTotalInDiscount in discount"
-      );
+        console.log(
+          cartDiscountTotalInDiscount,
+          "cartDiscountTotalInDiscount in discount"
+        );
 
-      setTotal(
-        cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
-      );
+        setDiscountAmount(cartDiscountTotalInDiscount.totalDiscount);
 
-      setQuantityInputValue({
-        ...quantityInputValue,
-        [product.PARTNAME]: parseInt(product.quantity),
-      });
+        setTotal(
+          cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
+        );
 
-      setProductQuantity({
-        ...productQuantity,
-        [product.PARTNAME]: product.quantity,
-      });
+        setQuantityInputValue({
+          ...quantityInputValue,
+          [product.PARTNAME]: parseInt(product.quantity),
+        });
 
-      setDiscountLabel({
-        ...discountLabel,
-        [product.PARTNAME]:
-          cartDiscountTotalInDiscount.discountLabel[product.PARTNAME],
-      });
-      //free quantity items
-    } else if (discountSelection.DEXT_OFFERCODE == "1") {
-      setTotal(cartFlatTotalInDiscount);
+        setProductQuantity({
+          ...productQuantity,
+          [product.PARTNAME]: product.quantity,
+        });
 
-      setQuantityInputValue({
-        ...quantityInputValue,
-        [product.PARTNAME]: parseInt(product.quantity),
-      });
+        setDiscountLabel({
+          ...discountLabel,
+          [product.PARTNAME]:
+            cartDiscountTotalInDiscount.discountLabel[product.PARTNAME],
+        });
+        //free quantity items
+      } else if (discountSelection.DEXT_OFFERCODE == "1") {
+        setTotal(cartFlatTotalInDiscount);
 
-      setProductQuantity({
-        ...productQuantity,
-        [product.PARTNAME]: product.quantity,
-      });
+        setQuantityInputValue({
+          ...quantityInputValue,
+          [product.PARTNAME]: parseInt(product.quantity),
+        });
 
-      setFreeQuantity({
-        ...freeQuantity,
-        [product.PARTNAME]: parseInt(discountSelection.FREEQTY),
-      });
+        setProductQuantity({
+          ...productQuantity,
+          [product.PARTNAME]: product.quantity,
+        });
 
-      setDiscountLabel({
-        ...discountLabel,
-        [product.PARTNAME]: discountSelection.OFFERDES,
-      });
-    } else if (discountSelection.DEXT_OFFERCODE == "4") {
-      
-      const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
-      // const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
-      
-      //create an array that has the total amount of quantities for each offer
-      
+        setFreeQuantity({
+          ...freeQuantity,
+          [product.PARTNAME]: parseInt(discountSelection.FREEQTY),
+        });
 
-      // updatedDataMix.forEach(item => {
-      //   if (item.MIX_MATCH_DISCOUNTED == true)
-      //     console.log(item, 'item that is mixed');
-      // });
-      const mixMatchDiscount = caluclateMixMatch(updatedDataMix);
+        setDiscountLabel({
+          ...discountLabel,
+          [product.PARTNAME]: discountSelection.OFFERDES,
+        });
+      } else if (discountSelection.DEXT_OFFERCODE == "4") {
+        const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
+        // const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
 
-      console.log(
-        mixMatchDiscount,
-        "cal in mixmatch"
-      );
-      console.log(
-        cartFlatTotalInDiscount,
-        "cartFlatTotalInDiscount in mixmatch"
-      );
-      
-      setTotal(cartFlatTotalInDiscount - mixMatchDiscount);
+        //create an array that has the total amount of quantities for each offer
 
-      // setQuantityInputValue({
-      //   ...quantityInputValue,
-      //   [product.PARTNAME]: parseInt(product.quantity),
-      // });
+        // updatedDataMix.forEach(item => {
+        //   if (item.MIX_MATCH_DISCOUNTED == true)
+        //     console.log(item, 'item that is mixed');
+        // });
+        const mixMatchDiscount = caluclateMixMatch(updatedDataMix);
 
-      // setProductQuantity({
-      //   ...productQuantity,
-      //   [product.PARTNAME]: product.quantity,
-      // });
+        console.log(mixMatchDiscount, "cal in mixmatch");
+        console.log(
+          cartFlatTotalInDiscount,
+          "cartFlatTotalInDiscount in mixmatch"
+        );
 
-      // setTotal(
-      //   cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
-      // );
+        setTotal(cartFlatTotalInDiscount - mixMatchDiscount);
+
+        // setQuantityInputValue({
+        //   ...quantityInputValue,
+        //   [product.PARTNAME]: parseInt(product.quantity),
+        // });
+
+        // setProductQuantity({
+        //   ...productQuantity,
+        //   [product.PARTNAME]: product.quantity,
+        // });
+
+        // setTotal(
+        //   cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
+        // );
+      }
     }
   }
 };
@@ -159,13 +164,14 @@ function ProductDiscountModal(props) {
     setQuantityInputValue,
     caluclateFlatTotal,
     caluclateDiscount,
+    setDiscountAmount,
     productQuantity,
     setProductQuantity,
     discountLabel,
     setDiscountLabel,
     freeQuantity,
     setFreeQuantity,
-    caluclateMixMatch
+    caluclateMixMatch,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -274,8 +280,6 @@ function ProductDiscountModal(props) {
       //       console.log(singleCartItem, "singleCartItem is 4");
       //   });
       // }, [cartItems]);
-    
-      
 
       cartTotalPrice +=
         parseFloat(product.WSPLPRICE) * parseInt(product.quantity);
@@ -340,7 +344,7 @@ function ProductDiscountModal(props) {
                                   <Button
                                     variant="primary"
                                     onClick={() =>
-                                      handleSwipe("left", rowSearch )
+                                      handleSwipe("left", rowSearch)
                                     }
                                   >
                                     <p>
@@ -370,6 +374,7 @@ function ProductDiscountModal(props) {
                                         setQuantityInputValue,
                                         caluclateFlatTotal,
                                         caluclateDiscount,
+                                        setDiscountAmount,
                                         productQuantity,
                                         setProductQuantity,
                                         discountLabel,
@@ -489,6 +494,7 @@ function ProductDiscountModal(props) {
                                   setQuantityInputValue,
                                   caluclateFlatTotal,
                                   caluclateDiscount,
+                                  setDiscountAmount,
                                   productQuantity,
                                   setProductQuantity,
                                   discountLabel,
