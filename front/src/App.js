@@ -4,6 +4,7 @@ import {
   Route,
   RouterProvider,
   useNavigate,
+  Navigate
 } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
@@ -26,10 +27,10 @@ import ReturnPolicy from "./pages/ReturnPolicy";
 
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isVendorName, setIsVendorName] = useState("");
   const token = localStorage.getItem("kedTokAuth");
-
+  const [isAuthenticated, setIsAuthenticated] = useState(token ? true : false);
+  
   console.log(isAuthenticated, "isAuthenticated tesst");
 
   useEffect(() => {
@@ -55,14 +56,13 @@ function App() {
           //   pathname: "/app",
           //   //search: `?userId=${username}`,
           // });
-        } else if (response.status === 401) {
-          console.log("token not valide");
-          setIsAuthenticated(false);
-        } else {
+        }else {
           // Other error occurred
           throw new Error("Failed to authenticate token.");
         }
       } catch (error) {
+        setIsAuthenticated(false);
+        localStorage.removeItem('kedTokAuth');
         console.error(error);
         // Handle the error, e.g., show an error message or redirect to an error page
       }
@@ -74,18 +74,21 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-        <Route
-          path="/"
-          element={
-            <Login
-              setIsVendorName={setIsVendorName}
-              setIsAuthenticated={setIsAuthenticated}
+        {!isAuthenticated ?
+          <>
+            <Route
+              path="/"
+              element={
+                <Login
+                  setIsVendorName={setIsVendorName}
+                  setIsAuthenticated={setIsAuthenticated}
+                />
+              }
             />
-          }
-        />
-        <Route path="/contact" element={<Contact />} />
-
-        <Route element={<PrivateRoutes isAuthenticated={isAuthenticated} />}>
+            <Route path="/contact" element={<Contact />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </>
+        :
           <Route
             element={
               <Navbar
@@ -109,8 +112,9 @@ function App() {
             <Route path="/app/return-policy" element={<ReturnPolicy />} />
             <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/contact" element={<Contact />} />
+            <Route path="*" element={<Navigate to="/app" />} />
           </Route>
-        </Route>
+        }
       </>
     )
   );
