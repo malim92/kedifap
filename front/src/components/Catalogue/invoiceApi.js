@@ -5,15 +5,18 @@ export const FetchInvoiceData = async (
     sorting,
     globalFilter,
     columnFilters,
-    pagination,
+    // pagination,
     setData,
     setRowCount,
     setIsError
   ) => {
     
+    let userId = localStorage.getItem('userId');
     const url = new URL(
-      `${process.env.REACT_APP_API_URL}/invoices`
+      `${process.env.REACT_APP_API_URL}/invoices?customer_id=${userId}`
     );
+  url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
+
     console.log(url, "url invoices");
   
     try {

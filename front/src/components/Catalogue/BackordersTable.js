@@ -57,7 +57,13 @@ const BackordersTable = () => {
     try {
       const response = await axios.get(url);
       console.log(response.data.value, "fetchOrderProducts 1");
-      const ordersList = response.data.B2B_ORDERITEMS_SUBFORM;
+      const ordersList = response.data.B2B_ORDERITEMS_SUBFORM.map((item) => ({
+        ...item,
+        PRICE: (parseFloat(item.PRICE) / 100).toFixed(2)
+      }));
+
+      
+
       setProductShow(!productShow);
       setPopupModalProduct({ ordersList });
       console.log(ordersList, "ordersList ");

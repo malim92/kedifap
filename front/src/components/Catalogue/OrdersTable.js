@@ -52,10 +52,6 @@ const OrdersTable = () => {
 
   const fetchOrderProducts = async (order) => {
     const orderId = order.original.ORDNAME;
-
-    const username = "apiuser";
-    const password = "1234";
-    
     
     const url = new URL(`${process.env.REACT_APP_API_URL}/backorder-products?order_id=${orderId}`);
     console.log(url, "url backorders");
@@ -63,7 +59,10 @@ const OrdersTable = () => {
     try {
       const response = await axios.get(url);
       console.log(response.data.value, "fetchOrderProducts 1");
-      const ordersList = response.data.B2B_ORDERITEMS_SUBFORM;
+      const ordersList = response.data.B2B_ORDERITEMS_SUBFORM.map((item) => ({
+        ...item,
+        PRICE: (parseFloat(item.PRICE) / 100).toFixed(2)
+      }));
       setProductShow(!productShow);
       setPopupModalProduct({ ordersList });
       console.log(ordersList, "ordersList ");

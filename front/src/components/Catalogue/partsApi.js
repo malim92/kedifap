@@ -1,4 +1,4 @@
-import VENDORS from "./VENDORS_DATA.json";
+// import VENDORS from "./VENDORS_DATA.json";
 import moment from "moment";
 
 export const FetchPartsData = async (
@@ -6,7 +6,6 @@ export const FetchPartsData = async (
   globalFilter,
   columnFilters,
   pagination,
-  stockData,
   setIconDisplay,
   setData,
   setRowCount,
@@ -80,34 +79,60 @@ export const FetchPartsData = async (
     console.log(url, "url");
     const response = await fetch(url.href);
     const json = await response.json();
-    // console.log(response, "response test");
+
+    console.log(json.data, "json pro");
+
+    //fetch vendors
+    let vendorJson;
+    try {
+      const vendorUrl = new URL(`${process.env.REACT_APP_API_URL}/vendors`);
+
+      const vendorResponse = await fetch(vendorUrl.href);
+      vendorJson = await vendorResponse.json();
+    } catch (error) {
+      setIsError(true);
+      console.error(error);
+      return;
+    }
 
     //replace supplier and importer code with name
     let supplierUpdatedArray = json.data.map((item) => {
-      let supplierName = VENDORS.value.find(
+      let supplierName = vendorJson.find(
         (vName) => vName.SUPNAME === item.SUPNAME
       );
-      let distributerName = VENDORS.value.find(
+
+      let distributerName = vendorJson.find(
         (dName) => dName.SUPNAME === item.DEXT_IMPORTERNAME
       );
+
       if (distributerName && supplierName) {
         return {
           ...item,
+          WSPLPRICE: (parseFloat(item.WSPLPRICE)).toFixed(2),
+          VATPRICE: (parseFloat(item.VATPRICE)).toFixed(2),
           SUPNAME: supplierName.SUPDES,
           DEXT_IMPORTERNAME: distributerName.SUPDES,
         };
       }
-      return item;
+
+      return {
+        ...item,
+        WSPLPRICE: (parseFloat(item.WSPLPRICE)).toFixed(2),
+        VATPRICE: (parseFloat(item.VATPRICE)).toFixed(2),
+      };
     });
 
-    // if (supValue !== "") {
-    // console.log(supValue, "supValue");
-    //   supValue = supValue.toLowerCase();
-    //   supplierUpdatedArray = supplierUpdatedArray.filter(
-    //     (supplierNameInArray) =>
-    //       supplierNameInArray.DEXT_IMPORTERNAME.toLowerCase().includes(supValue)
-    //   );
-    // }
+    let stockJson;
+    try {
+      const stockUrl = new URL("/stock", `${process.env.REACT_APP_API_URL}`);
+
+      const stockResponse = await fetch(stockUrl.href);
+      stockJson = await stockResponse.json();
+    } catch (error) {
+      setIsError(true);
+      console.error(error);
+      return;
+    }
 
     let discountJson;
     try {
@@ -123,6 +148,8 @@ export const FetchPartsData = async (
       console.error(error);
       return;
     }
+    
+
     let updatedArray = supplierUpdatedArray.map((item) => {
       const discountObjs = discountJson.filter(
         (discountItem) => discountItem.DEXT_OFFERPARTNAME === item.PARTNAME
@@ -130,9 +157,8 @@ export const FetchPartsData = async (
 
       if (discountObjs.length > 0) {
         setIconDisplay("inline-block");
-        const filteredDiscounts = discountObjs
-          //.filter((discountObj) => discountObj.OFFERDES.SALES == 'Y')
-          .map((discountObj) => ({
+        console.log(discountObjs, "discountObjs 1");
+        const filteredDiscounts = discountObjs.map((discountObj) => ({
             DISCOUNT: discountObj.DISCOUNT,
             OFFERQTY: discountObj.OFFERQTY,
             OFFERNUM: discountObj.OFFERNUM,
@@ -175,20 +201,19 @@ export const FetchPartsData = async (
     //     // return item;
     //   });
     updatedArray = updatedArray.map((item) => {
-      const total = stockData.reduce((acc, curr) => {
+      const total = stockJson.reduce((acc, curr) => {
         if (curr.PARTNAME === item.PARTNAME) {
-          return acc + curr.TBALANCE;
+          return (parseInt(acc) + parseInt(curr.TBALANCE));
         }
         return acc;
       }, 0);
 
-      const expiryDateCol = stockData.reduce((acc, curr) => {
+      const expiryDateCol = stockJson.reduce((acc, curr) => {
         if (curr.PARTNAME === item.PARTNAME) {
           acc = moment(curr.EXPIRYDATE).format("DD-MM-YYYY");
         }
         return acc;
       }, 0);
-
       return { ...item, stock: total, expiry: expiryDateCol };
     });
 
@@ -227,15 +252,13 @@ export const FetchPartsData = async (
       }
       return item;
     });
-
-    console.log(returnPolicyArray, "result 2");
     //console.log(stockData, "stockData");
 
     // const stockUrl = new URL( "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_PARTBAL?$filter=PARTNAME%20eq%20%27LP01059%27");
     // const stockResponse = await fetch(stockUrl.href);
     // const stockJson = await stockResponse.json();
     // console.log(stockJson.value,'stockJson');
-
+    console.log(returnPolicyArray, "json pro final");
     setData(returnPolicyArray);
     setRowCount(json.totalRows);
   } catch (error) {

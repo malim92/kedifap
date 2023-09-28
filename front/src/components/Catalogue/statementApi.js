@@ -11,12 +11,14 @@ export const FetchStatementsData = async (
   setIsError
 ) => {
 
-  const url = new URL(`${process.env.REACT_APP_API_URL}/statements`);
-  console.log(url, "url invoices");
+  let userId = localStorage.getItem('userId');
+  const url = new URL(`${process.env.REACT_APP_API_URL}/statements?customer_id=${userId}`);
+  url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
+  console.log(url, "url statements");
 
   try {
     const response = await axios.get(url);
-    console.log(response, "response invoices");
+    console.log(response, "response statements");
 
     const statementData = response.data.value.map((item) => ({
       ...item,

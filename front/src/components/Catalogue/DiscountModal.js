@@ -187,14 +187,17 @@ function ProductDiscountModal(props) {
     setCurrentBody(1);
   };
 
-  const handleSwipe = async (direction, product) => {
+  const handleSwipe = async (direction, product, index) => {
     if (direction === "left") {
       setCurrentBody(currentBody + 1);
     } else if (direction === "right" && currentBody > 1) {
       setCurrentBody(currentBody - 1);
     }
 
-    let offerResults = await FetchOffer(product.OFFERID);
+    console.log(index, "product index in swipe");
+    console.log(product, "product offer in swipe");
+    console.log(product.discounts, "product.discount offer in swipe");
+    let offerResults = await FetchOffer(index);
 
     //add the quantity balance for all same products
     const updatedOfferResults = Object.values(
@@ -312,6 +315,7 @@ function ProductDiscountModal(props) {
   }, []);
 
   if (rowSearch !== undefined) {
+
     return (
       <Modal
         show={show}
@@ -344,7 +348,7 @@ function ProductDiscountModal(props) {
                                   <Button
                                     variant="primary"
                                     onClick={() =>
-                                      handleSwipe("left", rowSearch)
+                                      handleSwipe("left", rowSearch, discount.OFFERID )
                                     }
                                   >
                                     <p>

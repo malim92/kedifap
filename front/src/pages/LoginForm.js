@@ -4,7 +4,7 @@ import axios from "axios";
 
 import pill from "../assets/login img side.png";
 
-function LoginForm({ setIsAuthenticated, setIsVendorName  }) {
+function LoginForm({ setIsAuthenticated  }) {
   let navigate = useNavigate();
 
   const [username, setUsername] = useState("");
@@ -45,7 +45,6 @@ function LoginForm({ setIsAuthenticated, setIsVendorName  }) {
 
       console.log(vendorId, "vendorId xxx");
       console.log(userId, "userId 2");
-      if (userId.startsWith("V")) setIsVendorName(userId);
       
       setIsAuthenticated(true);
       return navigate({

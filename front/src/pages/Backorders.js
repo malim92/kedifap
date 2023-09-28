@@ -3,7 +3,7 @@ import BackordersTable from "../components/Catalogue/BackordersTable";
 function BackOrders() {
     return (
         <div>
-            <h1 className="text-2xl py-4">Invoices</h1>
+            <h1 className="text-2xl py-4">Back orders</h1>
             <BackordersTable />
         </div>
     );

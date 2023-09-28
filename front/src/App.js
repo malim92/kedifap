@@ -49,8 +49,10 @@ function App() {
         if (response.status === 200) {
           // Token is valid
           console.log("token validated", token);
-          if (response.role == "vendor") setIsVendorName(response.username);
+          if (response.data.role == "vendor") setIsVendorName(response.data.userId);
           setIsAuthenticated(true);
+          console.log(isVendorName, "isVendorName tesst");
+
 
           // return navigate({
           //   pathname: "/app",
@@ -80,7 +82,7 @@ function App() {
               path="/"
               element={
                 <Login
-                  setIsVendorName={setIsVendorName}
+                  // setIsVendorName={setIsVendorName}
                   setIsAuthenticated={setIsAuthenticated}
                 />
               }

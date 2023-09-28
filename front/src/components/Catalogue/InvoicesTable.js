@@ -16,17 +16,17 @@ const InvoicesTable = () => {
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 100,
-  });
+  // const [pagination, setPagination] = useState({
+  //   pageIndex: 0,
+  //   pageSize: 100,
+  // });
 
   useEffect(() => {
     FetchInvoiceData(
       sorting,
       globalFilter,
       columnFilters,
-      pagination,
+      // pagination,
       setData,
       setRowCount,
       setIsError
@@ -34,8 +34,8 @@ const InvoicesTable = () => {
   }, [
     columnFilters,
     globalFilter,
-    pagination.pageIndex,
-    pagination.pageSize,
+    // pagination.pageIndex,
+    // pagination.pageSize,
     sorting,
   ]);
 
@@ -66,9 +66,10 @@ const InvoicesTable = () => {
       <MaterialReactTable
         columns={columns}
         data={data}
+        enablePagination={false}
         initialState={{ showColumnFilters: true }}
         manualFiltering
-        manualPagination
+        // manualPagination
         manualSorting
         muiToolbarAlertBannerProps={
           isError
@@ -80,14 +81,14 @@ const InvoicesTable = () => {
         }
         onColumnFiltersChange={setColumnFilters}
         onGlobalFilterChange={setGlobalFilter}
-        onPaginationChange={setPagination}
+        // onPaginationChange={setPagination}
         onSortingChange={setSorting}
         rowCount={rowCount}
         state={{
           columnFilters,
           globalFilter,
           isLoading,
-          pagination,
+          // pagination,
           showAlertBanner: isError,
           showProgressBars: isRefetching,
           sorting,

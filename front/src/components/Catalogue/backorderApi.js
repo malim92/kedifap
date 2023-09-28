@@ -11,13 +11,16 @@ export const FetchBackordersData = async (
   setIsError
 ) => {
 
-  const url = new URL(`${process.env.REACT_APP_API_URL}/backorders`);
+  let userId = localStorage.getItem('userId');
+  const url = new URL(`${process.env.REACT_APP_API_URL}/backorders?customer_id=${userId}`);
+  url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
   console.log(url, "url backorders");
 
   try {
     const response = await axios.get(url);
+    console.log(response, "response backorders");
 
-    const backordersData = response.data.value.map((item) => ({
+    const backordersData = response.data.map((item) => ({
       ...item,
       DEXT_SUBMISSIONDATE: moment(item.DEXT_SUBMISSIONDATE).format(
         "DD-MM-YYYY"

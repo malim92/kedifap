@@ -43,6 +43,7 @@ const StatementsTable = () => {
 
   const fetchStatement = async (statement) => {    
     const pdflink = statement.original.APIPATH;
+    console.log(statement,'pdflink');
       window.open(pdflink, '_blank');
   };
   

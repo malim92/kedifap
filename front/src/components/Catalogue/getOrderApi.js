@@ -12,10 +12,10 @@ export const FetchOrdersData = async (
 ) => {
 
   let userId = localStorage.getItem('userId');
-
-  userId =='C1001-01' ? userId = 'C1001' : userId = userId;
   
   const url = new URL(`${process.env.REACT_APP_API_URL}/fetch-orders?customer_id=${userId}`);
+  url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
+  // url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
 
   try {
     const response = await axios.get(url);
@@ -23,6 +23,8 @@ export const FetchOrdersData = async (
     //const json = await response.json();
     const ordersData = response.data.value.map((item) => ({
       ...item,
+      TOTPRICE: (parseFloat(item.TOTPRICE) / 100).toFixed(2),
+      TOTQUANT: (parseFloat(item.TOTQUANT) / 1000),
       DEXT_SUBMISSIONDATE: moment(item.DEXT_SUBMISSIONDATE).format("DD-MM-YYYY"),
     }));
 

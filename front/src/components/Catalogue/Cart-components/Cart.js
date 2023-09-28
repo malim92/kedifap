@@ -109,9 +109,10 @@ const Cart = (props) => {
     setDiscountAmount(0);
   };
 
-  const sendOrder = async (order, cartTotal) => {
+  const sendOrder = async (order, cartTotal, isVendorName) => {
     let userId = localStorage.getItem("userId");
     let userDesc = localStorage.getItem("userDesc");
+    console.log(isVendorName, "isVendorName in sendOrder.js");
 
     const productsinOrder = order.map((obj) => ({
       PARTNAME: obj.PARTNAME,
@@ -129,8 +130,10 @@ const Cart = (props) => {
       CUSTNAME: userId,
       CDES: userDesc,
       CURDATE: today,
-      DEXT_SUPPNAME: "V1239",
-      DEXT_SUPPDES: "4MORE LTD 2",
+      ...(isVendorName && { DEXT_SUPPNAME: isVendorName }),
+      ...(isVendorName && { DEXT_SUPPDES: userDesc }),
+      // DEXT_SUPPNAME: "V1239",
+      // DEXT_SUPPDES: "4MORE LTD 2",
       DCODE: null,
       DETAILS: "Test from API",
       DEXT_SUBMISSIONDATE: today,
@@ -153,6 +156,7 @@ const Cart = (props) => {
       console.log(response, "response");
       alert("Order Sent Successfully, Thank you!!");
     } catch (error) {
+      alert("There was an issue making your order, please contact support.");
       console.error(error);
     }
     setCartItems([]);
@@ -321,7 +325,7 @@ const Cart = (props) => {
               Clear Cart
             </button>
             <button
-              onClick={() => sendOrder(cartItems, total)}
+              onClick={() => sendOrder(cartItems, total, isVendorName)}
               class="btn btn-primary "
               disabled={orderButtonStatus === "disabled"}
             >

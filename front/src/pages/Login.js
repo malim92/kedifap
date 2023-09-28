@@ -19,7 +19,7 @@ import logo from "../assets/kedi logo.png";
 import leafe from "../assets/leafe.png";
 import "./login.css";
 
-export default ({ setIsAuthenticated, setIsVendorName }) => {
+export default ({ setIsAuthenticated }) => {
   const [swiperHeight, setSwiperHeight] = useState(0);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default ({ setIsAuthenticated, setIsVendorName }) => {
                   <img className="form-img" src={leafe} alt="placeholder" />
                 </div>
 
-                <LoginForm setIsVendorName={setIsVendorName} setIsAuthenticated={setIsAuthenticated} />
+                <LoginForm setIsAuthenticated={setIsAuthenticated} />
               </div>
             </Col>
           </Row>

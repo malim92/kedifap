@@ -28,8 +28,8 @@ export const ORDERS_COLUMNS = [
     {
         header: "Submission Date",
         accessorKey: 'DEXT_SUBMISSIONDATE',
-        enableColumnFilter: false,
-        enableSorting: false,
+        enableColumnFilter: true,
+        enableSorting: true,
 
     },
 ];

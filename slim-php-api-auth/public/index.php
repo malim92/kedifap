@@ -42,7 +42,7 @@ $app->add(function ($req, $res, $next) {
 
 // Display the login page
 $app->get('/', function (Request $request, Response $response, $args) {
-    
+
     //for testing
     // $username = 'api2';
     // $password = 'api2';
@@ -67,7 +67,8 @@ $app->get('/', function (Request $request, Response $response, $args) {
 // Authenticate
 $app->post('/authenticate', function (Request $request, Response $response) {
     session_start();
-    $dotenv_file = dirname(__DIR__, 1) . '..\.env';
+    // $dotenv_file = dirname(__DIR__, 1) . '..\.env';
+    $dotenv_file = dirname(__DIR__, 1) . '/.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
 
@@ -75,9 +76,9 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     $params = $request->getParsedBody();
     $name = $params['username'] ?? '';
     $pass = $params['password'] ?? '';
-    //echo $name;die;
+
     $sql = "SELECT * FROM customers WHERE DEXT_USERLOGIN = :user_id";
-    
+
     try {
         // Get DB Object
         $db = new db();
@@ -91,19 +92,20 @@ $app->post('/authenticate', function (Request $request, Response $response) {
         $data["success"] = false;
         $data["token"] = null;
         $status = 404;
-        
-        foreach ($users as $user) {
-            //print_r($user['CUSTNAME']) ;
+        $salt = 'JFLEw7skC$&hAxk4';
+        $hashed_login_attempt = crypt($pass, $salt);
 
-            if ($user['DEXT_USERLOGIN'] === $name && $user['DEXT_PASSWORD'] === $pass) {
-                
+        foreach ($users as $user) {
+
+            if ($user['DEXT_USERLOGIN'] === $name && $user['DEXT_PASSWORD'] === $hashed_login_attempt) {
+
                 $roleCheck = substr($name, 0, 1);
                 $userRole = 'customer';
-                $roleCheck == 'V' ? $userRole == 'vendor' : $userRole == 'customer';
+                $roleCheck == 'V' ? $userRole = 'vendor' : $userRole = 'customer';
                 $MyJWT = $this->JWT;
                 //return print_r($MyJWT);
                 $now = new DateTime();
-                $future = new DateTime("now +20 minutes");
+                $future = new DateTime("now +1 month");
                 $server = $request->getParams();
                 $payload = [
                     "iat" => $now->getTimeStamp(),
@@ -111,10 +113,11 @@ $app->post('/authenticate', function (Request $request, Response $response) {
                     "sub" => $server,
                     "role" => $userRole
                 ];
+
                 $secret = $dotenv_vars['SECRET'];
-                
+
                 $token = $MyJWT->encode($payload, $secret, "HS512");
-                
+
                 $sqlTokenCheck = "SELECT * FROM usr_token WHERE user_id = :user_id";
                 $token_stmt = $db->prepare($sqlTokenCheck);
                 $token_stmt->bindParam(':user_id', $name, PDO::PARAM_STR);
@@ -167,7 +170,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
                     }
                 }
 
-                
+
                 $status = 200;
                 //->withStatus(302)->withHeader('Location', 'https://kedi-app.com2go.co');
                 //return $response->withStatus(302)->withHeader('Location', 'http://localhost:3000/');
@@ -186,7 +189,6 @@ $app->get('/validate-token', function (Request $request, Response $response, arr
     // $data = array('message' => 'Hello from the backend!');
     // return $response->withJson($data);
     $file = '../log.txt'; // path to file
-    file_put_contents($file, 'here 1', FILE_APPEND);
     $dotenv_file = dirname(__DIR__, 1) . '..\.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
@@ -195,7 +197,6 @@ $app->get('/validate-token', function (Request $request, Response $response, arr
     //$token = json_decode($request->getBody())->token;
     $token_parts = explode(' ', $token);
 
-    file_put_contents($file, 'here 2', FILE_APPEND);
     if ($token_parts[0] === 'Bearer') {
         $token = $token_parts[1];
     }
@@ -208,12 +209,12 @@ $app->get('/validate-token', function (Request $request, Response $response, arr
         //return $response->withStatus(202)->withJson(['error' => 'Unauthorized']);
         return $response->withStatus(200)->withJson(['isTokenValid' => false]);
     }
-    file_put_contents($file, 'here 3', FILE_APPEND);
+
     try {
         $decoded = JWT::decode($token, $dotenv_vars['SECRET'], array('HS512'));
         $data_string = serialize($decoded);
         //file_put_contents($file, gettype($decoded) , FILE_APPEND);
-        file_put_contents($file, $data_string, FILE_APPEND);
+
         //print_r($decoded);
         //die;
         //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
@@ -371,11 +372,10 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         if ($customFilterQuery !== '') $and2 = ' AND ';
 
         $sql = "SELECT * FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery $sortingQuery LIMIT :size OFFSET :page";
-
+        
         $globalFilterDiscount = " INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME ";
 
-        $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery";
-        // var_dump($vendorSubQuery);die;
+        $totalRowsQuery = "SELECT COUNT(DISTINCT PARTNAME) FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery";
     }
 
     //global search
@@ -477,13 +477,16 @@ $app->post('/order', function (Request $request, Response $response) { {
             ],
             'verify' => false
         ]);
+        $file = './log.txt';
+        file_put_contents($file, $order, FILE_APPEND);
+
         $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
-            //$response = $client->post('/8f26953c-abf6-4290-8515-65a906f7df75', [
             'json' => $order,
         ]);
 
         $body = (string) $response->getBody();
-        $data = json_decode($body, true);
+
+        // $data = json_decode($body, true);
         return $body;
         // try {
         //     return $response->withStatus(200)->withJson($data);
@@ -495,46 +498,94 @@ $app->post('/order', function (Request $request, Response $response) { {
 
 $app->get('/vendors', function (Request $request, Response $response, array $args) {
 
-    $username = 'api2';
-    $password = 'api2';
+    $filterQuery = '';
+    $columnFilter = isset($request->getQueryParams('filters')['filters']) ? $request->getQueryParams('filters')['filters'] : '';
 
-    $client = new Client([
-        'base_uri' => 'https://priority.kedifap.local/',
-        'headers' => [
-            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
-        ],
-        'verify' => false
-    ]);
 
-    $response = $client->get('/odata/Priority/tabula.ini/efk/B2B_SUPPLIERS?$filter=STATDES eq \'Active\'', []);
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+        $columnFilterArray = json_decode($columnFilter);
+        $columnId = $columnFilterArray[0]->id;
+        $filterValue = $columnFilterArray[0]->value;
+        $filterQuery = "WHERE $columnId LIKE :filterValue";
+        // print_r($columnId);die;
+    }
 
-    $body = (string) $response->getBody();
-    $data = json_decode($body, true);
+    $sql = "SELECT * FROM `vendors` $filterQuery";
 
-    return $response;
+    $totalRowsQuery = "SELECT COUNT(SUPDES) FROM vendors  $filterQuery";
+    // return $sql;
+    try {
+
+        // Get DB Object
+        $db = new db();
+        $db = $db->connect();
+
+        $stmt = $db->prepare($sql);
+        $countStmt = $db->prepare($totalRowsQuery);
+
+        if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+            $stmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
+            $countStmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
+        }
+        // $stmt->debugDumpParams();
+        // die;
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // print_r($result );die;
+        return $response->withStatus(200)->withJson($result);
+    } catch (PDOException $e) {
+        echo '{"error": {"text": ' . $e->getMessage() . '}';
+    }
 });
 
 
 $app->get('/invoices', function (Request $request, Response $response, array $args) {
+    $customer_id = $request->getQueryParams('customer_id')['customer_id'];
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-30 day"))));
+    $columnFilter = $request->getQueryParams('filters')['filters'];
+    $filterQuery = '';
+    $ge = 'ge ';
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+        $columnFilterArray = json_decode($columnFilter);
+        $columnId = $columnFilterArray[0]->id;
+        $filterValue = $columnFilterArray[0]->value;
+        
+        if ($columnId == 'IVDATE') {
+            $ge = 'eq ';
+            $date = date("Y-m-d", strtotime($filterValue));
+            $filterQuery = '';
+        }
+        else 
+            $filterQuery = " and $columnId eq '$filterValue'";
+    }
 
     $username = 'api2';
     $password = 'api2';
 
-    $client = new Client([
-        'base_uri' => 'https://priority.kedifap.local/',
-        'headers' => [
-            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
-        ],
-        'verify' => false
-    ]);
-
-    $response = $client->get('/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq \'C1001\' and STATDES eq \'Final\' and IVDATE ge ' . $date, []);
-
-    $body = (string) $response->getBody();
-    // return $data;
-
-    return $response;
+    $url = 'https://dl.portal.kedifap.com/';
+    try {
+        $client = new Client([
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => $url,
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+            ],
+            'verify' => false
+        ]);
+    
+        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' .$ge  .$date  . $filterQuery;
+        // return $sub_url;
+    
+        $response = $client->get( $sub_url);
+    
+        // $body = (string) $response->getBody();
+        // return $data;
+    
+        return $response;
+    } catch (\Throwable $th) {
+        return $response->withStatus(401)->withJson(['error' => $th]);
+    }
+    
 });
 
 $app->get('/invoice-pdf', function (Request $request, Response $response, array $args) {
@@ -560,50 +611,97 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
 
 
 $app->get('/statements', function (Request $request, Response $response, array $args) {
+    $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+    $columnFilter = $request->getQueryParams('filters')['filters'];
+    
+    $filterQuery = '';
+
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+        $columnFilterArray = json_decode($columnFilter);
+        $columnId = $columnFilterArray[0]->id;
+        $filterValue = $columnFilterArray[0]->value;
+        $filterQuery = " and $columnId eq $filterValue";
+        $ge = 'ge ';
+        if ($columnId == 'DEXT_SUBMISSIONDATE') {
+            $date = date("Y-m-d", strtotime($filterValue));
+            $filterQuery = '';
+        }
+        
+    }
 
     $username = 'api2';
     $password = 'api2';
+    $todayDate = date("Y-m-d");
+    // $lastYearDate = '2023-08-01';
+    $lastYearDate = date("Y-m-d", strtotime("-1 year"));
+
+    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
+// return $sub_url;
+    $url = 'https://dl.portal.kedifap.com/';
+
     $client = new Client([
+        // 'base_uri' => $url,
         'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
         'verify' => false
     ]);
-    //2022-05-17    
-    $todayDate = date("Y-m-d");
-    $lastYearDate = date("Y-m-d", strtotime("-1 year"));
-    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq \'C1001\'';
-    // print_r($sub_url);die;
-    $response = $client->get($sub_url);
 
-    return $response;
+    try {
+        $response = $client->get($sub_url);
+
+        return $response;
+    } catch (\Throwable $th) {
+        return $response->withStatus(401)->withJson(['error' => $th]);
+    }
 });
 
 $app->get('/backorders', function (Request $request, Response $response, array $args) {
+
+    $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+    $columnFilter = $request->getQueryParams('filters')['filters'];
+    $filterQuery = '';
+    
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+        $columnFilterArray = json_decode($columnFilter);
+        $columnId = $columnFilterArray[0]->id;
+        $filterValue = $columnFilterArray[0]->value;
+        $where = ' WHERE ';
+        $filterQuery = " and $columnId LIKE :filterValue";
+        $and = ' AND ';
+        // print_r($columnId);die;
+    }
+
+    
+
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
 
-    $username = 'api2';
-    $password = 'api2';
-    $client = new Client([
-        'base_uri' => 'https://priority.kedifap.local/',
-        'headers' => [
-            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
-        ],
-        'verify' => false
-    ]);
-
-    $sub_url = '/odata/Priority/tabula.ini/efk/B2B_BACKORDERS?$filter=CUSTNAME eq \'C1001\' and DEXT_SUBMISSIONDATE ge ' . $date;
-    // print_r($sub_url);die;
-    $response = $client->get($sub_url);
-
-    return $response;
+    $sql = "SELECT * FROM backorders WHERE CUSTNAME = :custId AND DEXT_SUBMISSIONDATE > $date $filterQuery";
+    // return $sql;
+    try {
+        // Get DB Object
+        $db = new db();
+        // Connect
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':custId', $customer_id, PDO::PARAM_INT);
+        if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+            $stmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
+        }
+        $stmt->execute();
+        $backOrder = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $response->withStatus(200)->withJson($backOrder);
+    } catch (PDOException $e) {
+        echo '{"error": {"text": ' . $e->getMessage() . '}';
+    }
 });
 
 $app->get('/backorder-products', function (Request $request, Response $response, array $args) {
     $order_id = $request->getQueryParams('order_id')['order_id'];
     $username = 'api2';
     $password = 'api2';
+    $url = 'https://dl.portal.kedifap.com/';
     $client = new Client([
         'base_uri' => 'https://priority.kedifap.local/',
         'headers' => [
@@ -639,20 +737,49 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+    $columnFilter = $request->getQueryParams('filters')['filters'];
+    // $sorting = $request->getQueryParams('sorting')['sorting'];
+    // return $sorting;
+    $filterQuery = '';
+    $ge = 'ge ';
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+        $columnFilterArray = json_decode($columnFilter);
+        $columnId = $columnFilterArray[0]->id;
+        $filterValue = $columnFilterArray[0]->value;
+        $filterQuery = " and $columnId eq '$filterValue'";
+        
+        if ($columnId == 'DEXT_SUBMISSIONDATE') {
+            $ge = 'eq ';
+            $date = date("Y-m-d", strtotime($filterValue));
+            $filterQuery = '';
+        }
+        //        $columnId == 'DEXT_SUBMISSIONDATE' ? $ge = 'DEXT_SUBMISSIONDATE eq ' && $date = date("Y-m-d", strtotime($filterValue)) : $ge = 'DEXT_SUBMISSIONDATE ge '  ;
+
+    // print_r($columnId);die;
+    }
+
     $username = 'api2';
     $password = 'api2';
-    $client = new Client([
-        'base_uri' => 'https://priority.kedifap.local/',
-        'headers' => [
-            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
-        ],
-        'verify' => false
-    ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ge ' . $date;
-    // print_r($sub_url);die;
-    $response = $client->get($sub_url);
-
-    return $response;
+    $url = 'https://dl.portal.kedifap.com/';
+    try {
+        $client = new Client([
+            'base_uri' => 'https://priority.kedifap.local/',
+            // 'base_uri' => $url,
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+            ],
+            'verify' => false
+        ]);
+        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ' .$ge . $date . $filterQuery;
+        // return($sub_url);die;
+        $response = $client->get($sub_url);
+    
+        return $response;
+    } catch (\Throwable $th) {
+        return $response->withStatus(404)->withJson($th);
+    }
+    // return $columnFilter;
+    
 });
 
 $app->get('/discount', function (Request $request, Response $response, array $args) {
@@ -685,7 +812,8 @@ $app->get('/pharmacies', function (Request $request, Response $response, array $
         ],
         'verify' => false
     ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHCUSTONE?$filter=ACTIVEFLAG eq \'Y\'';
+    // $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHCUSTONE?$filter=ACTIVEFLAG eq \'Y\'';
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHONEBOOK';
     // print_r($sub_url);die;
     $response = $client->get($sub_url);
     // echo count($response['value']);die;
@@ -696,7 +824,7 @@ $app->get('/fetch-offer', function (Request $request, Response $response, array 
     $offer_id = $request->getQueryParams('offer_id')['offer_id'];
     // echo $offer_id;die;
     $sql = "SELECT parts.PARTNAME, parts.PARTDES, parts.SUPNAME, parts.DEXT_IMPORTERNAME, parts.VATPRICE, parts.WSPLPRICE, parts.IMGFILENAME, parts.DEXT_LOWSTOCKQTY, discount.DISCOUNT, discount.OFFERQTY, discount.OFFERDES, discount.OFFERID, discount.DEXT_OFFERCODE, stock.TBALANCE FROM `discount` INNER JOIN parts on discount.DEXT_OFFERPARTNAME = parts.PARTNAME INNER JOIN stock ON discount.DEXT_OFFERPARTNAME = stock.PARTNAME WHERE discount.OFFERID = :offerId";
-    
+
     try {
         // Get DB Object
         $db = new db();
@@ -723,7 +851,7 @@ $app->get('/fetch-offer', function (Request $request, Response $response, array 
 
 
 $app->get('/check-token', function (Request $request, Response $response, array $args) {
-    $dotenv_file = dirname(__DIR__, 1) . '..\.env';
+    $dotenv_file = dirname(__DIR__, 1) . '/.env';
     $dotenv_contents = file_get_contents($dotenv_file);
     $dotenv_vars = parse_ini_string($dotenv_contents);
 
@@ -742,7 +870,7 @@ $app->get('/check-token', function (Request $request, Response $response, array 
         $data_string = serialize($decoded);
         //print_r($decoded->sub->username);die;
         //file_put_contents($file, $data_string, FILE_APPEND);
-        
+
         //return $response->withStatus(200)->withJson(['message' => 'Token is valid']);
         return $response->withStatus(200)->withJson(['isTokenValid' => true, "role" => $decoded->role, "userId" => $decoded->sub->username]);
     } catch (\Throwable $th) {
@@ -750,5 +878,30 @@ $app->get('/check-token', function (Request $request, Response $response, array 
         return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
     }
 });
+
+
+$app->get('/stock', function (Request $request, Response $response, array $args) {
+
+    $sql = "SELECT * FROM `stock`";
+
+    try {
+
+        // Get DB Object
+        $db = new db();
+        $db = $db->connect();
+
+        $stmt = $db->prepare($sql);
+
+        // $stmt->debugDumpParams();
+        // die;
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // print_r($result );die;
+        return $response->withStatus(200)->withJson($result);
+    } catch (PDOException $e) {
+        echo '{"error": {"text": ' . $e->getMessage() . '}';
+    }
+});
+
 
 $app->run();

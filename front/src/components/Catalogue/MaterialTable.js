@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
 import { Info } from "@mui/icons-material";
 import PopupModal from "./Modal";
@@ -12,7 +12,6 @@ import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { COLUMNS } from "./columns-material";
 import { FetchPartsData } from "./partsApi";
-import STOCK from "./stock.json";
 import Cart from "./Cart-components/Cart";
 import "./MaterialTable.css";
 
@@ -63,8 +62,6 @@ const MaterialTable = ({ isVendorName }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartTemplate, setCartTemplate] = useState([]);
 
-  const stockData = useMemo(() => STOCK, []);
-
   const [iconDisplay, setIconDisplay] = useState(["none"]);
 
   const [barcodeValue, setBarcodeValue] = useState("");
@@ -102,7 +99,6 @@ const MaterialTable = ({ isVendorName }) => {
         globalFilter,
         columnFilters,
         pagination,
-        stockData,
         setIconDisplay,
         setData,
         setRowCount,
@@ -138,7 +134,6 @@ const MaterialTable = ({ isVendorName }) => {
       globalFilter,
       columnFilters,
       pagination,
-      stockData,
       setIconDisplay,
       setData,
       setRowCount,
@@ -441,11 +436,11 @@ const MaterialTable = ({ isVendorName }) => {
           showColumnFilters: true,
           columnVisibility: {
             BARCODE: false,
-            stock: false,
+            stock: true,
             SPEC19: true,
             SUPNAME: false,
             DEXT_IMPORTERNAME: false,
-            DEXT_BRAND: true,
+            DEXT_BRAND: false,
             SPEC1: false,
           },
         }}

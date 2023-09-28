@@ -8,10 +8,10 @@ export const FetchPharmacies = async () => {
     const response = await axios.get(url);
 
     const modifiedPharmaciesList = response.data.value
-  .reduce((acc, { CUSTDES, CUSTNAME }) => {
+  .reduce((acc, { FIRM, CUSTNAME }) => {
     const existingItem = acc.find(item => item.Code === CUSTNAME);
     if (!existingItem) {
-      acc.push({ label: CUSTDES, Code: CUSTNAME });
+      acc.push({ label: FIRM, Code: CUSTNAME });
     }
     return acc;
   }, []);
