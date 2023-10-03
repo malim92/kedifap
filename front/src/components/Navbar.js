@@ -71,7 +71,9 @@ export default function Navbar({ setIsAuthenticated, isVendorName }) {
         </div>
       </nav>
       <div className="w-4/5 mx-auto px-4">
-        <Banners />
+      {isVendorName == '' && (
+      <Banners />
+      )}
         <main>
           <Outlet />
         </main>

@@ -8,10 +8,9 @@ import { BsExclamationTriangle } from "react-icons/bs";
 import { MdWaterDrop } from "react-icons/md";
 import { TbFridge } from "react-icons/tb";
 
-
 function ProductModal(props) {
   const { show, handleClose, popupModalData } = props;
-
+  console.log(popupModalData, "test1");
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -26,20 +25,48 @@ function ProductModal(props) {
         {/* <p>Φ.Π.Α %: {popupModalData.vat}</p> */}
         <p>Διανομέα: {popupModalData.distributer}</p>
         <p>Barcode Συσκευασίας: {popupModalData.barcode}</p>
-        <p>Κωδικός Φ.Υ: {popupModalData.pharmaCode}</p>
+        {popupModalData.pharmaCode && (
+          <p>Κωδικός Φ.Υ: {popupModalData.pharmaCode}</p>
+        )}
         <p>Αντιπρόσωπο: {popupModalData.supplier}</p>
-        <p>return policy: {popupModalData.policy}</p>
-        
+        {popupModalData.policy && <p>Return Policy: {popupModalData.policy}</p>}
+        {popupModalData.stock_object &&
+          popupModalData.stock_object.length > 0 && (
+            <>
+              <p>Διαθέσιμες ημερομήνιες λήξεις</p>
+
+              {popupModalData.stock_object.map((productItem, index) => (
+                <p>{productItem.EXPIRYDATE}</p>
+              ))}
+            </>
+          )}
+
+        {/* <p>Stock Details: {popupModalData.stock_object[0].TBALANCE}</p> */}
+
         <Container>
           <Row>
             <div class="d-flex">
-            {popupModalData.ghs === 1 ? <img src={gesy} alt="gesy" style={{width: "30px"}}/> : null}
-            
-            {popupModalData.fragile === 1 ? <BsExclamationTriangle style={{color: "#93812b", width: "30px", fontSize:"25px"}}/> : null}
-            
-            {popupModalData.liquid === 1 ? <MdWaterDrop style={{color: "#2f4fa7", width: "30px", fontSize:"25px"}}/> : null}
-            
-            {popupModalData.fridge === 1 ? <TbFridge style={{color: "#2134bd", width: "30px", fontSize:"25px",}}/> : null}
+              {popupModalData.ghs == 1 ? (
+                <img src={gesy} alt="gesy" style={{ width: "30px" }} />
+              ) : null}
+
+              {popupModalData.fragile == 1 ? (
+                <BsExclamationTriangle
+                  style={{ color: "#93812b", width: "30px", fontSize: "25px" }}
+                />
+              ) : null}
+
+              {popupModalData.liquid == 1 ? (
+                <MdWaterDrop
+                  style={{ color: "#2f4fa7", width: "30px", fontSize: "25px" }}
+                />
+              ) : null}
+
+              {popupModalData.fridge == 1 ? (
+                <TbFridge
+                  style={{ color: "#2134bd", width: "30px", fontSize: "25px" }}
+                />
+              ) : null}
             </div>
           </Row>
         </Container>

@@ -236,6 +236,7 @@ const MaterialTable = ({ isVendorName }) => {
       liquid: rowSearch.DEXT_LIQUID,
       fridge: rowSearch.DEXT_FRAGILE,
       policy: rowSearch.DEXT_SUPPOLICYCODE,
+      stock_object: rowSearch.stock_object,
     });
   };
 

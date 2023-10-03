@@ -6,8 +6,9 @@ export const FetchPharmacies = async () => {
 
   try {
     const response = await axios.get(url);
-
-    const modifiedPharmaciesList = response.data.value
+    console.log(response, "response pharmacies");
+    // return response;
+    const modifiedPharmaciesList = response.data
   .reduce((acc, { FIRM, CUSTNAME }) => {
     const existingItem = acc.find(item => item.Code === CUSTNAME);
     if (!existingItem) {

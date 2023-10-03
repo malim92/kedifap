@@ -99,7 +99,7 @@ function App() {
               />
             }
           >
-            <Route path="/app" element={<Home />} />
+            <Route path="/app" element={<Home isVendorName={isVendorName} />} />
             <Route
               path="/app/catalogue"
               element={<ProductsTable isVendorName={isVendorName} />}

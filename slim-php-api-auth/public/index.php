@@ -372,7 +372,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         if ($customFilterQuery !== '') $and2 = ' AND ';
 
         $sql = "SELECT * FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery $sortingQuery LIMIT :size OFFSET :page";
-        
+
         $globalFilterDiscount = " INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME ";
 
         $totalRowsQuery = "SELECT COUNT(DISTINCT PARTNAME) FROM parts INNER JOIN discount ON parts.PARTNAME = discount.DEXT_OFFERPARTNAME $vendorSubQuery $where $filterQuery $and $customFilterQuery $and2 $isVendorQuery $where2 $and3 $quotaFilterQuery";
@@ -549,13 +549,12 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
         $filterValue = $columnFilterArray[0]->value;
-        
+
         if ($columnId == 'IVDATE') {
             $ge = 'eq ';
             $date = date("Y-m-d", strtotime($filterValue));
             $filterQuery = '';
-        }
-        else 
+        } else
             $filterQuery = " and $columnId eq '$filterValue'";
     }
 
@@ -565,27 +564,26 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
     $url = 'https://dl.portal.kedifap.com/';
     try {
         $client = new Client([
-            // 'base_uri' => 'https://priority.kedifap.local/',
-            'base_uri' => $url,
+            'base_uri' => 'https://priority.kedifap.local/',
+            // 'base_uri' => $url,
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
             'verify' => false
         ]);
-    
-        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' .$ge  .$date  . $filterQuery;
+
+        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' . $ge  . $date  . $filterQuery;
         // return $sub_url;
-    
-        $response = $client->get( $sub_url);
-    
+
+        $response = $client->get($sub_url);
+
         // $body = (string) $response->getBody();
         // return $data;
-    
+
         return $response;
     } catch (\Throwable $th) {
         return $response->withStatus(401)->withJson(['error' => $th]);
     }
-    
 });
 
 $app->get('/invoice-pdf', function (Request $request, Response $response, array $args) {
@@ -613,7 +611,7 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
 $app->get('/statements', function (Request $request, Response $response, array $args) {
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
     $columnFilter = $request->getQueryParams('filters')['filters'];
-    
+
     $filterQuery = '';
 
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
@@ -626,7 +624,6 @@ $app->get('/statements', function (Request $request, Response $response, array $
             $date = date("Y-m-d", strtotime($filterValue));
             $filterQuery = '';
         }
-        
     }
 
     $username = 'api2';
@@ -635,8 +632,10 @@ $app->get('/statements', function (Request $request, Response $response, array $
     // $lastYearDate = '2023-08-01';
     $lastYearDate = date("Y-m-d", strtotime("-1 year"));
 
-    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
-// return $sub_url;
+    // $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
+    //$sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE%20ge%20' . $lastYearDate . 'T00:00:00%2B02:00%20%20and%20CUSTNAME%20eq%20%27' . $customer_id . '%27' . $filterQuery;
+    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE ge 2023-09-01T00:00:00%2B02:00%20%20and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
+    // return $sub_url;
     $url = 'https://dl.portal.kedifap.com/';
 
     $client = new Client([
@@ -662,7 +661,7 @@ $app->get('/backorders', function (Request $request, Response $response, array $
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
     $columnFilter = $request->getQueryParams('filters')['filters'];
     $filterQuery = '';
-    
+
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
@@ -673,7 +672,7 @@ $app->get('/backorders', function (Request $request, Response $response, array $
         // print_r($columnId);die;
     }
 
-    
+
 
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
 
@@ -747,7 +746,7 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
         $columnId = $columnFilterArray[0]->id;
         $filterValue = $columnFilterArray[0]->value;
         $filterQuery = " and $columnId eq '$filterValue'";
-        
+
         if ($columnId == 'DEXT_SUBMISSIONDATE') {
             $ge = 'eq ';
             $date = date("Y-m-d", strtotime($filterValue));
@@ -755,7 +754,7 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
         }
         //        $columnId == 'DEXT_SUBMISSIONDATE' ? $ge = 'DEXT_SUBMISSIONDATE eq ' && $date = date("Y-m-d", strtotime($filterValue)) : $ge = 'DEXT_SUBMISSIONDATE ge '  ;
 
-    // print_r($columnId);die;
+        // print_r($columnId);die;
     }
 
     $username = 'api2';
@@ -770,16 +769,16 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
             ],
             'verify' => false
         ]);
-        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ' .$ge . $date . $filterQuery;
+        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ' . $ge . $date . $filterQuery;
         // return($sub_url);die;
         $response = $client->get($sub_url);
-    
+
         return $response;
     } catch (\Throwable $th) {
         return $response->withStatus(404)->withJson($th);
     }
     // return $columnFilter;
-    
+
 });
 
 $app->get('/discount', function (Request $request, Response $response, array $args) {
@@ -803,22 +802,42 @@ $app->get('/discount', function (Request $request, Response $response, array $ar
 
 $app->get('/pharmacies', function (Request $request, Response $response, array $args) {
 
-    $username = 'api2';
-    $password = 'api2';
-    $client = new Client([
-        'base_uri' => 'https://priority.kedifap.local/',
-        'headers' => [
-            'Authorization' => 'Basic ' . base64_encode("$username:$password"),
-        ],
-        'verify' => false
-    ]);
-    // $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHCUSTONE?$filter=ACTIVEFLAG eq \'Y\'';
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHONEBOOK';
-    // print_r($sub_url);die;
-    $response = $client->get($sub_url);
-    // echo count($response['value']);die;
-    return $response;
+    $sql = "SELECT * FROM customers WHERE CUSTNAME LIKE 'C%'";
+
+    try {
+        // Get DB Object
+        $db = new db();
+        // Connect
+        $db = $db->connect();
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $response->withStatus(200)->withJson($users);
+    } catch (PDOException $e) {
+        echo '{"error": {"text": ' . $e->getMessage() . '}';
+    }
+    // print_r($response);die;
 });
+
+// $app->get('/pharmacies', function (Request $request, Response $response, array $args) {
+
+//     $username = 'api2';
+//     $password = 'api2';
+//     $client = new Client([
+//         'base_uri' => 'https://priority.kedifap.local/',
+//         'headers' => [
+//             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+//         ],
+//         'verify' => false
+//     ]);
+//     // $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHCUSTONE?$filter=ACTIVEFLAG eq \'Y\'';
+//     $sub_url = 'odata/Priority/tabula.ini/efk/B2B_PHONEBOOK';
+//     // print_r($sub_url);die;
+//     $response = $client->get($sub_url);
+//     // echo count($response['value']);die;
+//     return $response;
+// });
 
 $app->get('/fetch-offer', function (Request $request, Response $response, array $args) {
     $offer_id = $request->getQueryParams('offer_id')['offer_id'];

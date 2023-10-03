@@ -108,8 +108,8 @@ export const FetchPartsData = async (
       if (distributerName && supplierName) {
         return {
           ...item,
-          WSPLPRICE: (parseFloat(item.WSPLPRICE)).toFixed(2),
-          VATPRICE: (parseFloat(item.VATPRICE)).toFixed(2),
+          WSPLPRICE: parseFloat(item.WSPLPRICE).toFixed(2),
+          VATPRICE: parseFloat(item.VATPRICE).toFixed(2),
           SUPNAME: supplierName.SUPDES,
           DEXT_IMPORTERNAME: distributerName.SUPDES,
         };
@@ -117,8 +117,8 @@ export const FetchPartsData = async (
 
       return {
         ...item,
-        WSPLPRICE: (parseFloat(item.WSPLPRICE)).toFixed(2),
-        VATPRICE: (parseFloat(item.VATPRICE)).toFixed(2),
+        WSPLPRICE: parseFloat(item.WSPLPRICE).toFixed(2),
+        VATPRICE: parseFloat(item.VATPRICE).toFixed(2),
       };
     });
 
@@ -148,7 +148,6 @@ export const FetchPartsData = async (
       console.error(error);
       return;
     }
-    
 
     let updatedArray = supplierUpdatedArray.map((item) => {
       const discountObjs = discountJson.filter(
@@ -159,15 +158,15 @@ export const FetchPartsData = async (
         setIconDisplay("inline-block");
         console.log(discountObjs, "discountObjs 1");
         const filteredDiscounts = discountObjs.map((discountObj) => ({
-            DISCOUNT: discountObj.DISCOUNT,
-            OFFERQTY: discountObj.OFFERQTY,
-            OFFERNUM: discountObj.OFFERNUM,
-            OFFERDES: discountObj.OFFERDES,
-            FREEQTY: discountObj.FREEQTY,
-            SALES: discountObj.SALES,
-            OFFERID: discountObj.OFFERID,
-            DEXT_OFFERCODE: discountObj.DEXT_OFFERCODE,
-          }));
+          DISCOUNT: discountObj.DISCOUNT,
+          OFFERQTY: discountObj.OFFERQTY,
+          OFFERNUM: discountObj.OFFERNUM,
+          OFFERDES: discountObj.OFFERDES,
+          FREEQTY: discountObj.FREEQTY,
+          SALES: discountObj.SALES,
+          OFFERID: discountObj.OFFERID,
+          DEXT_OFFERCODE: discountObj.DEXT_OFFERCODE,
+        }));
 
         if (filteredDiscounts.length > 0) {
           return {
@@ -188,22 +187,23 @@ export const FetchPartsData = async (
     //       (stockItem) => stockItem.PARTNAME === item.PARTNAME
     //     );
 
-    //     console.log(sotckObjs, "sotckObjs");
-    //     // if (sotckObjs.length > 0) {
-    //     //   return {
-    //     //     ...item,
-    //     //     stock: sotckObjs.map((discountObj) => ({
-    //     //       DISCOUNT: discountObj.DISCOUNT,
-    //     //       OFFERQTY: discountObj.OFFERQTY,
-    //     //     })),
-    //     //   };
-    //     // }
-    //     // return item;
-    //   });
+    // console.log(sotckObjs, "sotckObjs");
+    // if (sotckObjs.length > 0) {
+    //   return {
+    //     ...item,
+    //     stock: sotckObjs.map((discountObj) => ({
+    //       DISCOUNT: discountObj.DISCOUNT,
+    //       OFFERQTY: discountObj.OFFERQTY,
+    //     })),
+    //   };
+    // }
+    // return item;
+    // });
+
     updatedArray = updatedArray.map((item) => {
       const total = stockJson.reduce((acc, curr) => {
         if (curr.PARTNAME === item.PARTNAME) {
-          return (parseInt(acc) + parseInt(curr.TBALANCE));
+          return parseInt(acc) + parseInt(curr.TBALANCE);
         }
         return acc;
       }, 0);
@@ -214,9 +214,55 @@ export const FetchPartsData = async (
         }
         return acc;
       }, 0);
-      return { ...item, stock: total, expiry: expiryDateCol };
+
+      // const expiryDateCol = stockJson.filter((expiryItem) => {
+      //   if (expiryItem.PARTNAME == item.PARTNAME) {
+      //     return  moment(expiryItem.EXPIRYDATE).format("DD-MM-YYYY");
+      //   }
+      // });
+
+      // console.log(expiryDateCol, "expiryDateCol");
+
+      const sotckObjs = stockJson.filter(
+        (stockItem) => stockItem.PARTNAME === item.PARTNAME
+      );
+
+      // const exDate = stockJson.reduce((acc, curr) => {
+      //   acc = curr;
+      //   acc.EXPIRYDATE = moment(acc.EXPIRYDATE).format("DD-MM-YYYY");
+      //   // const dateIsAfter = moment(curr.EXPIRYDATE).isBefore(moment(acc.EXPIRYDATE));
+      //   if (moment(acc.EXPIRYDATE).isBefore(moment(curr.EXPIRYDATE))){
+
+      //     return acc;
+      //   }
+      // }, {});
+      let mostRecentDate;
+      if (sotckObjs.length > 0) {
+          mostRecentDate = sotckObjs.reduce((previousDate, currentDate) => {
+
+          let previousMoment = moment(previousDate.EXPIRYDATE)
+          let currentMoment = moment(currentDate.EXPIRYDATE)
+
+          return currentMoment.isBefore(previousMoment)
+            ? currentDate
+            : previousDate;
+        });
+
+      }
+
+      return {
+        ...item,
+        stock: total,
+        stock_object: sotckObjs,
+        expiry: mostRecentDate ? mostRecentDate.EXPIRYDATE : '0'
+      };
     });
 
+    // updatedArray = updatedArray.map((item) => {
+
+    //   return { ...item,  };
+    // });
+    // console.log(sotckObjs, "sotckObjs");
     //replace return policy code with description
     let returnPolicyArray = updatedArray.map((item) => {
       if (item.DEXT_SUPPOLICYCODE == "6M") {

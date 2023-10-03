@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import announcements from "../components/Announcements/announcements.json";
 import { GoPrimitiveSquare } from "react-icons/go";
 
-function Home() {
+function Home({ isVendorName }) {
   const [welcomeUser, setWelcomeUser] = useState("");
 
-  let userDesc = localStorage.getItem('userDesc');
+  let userDesc = localStorage.getItem("userDesc");
 
   useEffect(() => {
     setWelcomeUser(userDesc);
@@ -18,15 +18,18 @@ function Home() {
       {announce.title}
     </div>
   ));
+
   return (
     <>
       <div>
         <h1 className="text-2xl py-4">Welcome {welcomeUser}</h1>
       </div>
-      <div>
-        <h1 className="text-2xl py-4">Ανακοινώσεις</h1>
-        <div>{renderedAnnoucements}</div>
-      </div>
+      {isVendorName == "" && (
+        <div>
+          <h1 className="text-2xl py-4">Ανακοινώσεις</h1>
+          <div>{renderedAnnoucements}</div>
+        </div>
+      )}
     </>
   );
 }
