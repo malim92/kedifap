@@ -61,7 +61,8 @@ export const COLUMNS = [
     enableSorting: false,
     Cell: ({ cell }) =>
       {
-        const monthsDifference = now.diff(cell.row.original.expiry, "months");
+        const expiryDate = moment(cell.row.original.expiry, "DD-MM-YYYY");
+        const monthsDifference = now.diff(expiryDate, "months");
         if (monthsDifference > -6) {
             return <p style={{color:"red", fontWeight:"700"}}>{cell.row.original.expiry}</p>
         } else {

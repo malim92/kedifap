@@ -7,6 +7,7 @@ import gesy from "../../assets/GESY_FINAL_LOGO_NCR_L.png";
 import { BsExclamationTriangle } from "react-icons/bs";
 import { MdWaterDrop } from "react-icons/md";
 import { TbFridge } from "react-icons/tb";
+import moment from "moment";
 
 function ProductModal(props) {
   const { show, handleClose, popupModalData } = props;
@@ -36,7 +37,7 @@ function ProductModal(props) {
               <p>Διαθέσιμες ημερομήνιες λήξεις</p>
 
               {popupModalData.stock_object.map((productItem, index) => (
-                <p>{productItem.EXPIRYDATE}</p>
+                <p>{moment(productItem.EXPIRYDATE).format("DD-MM-YYYY")}</p>
               ))}
             </>
           )}

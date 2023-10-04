@@ -684,7 +684,7 @@ $app->get('/backorders', function (Request $request, Response $response, array $
         // Connect
         $db = $db->connect();
         $stmt = $db->prepare($sql);
-        $stmt->bindValue(':custId', $customer_id, PDO::PARAM_INT);
+        $stmt->bindValue(':custId', $customer_id, PDO::PARAM_STR);
         if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
             $stmt->bindValue(':filterValue', '%' . $filterValue . '%', PDO::PARAM_STR);
         }

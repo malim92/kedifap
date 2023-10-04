@@ -208,12 +208,12 @@ export const FetchPartsData = async (
         return acc;
       }, 0);
 
-      const expiryDateCol = stockJson.reduce((acc, curr) => {
-        if (curr.PARTNAME === item.PARTNAME) {
-          acc = moment(curr.EXPIRYDATE).format("DD-MM-YYYY");
-        }
-        return acc;
-      }, 0);
+      // const expiryDateCol = stockJson.reduce((acc, curr) => {
+      //   if (curr.PARTNAME === item.PARTNAME) {
+      //     acc = moment(curr.EXPIRYDATE).format("DD-MM-YYYY");
+      //   }
+      //   return acc;
+      // }, 0);
 
       // const expiryDateCol = stockJson.filter((expiryItem) => {
       //   if (expiryItem.PARTNAME == item.PARTNAME) {
@@ -249,12 +249,12 @@ export const FetchPartsData = async (
         });
 
       }
-
+      
       return {
         ...item,
         stock: total,
         stock_object: sotckObjs,
-        expiry: mostRecentDate ? mostRecentDate.EXPIRYDATE : '0'
+        expiry: mostRecentDate ? moment(mostRecentDate.EXPIRYDATE).format("DD-MM-YYYY") : '0'
       };
     });
 
