@@ -1,8 +1,36 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import MaterialReactTable from "material-react-table";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import { INVOICE_COLUMNS } from "./columns-invoice";
 import { FetchInvoiceData } from "./invoiceApi";
+import { pink, red } from "@mui/material/colors";
+import { alpha, styled } from "@mui/material/styles";
+import Switch from "@mui/material/Switch";
+
+const MaterialUISwitch = styled(Switch)(({ theme }) => ({
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: red[900],
+    "&:hover": {
+      backgroundColor: alpha(red[900], theme.palette.action.hoverOpacity),
+    },
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: red[900],
+  },
+}));
+
+const MaterialUISwitchQuota = styled(Switch)(({ theme }) => ({
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: pink["A200"],
+    "&:hover": {
+      backgroundColor: alpha(pink["A200"], theme.palette.action.hoverOpacity),
+    },
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: red[900],
+  },
+}));
 
 const InvoicesTable = () => {
   //data and fetching state
@@ -63,6 +91,38 @@ const InvoicesTable = () => {
 
   return (
     <>
+    <div class="custom-filters">
+        <FormControlLabel
+          control={
+            <MaterialUISwitch
+              sx={{ m: 1 }}
+              defaultUnchecked
+              // onChange={showDiscounted}
+            />
+          }
+          label="Current Month"
+        />
+        <FormControlLabel
+          control={
+            <MaterialUISwitchQuota
+              sx={{ m: 1 }}
+              defaultUnchecked
+              // onChange={showQuota}
+            />
+          }
+          label="Last Month"
+        />
+        <FormControlLabel
+          control={
+            <MaterialUISwitchQuota
+              sx={{ m: 1 }}
+              defaultUnchecked
+              // onChange={showQuota}
+            />
+          }
+          label="Last 4 Months"
+        />
+      </div>
       <MaterialReactTable
         columns={columns}
         data={data}

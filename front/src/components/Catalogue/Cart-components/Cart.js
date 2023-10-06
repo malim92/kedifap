@@ -32,6 +32,8 @@ const Cart = (props) => {
     isVendorName,
     caluclateMixMatch,
     discountAmount,
+    highlightStyle,
+    setHighlightStyle,
   } = props;
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
@@ -61,7 +63,7 @@ const Cart = (props) => {
     const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
-    setDiscountAmount(totalDiscountAmount.totalDiscount)
+    setDiscountAmount(totalDiscountAmount.totalDiscount);
 
     setTotal(
       cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
@@ -88,8 +90,7 @@ const Cart = (props) => {
     const totalDiscountAmount = caluclateDiscount(updatedCart);
     const mixMatchDiscount = caluclateMixMatch(updatedCart);
 
-    setDiscountAmount(totalDiscountAmount.totalDiscount)
-
+    setDiscountAmount(totalDiscountAmount.totalDiscount);
 
     setTotal(
       cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
@@ -98,7 +99,14 @@ const Cart = (props) => {
     delete freeQuantity[product.PARTNAME];
     setFreeQuantity(freeQuantity);
     //setQuantityInputValue({ ...quantityInputValue, [productId]: parseInt(event) });
+
+    const removedHighlight = highlightStyle.filter(
+      (highlightedProduct) => highlightedProduct !== product.PARTNAME
+    );
+    
+    setHighlightStyle(removedHighlight);
   };
+
 
   const clearCart = () => {
     setCartItems([]);
@@ -107,6 +115,7 @@ const Cart = (props) => {
     setQuantityInputValue({});
     setFreeQuantity({});
     setDiscountAmount(0);
+    setHighlightStyle([]);
   };
 
   const sendOrder = async (order, cartTotal, isVendorName) => {

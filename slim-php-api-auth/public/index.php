@@ -105,7 +105,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
                 $MyJWT = $this->JWT;
                 //return print_r($MyJWT);
                 $now = new DateTime();
-                $future = new DateTime("now +1 month");
+                $future = new DateTime("now +24 hours");
                 $server = $request->getParams();
                 $payload = [
                     "iat" => $now->getTimeStamp(),
@@ -719,8 +719,10 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
     $order_id = $request->getQueryParams('barcode')['barcode'];
     $username = 'api2';
     $password = 'api2';
+    $url = 'https://dl.portal.kedifap.com/';
     $client = new Client([
-        'base_uri' => 'https://priority.kedifap.local/',
+        // 'base_uri' => 'https://priority.kedifap.local/',
+        'base_uri' => $url,
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],

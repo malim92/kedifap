@@ -7,6 +7,7 @@ function ReturnPolicy() {
   const [id, setId] = useState("");
   const [showPolicy, setShowPolicy] = useState(false);
   const [returnPolicy, setReturnPolicy] = useState("");
+  const [productDesciption, setProductDesciption] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -17,12 +18,17 @@ function ReturnPolicy() {
     try {
       const response = await axios.get(url, { id });
       // Handle the response from the backend here
+      console.log(response, "response return policy");
 
       let returnPolicyArray = "";
+      let productDesciptionArray = "";
       response.data.value[0]
-        ? (returnPolicyArray = response.data.value[0].DEXT_SUPPOLICYCODE)
-        : setReturnPolicy("No product found!!");
+        ? (returnPolicyArray = response.data.value[0].DEXT_SUPPOLICYCODE) && (productDesciptionArray = response.data.value[0].PARTDES)
+        : setReturnPolicy("No product found!!") && setProductDesciption('');
 
+
+        productDesciptionArray !== null && productDesciptionArray.length > 0
+        ? setProductDesciption(productDesciptionArray): setProductDesciption("");
 
       returnPolicyArray !== null && returnPolicyArray.length > 0
         ? setShowPolicy(true)
@@ -43,6 +49,8 @@ function ReturnPolicy() {
         setReturnPolicy("Ειδική Συμφωνία");
       } else if (returnPolicyArray ==null )
         setReturnPolicy("No policy was found for the selected product");
+
+      
     } catch (error) {
       // Handle any errors that occur during the request
       console.error(error);
@@ -80,11 +88,17 @@ function ReturnPolicy() {
           </div>
         </form>
       </div>
+      {productDesciption && (
+        <div className="container form-group">
+          <div className="text-bg">{productDesciption}</div>
+        </div>
+      )}
       {showPolicy && (
         <div className="container form-group">
           <div className="text-bg">{returnPolicy}</div>
         </div>
       )}
+      
     </>
   );
 }

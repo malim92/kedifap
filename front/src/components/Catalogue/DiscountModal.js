@@ -30,11 +30,17 @@ const getDiscount = async (
   setDiscountLabel,
   freeQuantity,
   setFreeQuantity,
-  caluclateMixMatch
+  caluclateMixMatch,
+  highlightStyle,
+  setHighlightStyle,
 ) => {
   setShowCart(true);
-  console.log(quantityInputValue, "quantityInputValue chcek  ");
   console.log(product, "product chcek  ");
+  console.log(highlightStyle, "highlightStyle before chcek  ");
+  highlightStyle.push(product.PARTNAME);
+  setHighlightStyle(highlightStyle);
+  console.log(highlightStyle, "highlightStyle after chcek  ");
+
   const found = cartItems.find(
     (element) => element.PARTNAME == product.PARTNAME
   );
@@ -172,6 +178,8 @@ function ProductDiscountModal(props) {
     freeQuantity,
     setFreeQuantity,
     caluclateMixMatch,
+    highlightStyle,
+    setHighlightStyle
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -315,7 +323,6 @@ function ProductDiscountModal(props) {
   }, []);
 
   if (rowSearch !== undefined) {
-
     return (
       <Modal
         show={show}
@@ -348,7 +355,11 @@ function ProductDiscountModal(props) {
                                   <Button
                                     variant="primary"
                                     onClick={() =>
-                                      handleSwipe("left", rowSearch, discount.OFFERID )
+                                      handleSwipe(
+                                        "left",
+                                        rowSearch,
+                                        discount.OFFERID
+                                      )
                                     }
                                   >
                                     <p>
@@ -446,7 +457,8 @@ function ProductDiscountModal(props) {
             {currentBody === 2 && mixMatch.length !== 0 && (
               <>
                 <p>
-                  Number of items for this discount : {mixMatch[0].OFFERQTY}
+                  Number of items for this discount :{" "}
+                  {mixMatch[0].OFFERQTY / 1000}
                 </p>
                 <Table striped bordered hover>
                   {/* <thead>
@@ -469,23 +481,47 @@ function ProductDiscountModal(props) {
                   <tbody>
                     {mixMatch.map((item, index) => (
                       <tr key={index}>
-                        <td>{item.PARTNAME}</td>
-                        <td>{item.PARTDES}</td>
-                        <td>{item.WSPLPRICE}</td>
-                        <td>{item.TBALANCE}</td>
+                        <td
+                          style={
+                            highlightStyle.includes(item.PARTNAME)
+                              ? { color: "#0d6efd", fontWeight:"700" }
+                              : null
+                          }
+                        >
+                          {item.PARTNAME}
+                        </td>
+                        <td
+                          style={
+                            highlightStyle.includes(item.PARTNAME)
+                              ? { color: "#0d6efd", fontWeight:"700" }
+                              : null
+                          }
+                        >
+                          {item.PARTDES}
+                        </td>
+                        <td
+                          style={
+                            highlightStyle.includes(item.PARTNAME)
+                              ? { color: "#0d6efd", fontWeight:"700" }
+                              : null
+                          }
+                        >
+                          {item.WSPLPRICE}
+                        </td>
+                        <td
+                          style={
+                            highlightStyle.includes(item.PARTNAME)
+                              ? { color: "#0d6efd", fontWeight:"700" }
+                              : null
+                          }
+                        >
+                          {item.TBALANCE}
+                        </td>
+                        
                         <td>
                           <div class="cart-item-controls">
                             <button
                               className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
-                              // onClick={() =>
-                              //   addToCart(
-                              //     item,
-                              //     index,
-                              //     setQuantityInputValue,
-                              //     setProductQuantity,
-                              //     productQuantity
-                              //   )
-                              // }
                               onClick={() =>
                                 getDiscount(
                                   item,
@@ -505,7 +541,9 @@ function ProductDiscountModal(props) {
                                   setDiscountLabel,
                                   freeQuantity,
                                   setFreeQuantity,
-                                  caluclateMixMatch
+                                  caluclateMixMatch,
+                                  highlightStyle,
+                                  setHighlightStyle,
                                 )
                               }
                               style={{

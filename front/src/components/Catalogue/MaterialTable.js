@@ -72,6 +72,7 @@ const MaterialTable = ({ isVendorName }) => {
   const [quantityInputValue, setQuantityInputValue] = useState({});
   const [productQuantity, setProductQuantity] = useState({});
 
+  const [highlightStyle, setHighlightStyle] = useState([]);
   const handleBarcodeChange = (event) => {
     setBarcodeValue(event.target.value);
   };
@@ -362,30 +363,6 @@ const MaterialTable = ({ isVendorName }) => {
   return (
     <>
       <div class="custom-filters">
-        {/* <input
-          type="text"
-          id="filterInput"
-          value={barcodeValue || ""}
-          onChange={handleBarcodeChange}
-          placeholder="Search for barcode..."
-        /> */}
-        {/* <div class="cart-template-row">
-          <h4>
-            Cart Templates
-            <BiCartDownload
-              style={{
-                color: "#1f79d5",
-                cursor: "pointer",
-                fontSize: "40px",
-                margin: "auto",
-              }}
-              onClick={() => {
-                console.log(JSON.stringify(cartTemplate), " cartTemplate here");
-                cartTemplatePopup(cartTemplate);
-              }}
-            ></BiCartDownload>
-          </h4>
-        </div> */}
         <FormControlLabel
           control={
             <MaterialUISwitch
@@ -624,6 +601,8 @@ const MaterialTable = ({ isVendorName }) => {
         freeQuantity={freeQuantity}
         setFreeQuantity={setFreeQuantity}
         caluclateMixMatch={caluclateMixMatch}
+        highlightStyle={highlightStyle}
+        setHighlightStyle={setHighlightStyle}
       />
       <Cart
         showCart={showCart}
@@ -650,6 +629,8 @@ const MaterialTable = ({ isVendorName }) => {
         isVendorName={isVendorName}
         caluclateMixMatch={caluclateMixMatch}
         discountAmount={discountAmount}
+        highlightStyle={highlightStyle}
+        setHighlightStyle={setHighlightStyle}
       />
     </>
   );
