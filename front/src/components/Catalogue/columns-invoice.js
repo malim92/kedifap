@@ -7,7 +7,7 @@ export const INVOICE_COLUMNS = [
     {
         header: "Date",
         accessorKey: 'IVDATE',
-        enableColumnFilter: true
+        enableColumnFilter: false
 
     },
 ];

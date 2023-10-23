@@ -501,7 +501,6 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
     $filterQuery = '';
     $columnFilter = isset($request->getQueryParams('filters')['filters']) ? $request->getQueryParams('filters')['filters'] : '';
 
-
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
@@ -541,7 +540,32 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
 
 $app->get('/invoices', function (Request $request, Response $response, array $args) {
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
-    $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-30 day"))));
+
+    $monthFilter = isset($request->getQueryParams('monthFilter')['monthFilter']) ? $request->getQueryParams('monthFilter')['monthFilter'] : '';
+
+    $selectedDate = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
+    if (!empty(json_decode($monthFilter)) && !empty($monthFilter)) {
+        $monthFilterArray = json_decode($monthFilter);
+        $filterValue = $monthFilterArray[0]->value;
+        switch ($filterValue) {
+            case 'currentMonth':
+                $selectedDate = date("Y-m-01");
+                break;
+            case 'lastMonth':
+                $selectedDate = date("Y-m-01", strtotime("last month"));
+                break;
+            case 'last4Months':
+                $selectedDate = date("Y-m-01", strtotime("-4 months"));
+                break;
+
+            default:
+                # code...
+                break;
+        }
+        // print_r($columnId);die;
+    }
+
+
     $columnFilter = $request->getQueryParams('filters')['filters'];
     $filterQuery = '';
     $ge = 'ge ';
@@ -550,14 +574,16 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
         $columnId = $columnFilterArray[0]->id;
         $filterValue = $columnFilterArray[0]->value;
 
-        if ($columnId == 'IVDATE') {
-            $ge = 'eq ';
-            $date = date("Y-m-d", strtotime($filterValue));
-            $filterQuery = '';
-        } else
+        // if ($columnId == 'IVDATE') {
+        //     $ge = 'eq ';
+        //     $date = date("Y-m-d", strtotime($filterValue));
+        //     $filterQuery = '';
+        // } else
+        //     $filterQuery = " and $columnId eq '$filterValue'";
+        if ($columnId !== 'IVDATE') {
             $filterQuery = " and $columnId eq '$filterValue'";
+        }
     }
-
     $username = 'api2';
     $password = 'api2';
 
@@ -572,7 +598,82 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
             'verify' => false
         ]);
 
-        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' . $ge  . $date  . $filterQuery;
+        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
+        // return $sub_url;
+
+        $response = $client->get($sub_url);
+
+        // $body = (string) $response->getBody();
+        // return $data;
+
+        return $response;
+    } catch (\Throwable $th) {
+        return $response->withStatus(401)->withJson(['error' => $th]);
+    }
+});
+
+
+$app->get('/invoices-c', function (Request $request, Response $response, array $args) {
+    $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+
+    $monthFilter = isset($request->getQueryParams('monthFilter')['monthFilter']) ? $request->getQueryParams('monthFilter')['monthFilter'] : '';
+
+    $selectedDate = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
+    if (!empty(json_decode($monthFilter)) && !empty($monthFilter)) {
+        $monthFilterArray = json_decode($monthFilter);
+        $filterValue = $monthFilterArray[0]->value;
+        switch ($filterValue) {
+            case 'currentMonth':
+                $selectedDate = date("Y-m-01");
+                break;
+            case 'lastMonth':
+                $selectedDate = date("Y-m-01", strtotime("last month"));
+                break;
+            case 'last4Months':
+                $selectedDate = date("Y-m-01", strtotime("-4 months"));
+                break;
+
+            default:
+                # code...
+                break;
+        }
+        // print_r($columnId);die;
+    }
+
+
+    $columnFilter = $request->getQueryParams('filters')['filters'];
+    $filterQuery = '';
+    $ge = 'ge ';
+    if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
+        $columnFilterArray = json_decode($columnFilter);
+        $columnId = $columnFilterArray[0]->id;
+        $filterValue = $columnFilterArray[0]->value;
+
+        // if ($columnId == 'IVDATE') {
+        //     $ge = 'eq ';
+        //     $date = date("Y-m-d", strtotime($filterValue));
+        //     $filterQuery = '';
+        // } else
+        //     $filterQuery = " and $columnId eq '$filterValue'";
+        if ($columnId !== 'IVDATE') {
+            $filterQuery = " and $columnId eq '$filterValue'";
+        }
+    }
+    $username = 'api2';
+    $password = 'api2';
+
+    $url = 'https://dl.portal.kedifap.com/';
+    try {
+        $client = new Client([
+            'base_uri' => 'https://priority.kedifap.local/',
+            // 'base_uri' => $url,
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode("$username:$password"),
+            ],
+            'verify' => false
+        ]);
+
+        $sub_url = '/odata/Priority/tabula.ini/efk/CINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
         // return $sub_url;
 
         $response = $client->get($sub_url);
@@ -599,8 +700,7 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
         'verify' => false
     ]);
 
-
-    $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APINVOS');
+    substr($invoiceId, 0, 1) == 'C' ? $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APIMEMOS') : $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APINVOS');
 
     $body = (string) $response->getBody();
 
@@ -634,7 +734,7 @@ $app->get('/statements', function (Request $request, Response $response, array $
 
     // $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
     //$sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE%20ge%20' . $lastYearDate . 'T00:00:00%2B02:00%20%20and%20CUSTNAME%20eq%20%27' . $customer_id . '%27' . $filterQuery;
-    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE ge 2023-09-01T00:00:00%2B02:00%20%20and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
+    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE ge 2023-10-01T00:00:00%2B02:00%20%20and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
     // return $sub_url;
     $url = 'https://dl.portal.kedifap.com/';
 
@@ -728,11 +828,24 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
         ],
         'verify' => false
     ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=BARCODE eq \'' . $order_id . '\'';
-    // print_r($sub_url);die;
+    // $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=BARCODE eq \'' . $order_id . '\'';
+    $sub_url = 'odata/Priority/tabula.ini/efk/DEXT_CUSRETPOLICIES';
+    // return($sub_url);die;
     $response = $client->get($sub_url);
-
-    return $response;
+    $jsonContent = $response->getBody()->getContents();
+    $data = json_decode($jsonContent, true);
+    $values = $data['value'];
+    
+    foreach ($values as $value) {
+        print_r($value['CODE']);
+        if ($value['CODE'] == $order_id) {
+            return(json_encode($value['EXPLANATION']));
+        }
+        else return $response->withStatus(404)->withJson(['msg' => 'No policy was found for the selected product' ]);
+        $myresposnse = $value;
+        array_push($myresposnse, $value);
+    }
+    // return(json_encode($value));
 });
 
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {

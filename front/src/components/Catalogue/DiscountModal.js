@@ -32,19 +32,15 @@ const getDiscount = async (
   setFreeQuantity,
   caluclateMixMatch,
   highlightStyle,
-  setHighlightStyle,
+  setHighlightStyle
 ) => {
   setShowCart(true);
   console.log(product, "product chcek  ");
-  console.log(highlightStyle, "highlightStyle before chcek  ");
-  highlightStyle.push(product.PARTNAME);
-  setHighlightStyle(highlightStyle);
-  console.log(highlightStyle, "highlightStyle after chcek  ");
 
   const found = cartItems.find(
     (element) => element.PARTNAME == product.PARTNAME
   );
-
+  console.log(discountSelection, "discountSelection chcek  ");
   if (product.stock < discountSelection.OFFERQTY) {
     alert(
       `Sorry for inconvience but the selected product has only ${product.stock} in stock`
@@ -118,6 +114,10 @@ const getDiscount = async (
           [product.PARTNAME]: discountSelection.OFFERDES,
         });
       } else if (discountSelection.DEXT_OFFERCODE == "4") {
+        console.log(highlightStyle, "highlightStyle before chcek  ");
+        highlightStyle.push(product.PARTNAME);
+        setHighlightStyle(highlightStyle);
+        console.log(highlightStyle, "highlightStyle after chcek  ");
         const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
         // const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
 
@@ -179,7 +179,7 @@ function ProductDiscountModal(props) {
     setFreeQuantity,
     caluclateMixMatch,
     highlightStyle,
-    setHighlightStyle
+    setHighlightStyle,
   } = props;
 
   const [open, setOpen] = useState(false);
@@ -458,7 +458,7 @@ function ProductDiscountModal(props) {
               <>
                 <p>
                   Number of items for this discount :{" "}
-                  {mixMatch[0].OFFERQTY / 1000}
+                  {mixMatch[0].OFFERQTY}
                 </p>
                 <Table striped bordered hover>
                   {/* <thead>
@@ -484,7 +484,7 @@ function ProductDiscountModal(props) {
                         <td
                           style={
                             highlightStyle.includes(item.PARTNAME)
-                              ? { color: "#0d6efd", fontWeight:"700" }
+                              ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
                         >
@@ -493,7 +493,7 @@ function ProductDiscountModal(props) {
                         <td
                           style={
                             highlightStyle.includes(item.PARTNAME)
-                              ? { color: "#0d6efd", fontWeight:"700" }
+                              ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
                         >
@@ -502,7 +502,7 @@ function ProductDiscountModal(props) {
                         <td
                           style={
                             highlightStyle.includes(item.PARTNAME)
-                              ? { color: "#0d6efd", fontWeight:"700" }
+                              ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
                         >
@@ -511,13 +511,13 @@ function ProductDiscountModal(props) {
                         <td
                           style={
                             highlightStyle.includes(item.PARTNAME)
-                              ? { color: "#0d6efd", fontWeight:"700" }
+                              ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
                         >
                           {item.TBALANCE}
                         </td>
-                        
+
                         <td>
                           <div class="cart-item-controls">
                             <button
@@ -543,7 +543,7 @@ function ProductDiscountModal(props) {
                                   setFreeQuantity,
                                   caluclateMixMatch,
                                   highlightStyle,
-                                  setHighlightStyle,
+                                  setHighlightStyle
                                 )
                               }
                               style={{

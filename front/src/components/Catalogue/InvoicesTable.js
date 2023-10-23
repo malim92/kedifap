@@ -44,10 +44,32 @@ const InvoicesTable = () => {
   const [columnFilters, setColumnFilters] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
-  // const [pagination, setPagination] = useState({
-  //   pageIndex: 0,
-  //   pageSize: 100,
-  // });
+
+  const [currentMonth, setCurrentMonth] = useState(false);
+  const [lastMonth, setLastMonth] = useState(false);
+  const [last4Months, setLast4Months] = useState(false);
+  const [monthFilter, setmonthFilter] = useState(false);
+
+  const handleSwitchChange = (event) => {
+    const { name, checked } = event.target;
+
+    // Update the state of the selected switch and turn off the others
+    if (name === "currentMonth") {
+      setCurrentMonth(checked);
+      setLastMonth(false);
+      setLast4Months(false);
+    } else if (name === "lastMonth") {
+      setLastMonth(checked);
+      setCurrentMonth(false);
+      setLast4Months(false);
+    } else if (name === "last4Months") {
+      setLast4Months(checked);
+      setCurrentMonth(false);
+      setLastMonth(false);
+    }
+    console.log(name, "name test");
+    setmonthFilter(name);
+  };
 
   useEffect(() => {
     FetchInvoiceData(
@@ -57,7 +79,8 @@ const InvoicesTable = () => {
       // pagination,
       setData,
       setRowCount,
-      setIsError
+      setIsError,
+      monthFilter
     );
   }, [
     columnFilters,
@@ -65,6 +88,7 @@ const InvoicesTable = () => {
     // pagination.pageIndex,
     // pagination.pageSize,
     sorting,
+    monthFilter
   ]);
 
   const columns = useMemo(() => INVOICE_COLUMNS, []);
@@ -91,13 +115,15 @@ const InvoicesTable = () => {
 
   return (
     <>
-    <div class="custom-filters">
+      <div class="custom-filters">
         <FormControlLabel
           control={
             <MaterialUISwitch
               sx={{ m: 1 }}
+              name="currentMonth"
               defaultUnchecked
-              // onChange={showDiscounted}
+              checked={currentMonth}
+              onChange={handleSwitchChange}
             />
           }
           label="Current Month"
@@ -107,7 +133,9 @@ const InvoicesTable = () => {
             <MaterialUISwitchQuota
               sx={{ m: 1 }}
               defaultUnchecked
-              // onChange={showQuota}
+              name="lastMonth"
+              checked={lastMonth}
+              onChange={handleSwitchChange}
             />
           }
           label="Last Month"
@@ -116,8 +144,10 @@ const InvoicesTable = () => {
           control={
             <MaterialUISwitchQuota
               sx={{ m: 1 }}
+              name="last4Months"
               defaultUnchecked
-              // onChange={showQuota}
+              checked={last4Months}
+              onChange={handleSwitchChange}
             />
           }
           label="Last 4 Months"
