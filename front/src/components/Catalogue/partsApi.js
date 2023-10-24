@@ -208,6 +208,10 @@ export const FetchPartsData = async (
         return acc;
       }, 0);
 
+      // const expectedStock = stockJson.filter(
+      //   (stockItem.QTYTORECEIVE) => stockItem.PARTNAME === item.PARTNAME
+      // );
+      // console.log(expectedStock, "expectedStock here");
       // const expiryDateCol = stockJson.reduce((acc, curr) => {
       //   if (curr.PARTNAME === item.PARTNAME) {
       //     acc = moment(curr.EXPIRYDATE).format("DD-MM-YYYY");
@@ -238,26 +242,27 @@ export const FetchPartsData = async (
       // }, {});
       let mostRecentDate;
       if (sotckObjs.length > 0) {
-          mostRecentDate = sotckObjs.reduce((previousDate, currentDate) => {
-
-          let previousMoment = moment(previousDate.EXPIRYDATE)
-          let currentMoment = moment(currentDate.EXPIRYDATE)
+        mostRecentDate = sotckObjs.reduce((previousDate, currentDate) => {
+          let previousMoment = moment(previousDate.EXPIRYDATE);
+          let currentMoment = moment(currentDate.EXPIRYDATE);
 
           return currentMoment.isBefore(previousMoment)
             ? currentDate
             : previousDate;
         });
-
       }
-      
+
       return {
         ...item,
         stock: total,
         stock_object: sotckObjs,
-        expiry: mostRecentDate ? moment(mostRecentDate.EXPIRYDATE).format("DD-MM-YYYY") : '0'
+        expectedStock: sotckObjs.QTYTORECEIVE ?? 0,
+        expiry: mostRecentDate.EXPIRYDATE != null
+          ? moment(mostRecentDate.EXPIRYDATE).format("DD-MM-YYYY")
+          : "0",
       };
     });
-
+    
     // updatedArray = updatedArray.map((item) => {
 
     //   return { ...item,  };

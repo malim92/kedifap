@@ -821,8 +821,8 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
     $password = 'api2';
     $url = 'https://dl.portal.kedifap.com/';
     $client = new Client([
-        // 'base_uri' => 'https://priority.kedifap.local/',
-        'base_uri' => $url,
+        'base_uri' => 'https://priority.kedifap.local/',
+        // 'base_uri' => $url,
         'headers' => [
             'Authorization' => 'Basic ' . base64_encode("$username:$password"),
         ],
@@ -835,16 +835,13 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
     $jsonContent = $response->getBody()->getContents();
     $data = json_decode($jsonContent, true);
     $values = $data['value'];
-    
     foreach ($values as $value) {
-        print_r($value['CODE']);
         if ($value['CODE'] == $order_id) {
             return(json_encode($value['EXPLANATION']));
         }
-        else return $response->withStatus(404)->withJson(['msg' => 'No policy was found for the selected product' ]);
-        $myresposnse = $value;
-        array_push($myresposnse, $value);
+        else continue;
     }
+    return(json_encode(['No privacy policy found!!' ]));
     // return(json_encode($value));
 });
 

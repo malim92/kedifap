@@ -18,6 +18,11 @@ export const COLUMNS = [
     enableColumnFilter: false,
   },
   {
+    header: "Expected Stock",
+    accessorKey: "expectedStock",
+    enableColumnFilter: false,
+  },
+  {
     header: "Bar Code",
     accessorKey: "BARCODE",
   },

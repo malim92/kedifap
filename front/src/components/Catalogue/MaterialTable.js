@@ -420,6 +420,7 @@ const MaterialTable = ({ isVendorName }) => {
             DEXT_IMPORTERNAME: false,
             DEXT_BRAND: false,
             SPEC1: false,
+            expectedStock: isVendorName ? true : false
           },
         }}
         manualFiltering
