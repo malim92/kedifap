@@ -144,7 +144,7 @@ const Cart = (props) => {
       // DEXT_SUPPNAME: "V1239",
       // DEXT_SUPPDES: "4MORE LTD 2",
       DCODE: null,
-      DETAILS: "Test from API",
+      DETAILS: `order from B2B for customer ${userId}`,
       DEXT_SUBMISSIONDATE: today,
       PAYCODE: "20",
       DEXT_B2CONTACT: 9,

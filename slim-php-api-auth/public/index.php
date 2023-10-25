@@ -471,7 +471,7 @@ $app->post('/order', function (Request $request, Response $response) { {
 
         $client = new Client([
             'base_uri' => 'https://priority.kedifap.local/',
-            //'base_uri' => 'https://webhook.site/    ',
+            // 'base_uri' => 'https://webhook.site/    ',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
@@ -483,6 +483,9 @@ $app->post('/order', function (Request $request, Response $response) { {
         $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
             'json' => $order,
         ]);
+        // $response = $client->post('/4ed606cb-e8aa-412e-8365-88c22a819c8c', [
+        //     'json' => $order,
+        // ]);
 
         $body = (string) $response->getBody();
 
@@ -814,7 +817,6 @@ $app->get('/backorder-products', function (Request $request, Response $response,
 
     return $response;
 });
-
 $app->get('/return-policy', function (Request $request, Response $response, array $args) {
     $order_id = $request->getQueryParams('barcode')['barcode'];
     $username = 'api2';
@@ -828,21 +830,11 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
         ],
         'verify' => false
     ]);
-    // $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=BARCODE eq \'' . $order_id . '\'';
-    $sub_url = 'odata/Priority/tabula.ini/efk/DEXT_CUSRETPOLICIES';
-    // return($sub_url);die;
+    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=BARCODE eq \'' . $order_id . '\'';
+    // print_r($sub_url);die;
     $response = $client->get($sub_url);
-    $jsonContent = $response->getBody()->getContents();
-    $data = json_decode($jsonContent, true);
-    $values = $data['value'];
-    foreach ($values as $value) {
-        if ($value['CODE'] == $order_id) {
-            return(json_encode($value['EXPLANATION']));
-        }
-        else continue;
-    }
-    return(json_encode(['No privacy policy found!!' ]));
-    // return(json_encode($value));
+
+    return $response;
 });
 
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
