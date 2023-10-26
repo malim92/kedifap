@@ -267,7 +267,7 @@ export const FetchPartsData = async (
 
     //   return { ...item,  };
     // });
-    // console.log(sotckObjs, "sotckObjs");
+    console.log(updatedArray, "updatedArray ali");
     //replace return policy code with description
     let returnPolicyArray = updatedArray.map((item) => {
       if (item.DEXT_SUPPOLICYCODE == "6M") {

@@ -34,6 +34,10 @@ const getDiscount = async (
   highlightStyle,
   setHighlightStyle
 ) => {
+  if (product.TBALANCE == 0) {
+    alert("Sorry but the selected product dosn't have available stock!");
+    return;
+  }
   setShowCart(true);
   console.log(product, "product chcek  ");
 

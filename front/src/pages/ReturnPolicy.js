@@ -17,40 +17,38 @@ function ReturnPolicy() {
     );
     try {
       const response = await axios.get(url, { id });
-      console.log(returnPolicy, "returnPolicy");
-      setShowPolicy(true);
-      setReturnPolicy(response.data);
-      // response.data !=''
-      //   ? (setShowPolicy(true) && setReturnPolicy(response.data))
-      //   : setShowPolicy(true) && setReturnPolicy('No privacy policy found!!') ;
+      // Handle the response from the backend here
+      console.log(response, "response return policy");
 
-      // response.data
-      //   ? (returnPolicyArray = response.data) && (productDesciptionArray = response.data)
-      //   : setReturnPolicy("No product found!!") && setProductDesciption('');
+      let returnPolicyArray = "";
+      let productDesciptionArray = "";
+      response.data.value[0]
+        ? (returnPolicyArray = response.data.value[0].DEXT_SUPPOLICYCODE) && (productDesciptionArray = response.data.value[0].PARTDES)
+        : setReturnPolicy("No product found!!") && setProductDesciption('');
 
 
-      //   productDesciptionArray !== null && productDesciptionArray.length > 0
-      //   ? setProductDesciption(productDesciptionArray): setProductDesciption("");
+        productDesciptionArray !== null && productDesciptionArray.length > 0
+        ? setProductDesciption(productDesciptionArray): setProductDesciption("");
 
-      // returnPolicyArray !== null && returnPolicyArray.length > 0
-      //   ? setShowPolicy(true)
-      //   : setShowPolicy(true) && setReturnPolicy("No product found");
-      // //   console.log(returnPolicyArray.length , "returnPolicyArray length");
+      returnPolicyArray !== null && returnPolicyArray.length > 0
+        ? setShowPolicy(true)
+        : setShowPolicy(true) && setReturnPolicy("No product found");
+      //   console.log(returnPolicyArray.length , "returnPolicyArray length");
 
-      // if (returnPolicyArray == "6M") {
-      //   setReturnPolicy("Ο Προμηθευτής Δέχεται μόνο Ληξιπρόθεσμα 6Μ");
-      // } else if (returnPolicyArray == "6M/EXP") {
-      //   setReturnPolicy("Ο Προμηθευτής Δέχεται Ληγμένα & Ληξιπρόθεσμα 6M");
-      // } else if (returnPolicyArray == "ALL") {
-      //   setReturnPolicy("Ο Προμηθευτής Δέχεται Όλες τις Επιστροφές");
-      // } else if (returnPolicyArray == "EXP") {
-      //   setReturnPolicy("Ο Προμηθευτής Δέχεται μόνο Ληγμένα");
-      // } else if (returnPolicyArray == "NONE") {
-      //   setReturnPolicy("Ο Προμηθευτής ΔΕΝ Δέχεται Επιστροφές");
-      // } else if (returnPolicyArray == "SPECIAL") {
-      //   setReturnPolicy("Ειδική Συμφωνία");
-      // } else if (returnPolicyArray ==null )
-      //   setReturnPolicy("No policy was found for the selected product");
+      if (returnPolicyArray == "6M") {
+        setReturnPolicy("Ο Προμηθευτής Δέχεται μόνο Ληξιπρόθεσμα 6Μ");
+      } else if (returnPolicyArray == "6M/EXP") {
+        setReturnPolicy("Ο Προμηθευτής Δέχεται Ληγμένα & Ληξιπρόθεσμα 6M");
+      } else if (returnPolicyArray == "ALL") {
+        setReturnPolicy("Ο Προμηθευτής Δέχεται Όλες τις Επιστροφές");
+      } else if (returnPolicyArray == "EXP") {
+        setReturnPolicy("Ο Προμηθευτής Δέχεται μόνο Ληγμένα");
+      } else if (returnPolicyArray == "NONE") {
+        setReturnPolicy("Ο Προμηθευτής ΔΕΝ Δέχεται Επιστροφές");
+      } else if (returnPolicyArray == "SPECIAL") {
+        setReturnPolicy("Ειδική Συμφωνία");
+      } else if (returnPolicyArray ==null )
+        setReturnPolicy("No policy was found for the selected product");
 
       
     } catch (error) {
@@ -65,8 +63,6 @@ function ReturnPolicy() {
 
   return (
     <>
-    {console.log(returnPolicy, "returnPolicy 2")}
-    {console.log(productDesciption, "productDesciption 2")}
       <div className="container">
         <h1 className="text-2xl py-4">Πολιτική επιστροφών</h1>
         <form onSubmit={handleSubmit}>
@@ -93,12 +89,12 @@ function ReturnPolicy() {
         </form>
       </div>
       {productDesciption && (
-        <div className="container form-group desc">
+        <div className="container form-group">
           <div className="text-bg">{productDesciption}</div>
         </div>
       )}
       {showPolicy && (
-        <div className="container form-group policy">
+        <div className="container form-group">
           <div className="text-bg">{returnPolicy}</div>
         </div>
       )}
