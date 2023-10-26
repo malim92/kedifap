@@ -118,7 +118,7 @@ const Cart = (props) => {
     setHighlightStyle([]);
   };
 
-  const sendOrder = async (order, cartTotal, isVendorName) => {
+  const sendOrder = async (order, isVendorName, freeQuantity) => {
     let userId = localStorage.getItem("userId");
     let userDesc = localStorage.getItem("userDesc");
     console.log(isVendorName, "isVendorName in sendOrder.js");
@@ -126,9 +126,9 @@ const Cart = (props) => {
     const productsinOrder = order.map((obj) => ({
       PARTNAME: obj.PARTNAME,
       PDES: obj.PARTDES,
-      TQUANT: obj.quantity,
-      DEXT_REQUESTEDQTY: obj.quantity,
-      DEXT_FREEQTY: 0,
+      TQUANT: parseInt(obj.quantity),
+      DEXT_REQUESTEDQTY: parseInt(obj.quantity),
+      DEXT_FREEQTY: freeQuantity[obj.PARTNAME] > 0 ? freeQuantity[obj.PARTNAME] : 0,
       PERCENT: 0,
     }));
 
@@ -334,7 +334,7 @@ const Cart = (props) => {
               Clear Cart
             </button>
             <button
-              onClick={() => sendOrder(cartItems, total, isVendorName)}
+              onClick={() => sendOrder(cartItems, isVendorName, freeQuantity)}
               class="btn btn-primary "
               disabled={orderButtonStatus === "disabled"}
             >
