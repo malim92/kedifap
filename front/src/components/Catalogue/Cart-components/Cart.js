@@ -103,10 +103,9 @@ const Cart = (props) => {
     const removedHighlight = highlightStyle.filter(
       (highlightedProduct) => highlightedProduct !== product.PARTNAME
     );
-    
+
     setHighlightStyle(removedHighlight);
   };
-
 
   const clearCart = () => {
     setCartItems([]);
@@ -122,14 +121,20 @@ const Cart = (props) => {
     let userId = localStorage.getItem("userId");
     let userDesc = localStorage.getItem("userDesc");
     console.log(isVendorName, "isVendorName in sendOrder.js");
-
-    const productsinOrder = order.map((obj) => ({
+    console.log(order, "order.()");
+    console.log(order.length, "order.length()");
+    if (order.length == 0) {
+      throw Error("Cant send empty cart");
+    }
+    const productsinOrder = order.map((obj, index) => ({
       PARTNAME: obj.PARTNAME,
-      PDES: obj.PARTDES,
+      // PDES: obj.PARTDES,
       TQUANT: parseInt(obj.quantity),
       DEXT_REQUESTEDQTY: parseInt(obj.quantity),
-      DEXT_FREEQTY: freeQuantity[obj.PARTNAME] > 0 ? freeQuantity[obj.PARTNAME] : 0,
+      DEXT_FREEQTY:
+        freeQuantity[obj.PARTNAME] > 0 ? freeQuantity[obj.PARTNAME] : 0,
       PERCENT: 0,
+      DEXT_CONFIRMORDER: index == order.length - 1 ? "Y" : "",
     }));
 
     console.log(productsinOrder, "productsinOrder");
@@ -137,10 +142,10 @@ const Cart = (props) => {
 
     const orderObject = {
       CUSTNAME: userId,
-      CDES: userDesc,
+      // CDES: userDesc,
       CURDATE: today,
       ...(isVendorName && { DEXT_SUPPNAME: isVendorName }),
-      ...(isVendorName && { DEXT_SUPPDES: userDesc }),
+      ...(isVendorName && { DEXT_SUPPDES: userId }),
       // DEXT_SUPPNAME: "V1239",
       // DEXT_SUPPDES: "4MORE LTD 2",
       DCODE: null,
@@ -164,13 +169,13 @@ const Cart = (props) => {
       const response = await axios.post(url, orderObject);
       console.log(response, "response");
       alert("Order Sent Successfully, Thank you!!");
+      setCartItems([]);
+      setTotal(0);
+      setProductQuantity({});
     } catch (error) {
       alert("There was an issue making your order, please contact support.");
       console.error(error);
     }
-    setCartItems([]);
-    setTotal(0);
-    setProductQuantity({});
   };
 
   const saveCart = async (cartItems) => {
@@ -211,10 +216,7 @@ const Cart = (props) => {
       <button class="basket" onClick={handleCartClick}>
         <span className="icon">
           <p>
-            {Object.values(productQuantity).reduce(
-              (total, value) => total + parseInt(value),
-              0
-            )}
+            {Object.keys(productQuantity).length}
           </p>
         </span>
       </button>
@@ -326,17 +328,23 @@ const Cart = (props) => {
             />
           )}
 
-          <div class="d-flex justify-content-between">
+          <div className="d-flex justify-content-between">
             <button
               onClick={() => clearCart()}
-              class="btn btn-danger cart-clear-btn"
+              className="btn btn-danger cart-clear-btn"
             >
               Clear Cart
             </button>
             <button
-              onClick={() => sendOrder(cartItems, isVendorName, freeQuantity)}
-              class="btn btn-primary "
-              disabled={orderButtonStatus === "disabled"}
+              onClick={() => {
+                if (
+                  window.confirm("Θέλετε να αποσταλεί η παραγγελία σας;")
+                ) {
+                  sendOrder(cartItems, isVendorName, freeQuantity);
+                }
+              }}
+              className="btn btn-primary "
+              disabled={orderButtonStatus === "disabled" || cartItems.length == 0}
             >
               Send order
             </button>

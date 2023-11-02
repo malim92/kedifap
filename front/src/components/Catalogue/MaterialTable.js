@@ -387,7 +387,7 @@ const MaterialTable = ({ isVendorName }) => {
           }
           label="Products with quota"
         />
-        <input
+        {/* <input
           type="text"
           id="filterInput"
           value={supValue || ""}
@@ -400,7 +400,12 @@ const MaterialTable = ({ isVendorName }) => {
           value={activeIngValue || ""}
           onChange={handleActiveIngredientChange}
           placeholder="Search for Active Substance..."
-        />
+        /> */}
+        <p>Η ημερομηνία λήξης είναι πάντα η πιο κοντινή. Επιλέξτε <Info style={{
+                color: "#1f79d5",
+                cursor: "pointer",
+                fontSize: "15px",
+              }}/> για να δείτε όλες τις ημερομηνίες λήξεις.</p>
       </div>
 
       <MaterialReactTable
@@ -417,7 +422,7 @@ const MaterialTable = ({ isVendorName }) => {
         initialState={{
           showColumnFilters: true,
           columnVisibility: {
-            BARCODE: false,
+            BARCODE: true,
             stock: true,
             SPEC19: true,
             SUPNAME: false,

@@ -16,11 +16,13 @@ export const COLUMNS = [
     header: "Απόθεμα",
     accessorKey: "stock",
     enableColumnFilter: false,
+    enableSorting: false,
   },
   {
     header: "Expected Stock",
     accessorKey: "expectedStock",
     enableColumnFilter: false,
+    enableSorting: false,
   },
   {
     header: "Bar Code",
@@ -39,12 +41,12 @@ export const COLUMNS = [
     size: 20,
   },
   {
-    header: "Διανομέα",
+    header: "Διανομέας",
     accessorKey: "SUPNAME",
     show: false,
   },
   {
-    header: "Αντιπρόσωπο",
+    header: "Αντιπρόσωπος",
     accessorKey: "DEXT_IMPORTERNAME",
   },
   {
@@ -60,7 +62,7 @@ export const COLUMNS = [
     accessorKey: "SPEC19",
   },
   {
-    header: "Expiration Date",
+    header: "Expiration Date*",
     accessorKey: "expiry",
     enableColumnFilter: false,
     enableSorting: false,

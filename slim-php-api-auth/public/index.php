@@ -264,7 +264,6 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
     $where2 = '';
     $vendorSubQuery = '';
 
-
     if (!empty(json_decode($sorting))) {
         $soringArray = json_decode($sorting);
         $columnId = $soringArray[0]->id;
@@ -387,7 +386,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         $and3 = '';
         if ($quotaFilterQuery !== '') $and3 = ' AND ';
 
-        $sql = "SELECT * FROM parts $globalFilterDiscount WHERE PARTNAME OR PARTDES LIKE :globalFilter $and $isVendorQuery $and2 $filterQuery $and3 $quotaFilterQuery $sortingQuery";
+        $sql = "SELECT * FROM parts $globalFilterDiscount WHERE PARTNAME OR PARTDES OR BARCODE LIKE :globalFilter $and $isVendorQuery $and2 $filterQuery $and3 $quotaFilterQuery $sortingQuery";
 
         $totalRowsQuery = "SELECT COUNT(PARTNAME) FROM parts $globalFilterDiscount WHERE PARTNAME OR PARTDES LIKE :globalFilter $and $isVendorQuery $and2 $filterQuery $and3 $quotaFilterQuery";
         // var_dump($isVendorQuery);die;
@@ -470,8 +469,8 @@ $app->post('/order', function (Request $request, Response $response) { {
         $password = 'api2';
 
         $client = new Client([
-            'base_uri' => 'https://priority.kedifap.local/',
-            // 'base_uri' => 'https://webhook.site/    ',
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => 'https://webhook.site/    ',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
@@ -480,13 +479,12 @@ $app->post('/order', function (Request $request, Response $response) { {
         $file = './log.txt';
         file_put_contents($file, $order, FILE_APPEND);
 
-        $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
-            'json' => $order,
-        ]);
-        // $response = $client->post('/4ed606cb-e8aa-412e-8365-88c22a819c8c', [
+        // $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
         //     'json' => $order,
         // ]);
-
+        $response = $client->post('https://webhook.site/1564e48b-1224-48f7-ae98-6c6c15473479', [
+            'json' => $order,
+        ]);
         $body = (string) $response->getBody();
 
         // $data = json_decode($body, true);
@@ -866,8 +864,8 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
     $url = 'https://dl.portal.kedifap.com/';
     try {
         $client = new Client([
-            'base_uri' => 'https://priority.kedifap.local/',
-            // 'base_uri' => $url,
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => $url,
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],

@@ -50,7 +50,12 @@ export const FetchInvoiceData = async (
   console.log(urlInvoiceC, "urlInvoiceC invoices");
   urlInvoiceC.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
 
-
+  if (monthFilter) {
+    urlInvoiceC.searchParams.set(
+      "monthFilter",
+      JSON.stringify([{ id: "monthFilter", value: monthFilter }])
+    );
+  }
   try {
     const responseC = await axios.get(urlInvoiceC);
     console.log(responseC, "response InvoiceC");

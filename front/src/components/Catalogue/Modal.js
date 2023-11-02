@@ -24,17 +24,17 @@ function ProductModal(props) {
         <p>Χονδρική τιμή: {popupModalData.price}</p>
         <p>Λιανική Τιμή: {popupModalData.priceVat}</p>
         {/* <p>Φ.Π.Α %: {popupModalData.vat}</p> */}
-        <p>Διανομέα: {popupModalData.distributer}</p>
+        <p>Διανομέας: {popupModalData.distributer}</p>
         <p>Barcode Συσκευασίας: {popupModalData.barcode}</p>
         {popupModalData.pharmaCode && (
           <p>Κωδικός Φ.Υ: {popupModalData.pharmaCode}</p>
         )}
-        <p>Αντιπρόσωπο: {popupModalData.supplier}</p>
+        <p>Αντιπρόσωπος: {popupModalData.supplier}</p>
         {popupModalData.policy && <p>Return Policy: {popupModalData.policy}</p>}
         {popupModalData.stock_object &&
           popupModalData.stock_object.length > 0 && (
             <>
-              <p>Διαθέσιμες ημερομήνιες λήξεις</p>
+              <p>Διαθέσιμες ημερομήνιες λήξεις:</p>
 
               {popupModalData.stock_object.map((productItem, index) => (
                 <p>{moment(productItem.EXPIRYDATE).format("DD-MM-YYYY")}</p>

@@ -90,6 +90,13 @@ const OrdersTable = () => {
         // }}
         columns={columns}
         data={data}
+        muiTableBodyProps={{
+          sx: {
+            '& tr:nth-of-type(odd)': {
+              backgroundColor: '#f5f5f5',
+            },
+          },
+        }}
         initialState={{ showColumnFilters: true }}
         manualFiltering
         manualPagination
@@ -118,7 +125,8 @@ const OrdersTable = () => {
         }}
         enableRowActions
         renderRowActions={({ row }) => (
-          <div style={{ display: "flex", alignItems: "center" }}>
+          <div className="alix" style={{ display: "flex", alignItems: "center" }}>
+            {console.log(row,'rowxx')}
             <button
               className="btn btn-primary"
               onClick={() => {
@@ -126,6 +134,8 @@ const OrdersTable = () => {
               }}
               style={{
                 fontSize: "15px",
+                border: 'none',
+                backgroundColor: row.original.ORDSTATUSDES == 'Merged' ? '#000' : row.original.ORDSTATUSDES == 'Received' ? 'blue' : row.original.ORDSTATUSDES == 'Completed' ? 'green' : row.original.ORDSTATUSDES == 'Cancelled' ? 'red' : row.original.ORDSTATUSDES == 'Pending' ? 'orange': ''
               }}
             >
               Products Details
