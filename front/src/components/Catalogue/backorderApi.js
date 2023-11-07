@@ -11,9 +11,10 @@ export const FetchBackordersData = async (
   setIsError
 ) => {
 
-  let userId = localStorage.getItem('userId');
+  let userId = localStorage.getItem('userId').split('-')[0];
   const url = new URL(`${process.env.REACT_APP_API_URL}/backorders?customer_id=${userId}`);
   url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
+  url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
   console.log(url, "url backorders");
 
   try {

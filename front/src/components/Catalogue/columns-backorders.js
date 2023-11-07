@@ -7,7 +7,8 @@ export const BACKORDERS_COLUMNS = [
     {
         header: "Submission Date",
         accessorKey: 'DEXT_SUBMISSIONDATE',
-        enableColumnFilter: false
+        enableColumnFilter: false,
+        enableSorting: true,
     },
     {
         header: "Total Amount",

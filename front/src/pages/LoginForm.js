@@ -32,7 +32,7 @@ function LoginForm({ setIsAuthenticated  }) {
       const response = await axios.post(url, loginCredentials);
       console.log(response, "response xxxG");
       const token = response.data.token;
-      let userId = response.data.user.CUSTNAME;
+      let userId = response.data.user.DEXT_USERLOGIN;
       const userDesc = response.data.user.FIRM;
       const vendorId = response.data.user.SUPNAME;
       // userId == '' ? userId = vendorId : userId = userId;

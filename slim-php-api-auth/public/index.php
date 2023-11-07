@@ -469,8 +469,8 @@ $app->post('/order', function (Request $request, Response $response) { {
         $password = 'api2';
 
         $client = new Client([
-            // 'base_uri' => 'https://priority.kedifap.local/',
-            'base_uri' => 'https://webhook.site/    ',
+            'base_uri' => 'https://priority.kedifap.local/',
+            // 'base_uri' => 'https://webhook.site/    ',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
@@ -500,8 +500,19 @@ $app->post('/order', function (Request $request, Response $response) { {
 $app->get('/vendors', function (Request $request, Response $response, array $args) {
 
     $filterQuery = '';
+    $sortingQuery = '';
+    $sortingQuery = 'ORDER BY SUPDES ASC';
     $columnFilter = isset($request->getQueryParams('filters')['filters']) ? $request->getQueryParams('filters')['filters'] : '';
+    $columnSort = isset($request->getQueryParams('sorting')['sorting']) ? $request->getQueryParams('sorting')['sorting'] : '';
 
+    if (!empty(json_decode($columnSort))) {
+        $sortingArray = json_decode($columnSort);
+        $columnId = $sortingArray[0]->id;
+        $sortDirection = $sortingArray[0]->desc;
+        $sortDirection = !empty($sortDirection) ? 'DESC' : 'ASC';
+        $sortingQuery = "ORDER BY $columnId $sortDirection";
+    }
+// return $columnId;
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
@@ -510,7 +521,7 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
         // print_r($columnId);die;
     }
 
-    $sql = "SELECT * FROM `vendors` $filterQuery";
+    $sql = "SELECT * FROM `vendors` $filterQuery $sortingQuery";
 
     $totalRowsQuery = "SELECT COUNT(SUPDES) FROM vendors  $filterQuery";
     // return $sql;
@@ -761,7 +772,9 @@ $app->get('/backorders', function (Request $request, Response $response, array $
 
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
     $columnFilter = $request->getQueryParams('filters')['filters'];
+    $columnSort = isset($request->getQueryParams('sorting')['sorting']) ? $request->getQueryParams('sorting')['sorting'] : '';
     $filterQuery = '';
+    $sortingQuery = '';
 
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
@@ -772,12 +785,17 @@ $app->get('/backorders', function (Request $request, Response $response, array $
         $and = ' AND ';
         // print_r($columnId);die;
     }
-
-
+    if (!empty(json_decode($columnSort))) {
+        $sortingArray = json_decode($columnSort);
+        $columnId = $sortingArray[0]->id;
+        $sortDirection = $sortingArray[0]->desc;
+        $sortDirection = !empty($sortDirection) ? 'DESC' : 'ASC';
+        $sortingQuery = "ORDER BY $columnId $sortDirection";
+    }
 
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
 
-    $sql = "SELECT * FROM backorders WHERE CUSTNAME = :custId AND DEXT_SUBMISSIONDATE > $date $filterQuery";
+    $sql = "SELECT * FROM backorders WHERE CUSTNAME = :custId AND DEXT_SUBMISSIONDATE > $date $filterQuery $sortingQuery";
     // return $sql;
     try {
         // Get DB Object

@@ -12,6 +12,8 @@ export const fetchVendors = async (
   
   const url = new URL(`${process.env.REACT_APP_API_URL}/vendors`);
   url.searchParams.set("filters", JSON.stringify(columnFilters ?? []));
+  url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
+
   console.log(url, "url vend xx xx");
   console.log(columnFilters, "url vend columnFilters xx");
 
