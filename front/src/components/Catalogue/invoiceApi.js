@@ -11,7 +11,7 @@ export const FetchInvoiceData = async (
   setIsError,
   monthFilter
 ) => {
-  let userId = localStorage.getItem('userId').split('-')[0];
+  let userId = localStorage.getItem('userId');
   const url = new URL(
     `${process.env.REACT_APP_API_URL}/invoices?customer_id=${userId}`
   );

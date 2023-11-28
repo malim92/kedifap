@@ -17,7 +17,6 @@ export const FetchPartsData = async (
   quotaProducts,
   isVendorName
 ) => {
-  // if (isVendorName.startsWith('V')) userTest = isVendorName;
 
   try {
     //const url = new URL("/parts/", "http://localhost:8000");
@@ -134,6 +133,21 @@ export const FetchPartsData = async (
       return;
     }
 
+    let stockDetailedJson;
+    try {
+      const stockDetailedUrl = new URL(
+        "/stock-detailed",
+        `${process.env.REACT_APP_API_URL}`
+      );
+
+      const stockDetailedResponse = await fetch(stockDetailedUrl.href);
+      stockDetailedJson = await stockDetailedResponse.json();
+    } catch (error) {
+      setIsError(true);
+      console.error(error);
+      return;
+    }
+
     let discountJson;
     try {
       const discountUrl = new URL(
@@ -182,24 +196,6 @@ export const FetchPartsData = async (
       (partName) => updatedArray.find((item) => item.PARTNAME === partName)
     );
 
-    // let stockupdatedArray = json.data.map((item) => {
-    //     const sotckObjs = stockData.filter(
-    //       (stockItem) => stockItem.PARTNAME === item.PARTNAME
-    //     );
-
-    // console.log(sotckObjs, "sotckObjs");
-    // if (sotckObjs.length > 0) {
-    //   return {
-    //     ...item,
-    //     stock: sotckObjs.map((discountObj) => ({
-    //       DISCOUNT: discountObj.DISCOUNT,
-    //       OFFERQTY: discountObj.OFFERQTY,
-    //     })),
-    //   };
-    // }
-    // return item;
-    // });
-
     updatedArray = updatedArray.map((item) => {
       const total = stockJson.reduce((acc, curr) => {
         if (curr.PARTNAME === item.PARTNAME) {
@@ -208,41 +204,16 @@ export const FetchPartsData = async (
         return acc;
       }, 0);
 
-      // const expectedStock = stockJson.filter(
-      //   (stockItem.QTYTORECEIVE) => stockItem.PARTNAME === item.PARTNAME
-      // );
-      // console.log(expectedStock, "expectedStock here");
-      // const expiryDateCol = stockJson.reduce((acc, curr) => {
-      //   if (curr.PARTNAME === item.PARTNAME) {
-      //     acc = moment(curr.EXPIRYDATE).format("DD-MM-YYYY");
-      //   }
-      //   return acc;
-      // }, 0);
-
-      // const expiryDateCol = stockJson.filter((expiryItem) => {
-      //   if (expiryItem.PARTNAME == item.PARTNAME) {
-      //     return  moment(expiryItem.EXPIRYDATE).format("DD-MM-YYYY");
-      //   }
-      // });
-
-      // console.log(expiryDateCol, "expiryDateCol");
-
-      const sotckObjs = stockJson.filter(
-        (stockItem) => stockItem.PARTNAME === item.PARTNAME
+      const stockObjs = stockDetailedJson.filter(
+        (stockItem) => 
+          stockItem.PARTNAME === item.PARTNAME
+        
       );
 
-      // const exDate = stockJson.reduce((acc, curr) => {
-      //   acc = curr;
-      //   acc.EXPIRYDATE = moment(acc.EXPIRYDATE).format("DD-MM-YYYY");
-      //   // const dateIsAfter = moment(curr.EXPIRYDATE).isBefore(moment(acc.EXPIRYDATE));
-      //   if (moment(acc.EXPIRYDATE).isBefore(moment(curr.EXPIRYDATE))){
-
-      //     return acc;
-      //   }
-      // }, {});
       let mostRecentDate;
-      if (sotckObjs.length > 0) {
-        mostRecentDate = sotckObjs.reduce((previousDate, currentDate) => {
+      
+      if (stockObjs && stockObjs.length > 0) {
+        mostRecentDate = stockObjs.reduce((previousDate, currentDate) => {
           let previousMoment = moment(previousDate.EXPIRYDATE);
           let currentMoment = moment(currentDate.EXPIRYDATE);
 
@@ -255,19 +226,14 @@ export const FetchPartsData = async (
       return {
         ...item,
         stock: total,
-        stock_object: sotckObjs,
-        expectedStock: sotckObjs.QTYTORECEIVE ?? 0,
-        expiry: mostRecentDate.EXPIRYDATE != null
+        stock_object: stockObjs,
+        expectedStock: stockObjs.QTYTORECEIVE ?? 0,
+        expiry: mostRecentDate && mostRecentDate.EXPIRYDATE != null
           ? moment(mostRecentDate.EXPIRYDATE).format("DD-MM-YYYY")
           : "0",
       };
     });
     
-    // updatedArray = updatedArray.map((item) => {
-
-    //   return { ...item,  };
-    // });
-    console.log(updatedArray, "updatedArray ali");
     //replace return policy code with description
     let returnPolicyArray = updatedArray.map((item) => {
       if (item.DEXT_SUPPOLICYCODE == "6M") {
@@ -303,12 +269,7 @@ export const FetchPartsData = async (
       }
       return item;
     });
-    //console.log(stockData, "stockData");
-
-    // const stockUrl = new URL( "https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_PARTBAL?$filter=PARTNAME%20eq%20%27LP01059%27");
-    // const stockResponse = await fetch(stockUrl.href);
-    // const stockJson = await stockResponse.json();
-    // console.log(stockJson.value,'stockJson');
+    
     console.log(returnPolicyArray, "json pro final");
     setData(returnPolicyArray);
     setRowCount(json.totalRows);

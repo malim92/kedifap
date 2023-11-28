@@ -512,7 +512,7 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
         $sortDirection = !empty($sortDirection) ? 'DESC' : 'ASC';
         $sortingQuery = "ORDER BY $columnId $sortDirection";
     }
-// return $columnId;
+    // return $columnId;
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
@@ -551,7 +551,10 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
 
 
 $app->get('/invoices', function (Request $request, Response $response, array $args) {
+
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+    list($customer_main_id, $customer_login_id) = explode('-', $customer_id);
+
 
     $monthFilter = isset($request->getQueryParams('monthFilter')['monthFilter']) ? $request->getQueryParams('monthFilter')['monthFilter'] : '';
 
@@ -610,7 +613,7 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
             'verify' => false
         ]);
 
-        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
+        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_main_id . '\'' . ' and DCODE eq \'' . $customer_login_id . '\' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
         // return $sub_url;
 
         $response = $client->get($sub_url);
@@ -627,6 +630,7 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
 
 $app->get('/invoices-c', function (Request $request, Response $response, array $args) {
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+    list($customer_main_id, $customer_login_id) = explode('-', $customer_id);
 
     $monthFilter = isset($request->getQueryParams('monthFilter')['monthFilter']) ? $request->getQueryParams('monthFilter')['monthFilter'] : '';
 
@@ -685,7 +689,7 @@ $app->get('/invoices-c', function (Request $request, Response $response, array $
             'verify' => false
         ]);
 
-        $sub_url = '/odata/Priority/tabula.ini/efk/CINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_id . '\'' . ' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
+        $sub_url = '/odata/Priority/tabula.ini/efk/CINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_main_id . '\'' . 'and DCODE eq \'' . $customer_login_id . '\' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
         // return $sub_url;
 
         $response = $client->get($sub_url);
@@ -722,6 +726,8 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
 
 $app->get('/statements', function (Request $request, Response $response, array $args) {
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+    list($customer_main_id, $customer_login_id) = explode('-', $customer_id);
+
     $columnFilter = $request->getQueryParams('filters')['filters'];
 
     $filterQuery = '';
@@ -746,7 +752,7 @@ $app->get('/statements', function (Request $request, Response $response, array $
 
     // $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
     //$sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE%20ge%20' . $lastYearDate . 'T00:00:00%2B02:00%20%20and%20CUSTNAME%20eq%20%27' . $customer_id . '%27' . $filterQuery;
-    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE ge 2023-10-01T00:00:00%2B02:00%20%20and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
+    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE ge 2023-10-01T00:00:00%2B02:00%20%20and CUSTNAME eq ' . '\'' . $customer_main_id . '\' and DCODE eq \'' . $customer_login_id . '\'' . $filterQuery;
     // return $sub_url;
     $url = 'https://dl.portal.kedifap.com/';
 
@@ -834,7 +840,12 @@ $app->get('/backorder-products', function (Request $request, Response $response,
     return $response;
 });
 $app->get('/return-policy', function (Request $request, Response $response, array $args) {
-    $order_id = $request->getQueryParams('barcode')['barcode'];
+    if (isset($request->getQueryParams('barcode')['barcode']))
+        $order_id = $request->getQueryParams('barcode')['barcode'];
+
+    if (isset($request->getQueryParams('kdcode')['kdcode']))
+        $kdcode_id = $request->getQueryParams('kdcode')['kdcode'];
+
     $username = 'api2';
     $password = 'api2';
     $url = 'https://dl.portal.kedifap.com/';
@@ -846,8 +857,10 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
         ],
         'verify' => false
     ]);
-    $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=BARCODE eq \'' . $order_id . '\'';
-    // print_r($sub_url);die;
+    if (isset($order_id) && $order_id)
+        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=BARCODE eq \'' . $order_id . '\'';
+    else $sub_url = 'odata/Priority/tabula.ini/efk/B2B_LOGPART?$filter=DEXT_PARTBARCODE eq \'' . $kdcode_id . '\'';
+    // return($sub_url);die;
     $response = $client->get($sub_url);
 
     return $response;
@@ -856,40 +869,46 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
+
+    list($customer_main_id, $customer_login_id) = explode('-', $customer_id);
+
     $columnFilter = $request->getQueryParams('filters')['filters'];
     // $sorting = $request->getQueryParams('sorting')['sorting'];
     // return $sorting;
     $filterQuery = '';
     $ge = 'ge ';
+    $ls = '';
+    
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
         $filterValue = $columnFilterArray[0]->value;
         $filterQuery = " and $columnId eq '$filterValue'";
-
+        $nextDay = '';
         if ($columnId == 'DEXT_SUBMISSIONDATE') {
-            $ge = 'eq ';
+            // $ge = 'eq ';
+            $ls = ' and DEXT_SUBMISSIONDATE le ';
             $date = date("Y-m-d", strtotime($filterValue));
+            $nextDay = date('Y-m-d', strtotime("+1 day", strtotime($filterValue)));
+            // return $nextDay;
             $filterQuery = '';
         }
-        //        $columnId == 'DEXT_SUBMISSIONDATE' ? $ge = 'DEXT_SUBMISSIONDATE eq ' && $date = date("Y-m-d", strtotime($filterValue)) : $ge = 'DEXT_SUBMISSIONDATE ge '  ;
-
-        // print_r($columnId);die;
+        
     }
-
+    
     $username = 'api2';
     $password = 'api2';
     $url = 'https://dl.portal.kedifap.com/';
     try {
         $client = new Client([
-            // 'base_uri' => 'https://priority.kedifap.local/',
-            'base_uri' => $url,
+            'base_uri' => 'https://priority.kedifap.local/',
+            // 'base_uri' => $url,
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
             'verify' => false
         ]);
-        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_id . '\' and DEXT_SUBMISSIONDATE ' . $ge . $date . $filterQuery;
+        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_main_id . '\' and DCODE eq \'' . $customer_login_id . '\' and DEXT_SUBMISSIONDATE ' . $ge . $date .$ls . $nextDay .$filterQuery;
         // return($sub_url);die;
         $response = $client->get($sub_url);
 
@@ -1022,6 +1041,29 @@ $app->get('/check-token', function (Request $request, Response $response, array 
 $app->get('/stock', function (Request $request, Response $response, array $args) {
 
     $sql = "SELECT * FROM `stock`";
+
+    try {
+
+        // Get DB Object
+        $db = new db();
+        $db = $db->connect();
+
+        $stmt = $db->prepare($sql);
+
+        // $stmt->debugDumpParams();
+        // die;
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // print_r($result );die;
+        return $response->withStatus(200)->withJson($result);
+    } catch (PDOException $e) {
+        echo '{"error": {"text": ' . $e->getMessage() . '}';
+    }
+});
+
+$app->get('/stock-detailed', function (Request $request, Response $response, array $args) {
+
+    $sql = "SELECT * FROM `stock_detailed`";
 
     try {
 

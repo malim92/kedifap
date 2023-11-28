@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 import "./ReturnPolicy.css";
 
 function ReturnPolicy() {
   const [id, setId] = useState("");
+  const [kdId, setKdId] = useState("");
   const [showPolicy, setShowPolicy] = useState(false);
   const [returnPolicy, setReturnPolicy] = useState("");
   const [productDesciption, setProductDesciption] = useState("");
@@ -12,9 +16,18 @@ function ReturnPolicy() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const url = new URL(
-      `${process.env.REACT_APP_API_URL}/return-policy?barcode=${id}`
-    );
+    const formName = event.target.name;
+    let url;
+    if (formName == "barcode") {
+      url = new URL(
+        `${process.env.REACT_APP_API_URL}/return-policy?barcode=${id}`
+      );
+    } else {
+      url = new URL(
+        `${process.env.REACT_APP_API_URL}/return-policy?kdcode=${kdId}`
+      );
+    }
+
     try {
       const response = await axios.get(url, { id });
       // Handle the response from the backend here
@@ -23,12 +36,13 @@ function ReturnPolicy() {
       let returnPolicyArray = "";
       let productDesciptionArray = "";
       response.data.value[0]
-        ? (returnPolicyArray = response.data.value[0].DEXT_SUPPOLICYCODE) && (productDesciptionArray = response.data.value[0].PARTDES)
-        : setReturnPolicy("No product found!!") && setProductDesciption('');
+        ? (returnPolicyArray = response.data.value[0].DEXT_SUPPOLICYCODE) &&
+          (productDesciptionArray = response.data.value[0].PARTDES)
+        : setReturnPolicy("No product found!!") && setProductDesciption("");
 
-
-        productDesciptionArray !== null && productDesciptionArray.length > 0
-        ? setProductDesciption(productDesciptionArray): setProductDesciption("");
+      productDesciptionArray !== null && productDesciptionArray.length > 0
+        ? setProductDesciption(productDesciptionArray)
+        : setProductDesciption("");
 
       returnPolicyArray !== null && returnPolicyArray.length > 0
         ? setShowPolicy(true)
@@ -47,10 +61,8 @@ function ReturnPolicy() {
         setReturnPolicy("Ο Προμηθευτής ΔΕΝ Δέχεται Επιστροφές");
       } else if (returnPolicyArray == "SPECIAL") {
         setReturnPolicy("Ειδική Συμφωνία");
-      } else if (returnPolicyArray ==null )
+      } else if (returnPolicyArray == null)
         setReturnPolicy("No policy was found for the selected product");
-
-      
     } catch (error) {
       // Handle any errors that occur during the request
       console.error(error);
@@ -61,33 +73,67 @@ function ReturnPolicy() {
     setId(event.target.value);
   };
 
+  const handleKdCode = (event) => {
+    setKdId(event.target.value);
+  };
+
   return (
     <>
-      <div className="container">
-        <h1 className="text-2xl py-4">Πολιτική επιστροφών</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="idInput">Barcode:</label>
-            <input
-              type="text"
-              className="form-control"
-              id="idInput"
-              value={id}
-              onChange={handleChange}
-            />
-            <button
-              className="btn btn-primary"
-              style={{
-                fontSize: "15px",
-                marginTop: "10px",
-                marginBottom: "10px",
-              }}
-            >
-              Request Πολιτική επιστροφών
-            </button>
-          </div>
-        </form>
-      </div>
+      <h1 className="text-2xl py-4">Πολιτική επιστροφών</h1>
+      <Container>
+        <Row>
+          <Col>
+            <form name="barcode" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="idInput">Barcode:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="idInput"
+                  value={id}
+                  onChange={handleChange}
+                />
+
+                <button
+                  className="btn btn-primary"
+                  style={{
+                    fontSize: "15px",
+                    marginTop: "10px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  Request Πολιτική επιστροφών
+                </button>
+              </div>
+            </form>
+          </Col>
+          <Col>
+            <form name="kdcode" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="kdInput">KDPart Code:</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="kdInput"
+                  value={kdId}
+                  onChange={handleKdCode}
+                />
+                <button
+                  className="btn btn-primary"
+                  style={{
+                    fontSize: "15px",
+                    marginTop: "10px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  Request Πολιτική επιστροφών
+                </button>
+              </div>
+            </form>
+          </Col>
+        </Row>
+      </Container>
+
       {productDesciption && (
         <div className="container form-group">
           <div className="text-bg">{productDesciption}</div>
@@ -98,7 +144,6 @@ function ReturnPolicy() {
           <div className="text-bg">{returnPolicy}</div>
         </div>
       )}
-      
     </>
   );
 }
