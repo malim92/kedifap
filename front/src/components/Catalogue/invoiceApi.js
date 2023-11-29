@@ -11,14 +11,13 @@ export const FetchInvoiceData = async (
   setIsError,
   monthFilter
 ) => {
-  let userId = localStorage.getItem('userId');
+  let userId = localStorage.getItem("userId");
   const url = new URL(
     `${process.env.REACT_APP_API_URL}/invoices?customer_id=${userId}`
   );
   url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
 
   console.log(url, "url invoices");
-  console.log(monthFilter, "url monthFilter");
 
   //call Api
   if (monthFilter) {
@@ -69,6 +68,17 @@ export const FetchInvoiceData = async (
   }
 
   let totalInvoices = [...InvoiceData, ...InvoiceDataC];
+
+  if (typeof sorting !== 'undefined' && sorting.length > 0) {
+    totalInvoices = sorting[0]["desc"]
+      ? totalInvoices.sort((a, b) =>
+          moment(b.IVDATE, "DD-MM-YYYY").diff(moment(a.IVDATE, "DD-MM-YYYY"))
+        )
+      : totalInvoices.sort((a, b) =>
+          moment(a.IVDATE, "DD-MM-YYYY").diff(moment(b.IVDATE, "DD-MM-YYYY"))
+        );
+  }
+  console.log(totalInvoices, "url sortedTotalInvoices");
   setData(totalInvoices);
   setRowCount(InvoiceData.length);
 };

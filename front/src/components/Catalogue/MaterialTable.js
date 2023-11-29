@@ -65,8 +65,8 @@ const MaterialTable = ({ isVendorName }) => {
   const [iconDisplay, setIconDisplay] = useState(["none"]);
 
   const [barcodeValue, setBarcodeValue] = useState("");
-  const [discountedProducts, setDiscountedProducts] = useState("");
-  const [quotaProducts, setQuotaProducts] = useState("");
+  const [discountedProducts, setDiscountedProducts] = useState(false);
+  const [quotaProducts, setQuotaProducts] = useState(false);
   const [supValue, setSupValue] = useState("");
   const [activeIngValue, setActiveIngValue] = useState("");
   const [quantityInputValue, setQuantityInputValue] = useState({});
@@ -82,6 +82,8 @@ const MaterialTable = ({ isVendorName }) => {
   };
 
   const showQuota = (event) => {
+    console.log(event.target.checked, "test showQuota1");
+
     setQuotaProducts(event.target.checked);
   };
 
@@ -93,41 +95,41 @@ const MaterialTable = ({ isVendorName }) => {
     setActiveIngValue(event.target.value);
   };
 
-  useEffect(() => {
-    const debounceTimeout = setTimeout(() => {
-      FetchPartsData(
-        sorting,
-        globalFilter,
-        columnFilters,
-        pagination,
-        setIconDisplay,
-        setData,
-        setRowCount,
-        setIsError,
-        barcodeValue,
-        supValue,
-        activeIngValue,
-        discountedProducts,
-        quotaProducts,
-        isVendorName
-      );
-    }, 1000);
+  // useEffect(() => {
+  //   const debounceTimeout = setTimeout(() => {
+  //     FetchPartsData(
+  //       sorting,
+  //       globalFilter,
+  //       columnFilters,
+  //       pagination,
+  //       setIconDisplay,
+  //       setData,
+  //       setRowCount,
+  //       setIsError,
+  //       barcodeValue,
+  //       supValue,
+  //       activeIngValue,
+  //       discountedProducts,
+  //       quotaProducts,
+  //       isVendorName
+  //     );
+  //   }, 1000);
 
-    return () => {
-      clearTimeout(debounceTimeout);
-    };
-  }, [
-    columnFilters,
-    globalFilter,
-    pagination.pageIndex,
-    pagination.pageSize,
-    sorting,
-    barcodeValue,
-    supValue,
-    activeIngValue,
-    discountedProducts,
-    quotaProducts,
-  ]);
+  //   return () => {
+  //     clearTimeout(debounceTimeout);
+  //   };
+  // }, [
+  //   columnFilters,
+  //   globalFilter,
+  //   pagination.pageIndex,
+  //   pagination.pageSize,
+  //   sorting,
+  //   barcodeValue,
+  //   supValue,
+  //   activeIngValue,
+  //   discountedProducts,
+  //   quotaProducts,
+  // ]);
 
   useEffect(() => {
     FetchPartsData(
@@ -143,7 +145,7 @@ const MaterialTable = ({ isVendorName }) => {
       supValue,
       activeIngValue,
       discountedProducts,
-      quotaProducts,
+      // quotaProducts,
       isVendorName
     );
   }, [
@@ -152,6 +154,11 @@ const MaterialTable = ({ isVendorName }) => {
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
+    // barcodeValue,
+    // supValue,
+    // activeIngValue,
+    discountedProducts,
+    quotaProducts,
   ]);
 
   const columns = useMemo(() => COLUMNS, []);
@@ -174,7 +181,7 @@ const MaterialTable = ({ isVendorName }) => {
       alert("Sorry but the selected product dosn't have available stock!");
       return;
     }
-    
+
     const found = cartItems.find((element) => element.PARTNAME == PARTNAME);
     if (found) {
       alert("Product is already in the cart!");
@@ -280,31 +287,34 @@ const MaterialTable = ({ isVendorName }) => {
   }
 
   function caluclateMixMatch(productsInCart) {
-    console.log('productsInCart in mixx', productsInCart);
-    let discountedAmount=0;
+    console.log("productsInCart in mixx", productsInCart);
+    let discountedAmount = 0;
 
     const offerIdQuantities = productsInCart.reduce((quantities, item) => {
       const offerId = item.OFFERID;
       const quantity = item.quantity;
-    
+
       if (!quantities[offerId]) {
         quantities[offerId] = 0;
       }
-    
+
       quantities[offerId] += parseInt(quantity);
-    
+
       return quantities;
     }, {});
 
     //checl if the total quantities accumalted are bigger than the offer quantity
-    productsInCart.forEach(item => {
+    productsInCart.forEach((item) => {
       const offerId = item.OFFERID;
       const offerQty = parseInt(item.OFFERQTY);
 
       if (offerIdQuantities[offerId] >= offerQty) {
         // item.MIX_MATCH_DISCOUNTED = true;
-        console.log(item, 'item that is mixed');
-        discountedAmount += parseFloat(item.DISCOUNT) / 100 * parseFloat(item.WSPLPRICE) * parseInt(item.quantity);
+        console.log(item, "item that is mixed");
+        discountedAmount +=
+          (parseFloat(item.DISCOUNT) / 100) *
+          parseFloat(item.WSPLPRICE) *
+          parseInt(item.quantity);
       }
     });
 
@@ -366,6 +376,7 @@ const MaterialTable = ({ isVendorName }) => {
 
   return (
     <>
+      {console.log("test repeate")}
       <div class="custom-filters">
         <FormControlLabel
           control={
@@ -401,11 +412,17 @@ const MaterialTable = ({ isVendorName }) => {
           onChange={handleActiveIngredientChange}
           placeholder="Search for Active Substance..."
         /> */}
-        <p>Η ημερομηνία λήξης είναι πάντα η πιο κοντινή. Επιλέξτε <Info style={{
-                color: "#1f79d5",
-                cursor: "pointer",
-                fontSize: "15px",
-              }}/> για να δείτε όλες τις ημερομηνίες λήξεις.</p>
+        <p>
+          Η ημερομηνία λήξης είναι πάντα η πιο κοντινή. Επιλέξτε{" "}
+          <Info
+            style={{
+              color: "#1f79d5",
+              cursor: "pointer",
+              fontSize: "15px",
+            }}
+          />{" "}
+          για να δείτε όλες τις ημερομηνίες λήξεις.
+        </p>
       </div>
 
       <MaterialReactTable
@@ -429,7 +446,7 @@ const MaterialTable = ({ isVendorName }) => {
             DEXT_IMPORTERNAME: false,
             DEXT_BRAND: false,
             SPEC1: false,
-            expectedStock: isVendorName ? true : false
+            expectedStock: isVendorName ? true : false,
           },
         }}
         manualFiltering
@@ -538,29 +555,11 @@ const MaterialTable = ({ isVendorName }) => {
             ></Info>
             {row.original.IMGFILENAME !== null && (
               <>
-                {/* <FaImage
-                  style={{
-                    color: "#1f79d5",
-                    cursor: "pointer",
-                    fontSize: "35px",
-                  }}
-                  onClick={openLightbox}
-                  // onClick={() => {
-                  //   console.log(row.original, "row.original.IMGFILENAM");
-
-                  //   window.open(row.original.IMGFILENAME, "_blank");
-                  // }}
-                  // onClick={() => {
-                  //   setVisible(true);
-                  //   console.log(row.original.IMGFILENAME, "image visible");
-                  // }}
-                >
-                  
-                </FaImage> */}
-                {/* {isOpen && ( */}
-                <div class="thumbnail">
+                {console.log(row.original, "row.original test")}
+                <div class={"thumbnail " + row.original.PARTNAME}>
                   <SlideshowLightbox>
                     <img
+                      key={row.original.PARTNAME} // Add a unique key
                       className="w-full rounded"
                       src={encodeURI(row.original.IMGFILENAME)}
                       style={{ maxWidth: "100%", maxHeight: "100%" }}

@@ -118,7 +118,8 @@ const Cart = (props) => {
   };
 
   const sendOrder = async (order, isVendorName, freeQuantity) => {
-    let userId = localStorage.getItem("userId");
+    let userFullId = localStorage.getItem("userId");
+    let [userId, dCode] = userFullId.split('-');
     let userDesc = localStorage.getItem("userDesc");
     console.log(isVendorName, "isVendorName in sendOrder.js");
     console.log(order, "order.()");
@@ -148,7 +149,7 @@ const Cart = (props) => {
       ...(isVendorName && { DEXT_SUPPDES: userId }),
       // DEXT_SUPPNAME: "V1239",
       // DEXT_SUPPDES: "4MORE LTD 2",
-      DCODE: null,
+      DCODE: dCode,
       DETAILS: `order from B2B for customer ${userId}`,
       DEXT_SUBMISSIONDATE: today,
       PAYCODE: "20",

@@ -14,7 +14,7 @@ export const FetchPartsData = async (
   supValue,
   activeIngValue,
   discountedProducts,
-  quotaProducts,
+  // quotaProducts,
   isVendorName
 ) => {
 
@@ -64,16 +64,16 @@ export const FetchPartsData = async (
       );
     }
     //if quota switch is on
-    if (
-      quotaProducts !== "" &&
-      quotaProducts !== undefined &&
-      quotaProducts !== false
-    ) {
-      url.searchParams.set(
-        "quotaFilter",
-        JSON.stringify([{ id: "quotaFilter", value: quotaProducts }])
-      );
-    }
+    // if (
+    //   quotaProducts !== "" &&
+    //   quotaProducts !== undefined &&
+    //   quotaProducts !== false
+    // ) {
+    //   url.searchParams.set(
+    //     "quotaFilter",
+    //     JSON.stringify([{ id: "quotaFilter", value: quotaProducts }])
+    //   );
+    // }
 
     console.log(url, "url");
     const response = await fetch(url.href);

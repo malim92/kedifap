@@ -479,12 +479,12 @@ $app->post('/order', function (Request $request, Response $response) { {
         $file = './log.txt';
         file_put_contents($file, $order, FILE_APPEND);
 
-        // $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
-        //     'json' => $order,
-        // ]);
-        $response = $client->post('https://webhook.site/1564e48b-1224-48f7-ae98-6c6c15473479', [
+        $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
             'json' => $order,
         ]);
+        // $response = $client->post('https://webhook.site/1564e48b-1224-48f7-ae98-6c6c15473479', [
+        //     'json' => $order,
+        // ]);
         $body = (string) $response->getBody();
 
         // $data = json_decode($body, true);
@@ -605,8 +605,8 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
     $url = 'https://dl.portal.kedifap.com/';
     try {
         $client = new Client([
-            'base_uri' => 'https://priority.kedifap.local/',
-            // 'base_uri' => $url,
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => $url,
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
@@ -681,8 +681,8 @@ $app->get('/invoices-c', function (Request $request, Response $response, array $
     $url = 'https://dl.portal.kedifap.com/';
     try {
         $client = new Client([
-            'base_uri' => 'https://priority.kedifap.local/',
-            // 'base_uri' => $url,
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => $url,
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
@@ -731,7 +731,6 @@ $app->get('/statements', function (Request $request, Response $response, array $
     $columnFilter = $request->getQueryParams('filters')['filters'];
 
     $filterQuery = '';
-
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
@@ -752,7 +751,7 @@ $app->get('/statements', function (Request $request, Response $response, array $
 
     // $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=FROMDATE ge ' . $lastYearDate . ' and TODATE le ' . $todayDate . ' and CUSTNAME eq ' . '\'' . $customer_id . '\'' . $filterQuery;
     //$sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE%20ge%20' . $lastYearDate . 'T00:00:00%2B02:00%20%20and%20CUSTNAME%20eq%20%27' . $customer_id . '%27' . $filterQuery;
-    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE ge 2023-10-01T00:00:00%2B02:00%20%20and CUSTNAME eq ' . '\'' . $customer_main_id . '\' and DCODE eq \'' . $customer_login_id . '\'' . $filterQuery;
+    $sub_url = '/odata/Priority/tabula.ini/efk/DEXT_CUSTSTMT?$filter=TODATE ge 2023-10-01T00:00:00%2B02:00%20%20and CUSTNAME eq ' . '\'' . $customer_main_id . '\' ' . $filterQuery;
     // return $sub_url;
     $url = 'https://dl.portal.kedifap.com/';
 
@@ -764,6 +763,7 @@ $app->get('/statements', function (Request $request, Response $response, array $
         ],
         'verify' => false
     ]);
+    // return $sub_url;
 
     try {
         $response = $client->get($sub_url);

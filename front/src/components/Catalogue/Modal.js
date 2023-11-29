@@ -11,7 +11,7 @@ import moment from "moment";
 
 function ProductModal(props) {
   const { show, handleClose, popupModalData } = props;
-  console.log(popupModalData, "test1");
+
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
