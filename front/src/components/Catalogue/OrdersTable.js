@@ -1,9 +1,38 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+
 import { ORDERS_COLUMNS } from "./columns-orders";
 import { FetchOrdersData } from "./getOrderApi";
 import axios from "axios";
 import OrderProductsModal from './ProductsModal';
+import { pink, red } from "@mui/material/colors";
+import { alpha, styled } from "@mui/material/styles";
+
+const MaterialUISwitch = styled(Switch)(({ theme }) => ({
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: red[900],
+    "&:hover": {
+      backgroundColor: alpha(red[900], theme.palette.action.hoverOpacity),
+    },
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: red[900],
+  },
+}));
+
+const MaterialUISwitchQuota = styled(Switch)(({ theme }) => ({
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: pink["A200"],
+    "&:hover": {
+      backgroundColor: alpha(pink["A200"], theme.palette.action.hoverOpacity),
+    },
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: red[900],
+  },
+}));
 
 //https://ked.priority-software.com.cy/odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=DEXT_SUBMISSIONDATE%20ge%202022-04-02T00:00:00%2B02:00%20and%20DEXT_SUBMISSIONDATE%20le%202022-04-27T23:59:59%2B02:00
 const OrdersTable = () => {
@@ -23,12 +52,38 @@ const OrdersTable = () => {
     pageSize: 100,
   });
 
+  //filters states
+  const [currentMonth, setCurrentMonth] = useState(false);
+  const [lastMonth, setLastMonth] = useState(false);
+  const [last4Months, setLast4Months] = useState(false);
+  const [monthFilter, setmonthFilter] = useState(false);
+
   //Modal state
   const [productShow, setProductShow] = useState(false);
   const [popupModalProduct, setPopupModalProduct] = useState({});
 
   const handleProductClose = () => setProductShow(false);
 
+  const handleSwitchChange = (event) => {
+    const { name, checked } = event.target;
+
+    // Update the state of the selected switch and turn off the others
+    if (name === "currentMonth") {
+      setCurrentMonth(checked);
+      setLastMonth(false);
+      setLast4Months(false);
+    } else if (name === "lastMonth") {
+      setLastMonth(checked);
+      setCurrentMonth(false);
+      setLast4Months(false);
+    } else if (name === "last4Months") {
+      setLast4Months(checked);
+      setCurrentMonth(false);
+      setLastMonth(false);
+    }
+    console.log(name, "name test");
+    setmonthFilter(name);
+  };
 
   useEffect(() => {
     FetchOrdersData(
@@ -38,7 +93,8 @@ const OrdersTable = () => {
       pagination,
       setData,
       setRowCount,
-      setIsError
+      setIsError,
+      monthFilter
     );
   }, [
     columnFilters,
@@ -46,6 +102,7 @@ const OrdersTable = () => {
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
+    monthFilter
   ]);
 
   const columns = useMemo(() => ORDERS_COLUMNS, []);
@@ -74,6 +131,44 @@ const OrdersTable = () => {
 
   return (
     <>
+    <div class="custom-filters">
+        <FormControlLabel
+          control={
+            <MaterialUISwitch
+              sx={{ m: 1 }}
+              name="currentMonth"
+              defaultUnchecked
+              checked={currentMonth}
+              onChange={handleSwitchChange}
+            />
+          }
+          label="Current Month"
+        />
+        <FormControlLabel
+          control={
+            <MaterialUISwitchQuota
+              sx={{ m: 1 }}
+              defaultUnchecked
+              name="lastMonth"
+              checked={lastMonth}
+              onChange={handleSwitchChange}
+            />
+          }
+          label="Last Month"
+        />
+        <FormControlLabel
+          control={
+            <MaterialUISwitchQuota
+              sx={{ m: 1 }}
+              name="last4Months"
+              defaultUnchecked
+              checked={last4Months}
+              onChange={handleSwitchChange}
+            />
+          }
+          label="Last 4 Months"
+        />
+      </div>
     <OrderProductsModal
         show={productShow}
         popupModalProduct={popupModalProduct}
@@ -135,7 +230,7 @@ const OrdersTable = () => {
               style={{
                 fontSize: "15px",
                 border: 'none',
-                backgroundColor: row.original.ORDSTATUSDES == 'Merged' ? '#000' : row.original.ORDSTATUSDES == 'Received' ? 'blue' : row.original.ORDSTATUSDES == 'Completed' ? 'green' : row.original.ORDSTATUSDES == 'Cancelled' ? 'red' : row.original.ORDSTATUSDES == 'Pending' ? 'orange': ''
+                backgroundColor: row.original.ORDSTATUSDES == 'Merged' ? '#000' : row.original.ORDSTATUSDES == 'Received' ? 'blue' : row.original.ORDSTATUSDES == 'Completed' ? 'green' : row.original.ORDSTATUSDES == 'Canceled' ? 'red' : row.original.ORDSTATUSDES == 'Pending' ? 'orange': ''
               }}
             >
               Products Details

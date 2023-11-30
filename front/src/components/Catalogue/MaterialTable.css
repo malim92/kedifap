@@ -37,3 +37,6 @@ img.w-full.rounded._3xuz3 {
     object-fit: contain;
   }
   
+  #ReactSimpleImageViewer {
+    z-index: 100;
+  }

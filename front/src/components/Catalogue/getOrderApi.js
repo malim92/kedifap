@@ -8,7 +8,8 @@ export const FetchOrdersData = async (
   pagination,
   setData,
   setRowCount,
-  setIsError
+  setIsError,
+  monthFilter
 ) => {
 
   let userId = localStorage.getItem('userId');
@@ -16,6 +17,13 @@ export const FetchOrdersData = async (
   const url = new URL(`${process.env.REACT_APP_API_URL}/fetch-orders?customer_id=${userId}`);
   url.searchParams.set("filters", JSON.stringify(columnFilters ?? [])); //[{"id":"PARTNAME","value":"sa"}]
   // url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
+
+  if (monthFilter) {
+    url.searchParams.set(
+      "monthFilter",
+      JSON.stringify([{ id: "monthFilter", value: monthFilter }])
+    );
+  }
 
   try {
     const response = await axios.get(url);

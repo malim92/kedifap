@@ -1,12 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import MaterialReactTable from "material-react-table";
 import { Info } from "@mui/icons-material";
 import PopupModal from "./Modal";
 import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown } from "react-icons/fa";
-import "lightbox.js-react/dist/index.css";
-import { SlideshowLightbox, initLightboxJS } from "lightbox.js-react";
+import ImageViewer from "react-simple-image-viewer";
 
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -72,7 +71,23 @@ const MaterialTable = ({ isVendorName }) => {
   const [quantityInputValue, setQuantityInputValue] = useState({});
   const [productQuantity, setProductQuantity] = useState({});
 
+  //image viewr
+  const [currentImage, setCurrentImage] = useState("");
+  const [tagetImage, setTargetImage] = useState("");
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+
   const [highlightStyle, setHighlightStyle] = useState([]);
+
+  const openImageViewer = useCallback((index, imgSrc) => {
+    setTargetImage(imgSrc);
+    setCurrentImage(index);
+    setIsViewerOpen(true);
+  }, []);
+
+  const closeImageViewer = () => {
+    setCurrentImage(0);
+    setIsViewerOpen(false);
+  };
   const handleBarcodeChange = (event) => {
     setBarcodeValue(event.target.value);
   };
@@ -212,7 +227,7 @@ const MaterialTable = ({ isVendorName }) => {
       setShowCart(true);
     }
   };
-
+  
   //custom state
   const [show, setShow] = useState(false);
   const [discountShow, setDiscountShow] = useState(false);
@@ -424,7 +439,15 @@ const MaterialTable = ({ isVendorName }) => {
           για να δείτε όλες τις ημερομηνίες λήξεις.
         </p>
       </div>
-
+      {isViewerOpen && (
+        <ImageViewer
+          src={[tagetImage]}
+          currentIndex={0}
+          disableScroll={false}
+          closeOnClickOutside={true}
+          onClose={closeImageViewer}
+        />
+      )}
       <MaterialReactTable
         displayColumnDefOptions={{
           "mrt-row-actions": {
@@ -555,18 +578,20 @@ const MaterialTable = ({ isVendorName }) => {
             ></Info>
             {row.original.IMGFILENAME !== null && (
               <>
-                {console.log(row.original, "row.original test")}
-                <div class={"thumbnail " + row.original.PARTNAME}>
-                  <SlideshowLightbox>
-                    <img
-                      key={row.original.PARTNAME} // Add a unique key
-                      className="w-full rounded"
-                      src={encodeURI(row.original.IMGFILENAME)}
-                      style={{ maxWidth: "100%", maxHeight: "100%" }}
-                    />
-                  </SlideshowLightbox>
+                <div class={"thumbnail"}>
+                  <img
+                    src={row.original.IMGFILENAME}
+                    onClick={() =>
+                      openImageViewer(
+                        row.original.PARTNAME,
+                        row.original.IMGFILENAME
+                      )
+                    }
+                    className="w-full rounded"
+                    key={row.original.PARTNAME}
+                    style={{ maxWidth: "100%", maxHeight: "100%" }}
+                  />
                 </div>
-                {/* )} */}
               </>
             )}
           </div>

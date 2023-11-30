@@ -117,7 +117,7 @@ const Cart = (props) => {
     setHighlightStyle([]);
   };
 
-  const sendOrder = async (order, isVendorName, freeQuantity) => {
+  const sendOrder = async (order, isVendorName, freeQuantity, pharmacyValue) => {
     let userFullId = localStorage.getItem("userId");
     let [userId, dCode] = userFullId.split('-');
     let userDesc = localStorage.getItem("userDesc");
@@ -138,11 +138,11 @@ const Cart = (props) => {
       DEXT_CONFIRMORDER: index == order.length - 1 ? "Y" : "",
     }));
 
-    console.log(productsinOrder, "productsinOrder");
+    console.log(pharmacyValue, "pharmacyValue");
     let today = moment().format();
 
     const orderObject = {
-      CUSTNAME: userId,
+      CUSTNAME: isVendorName ? pharmacyValue.Code: userId,
       // CDES: userDesc,
       CURDATE: today,
       ...(isVendorName && { DEXT_SUPPNAME: isVendorName }),
@@ -341,7 +341,7 @@ const Cart = (props) => {
                 if (
                   window.confirm("Θέλετε να αποσταλεί η παραγγελία σας;")
                 ) {
-                  sendOrder(cartItems, isVendorName, freeQuantity);
+                  sendOrder(cartItems, isVendorName, freeQuantity, pharmacyValue);
                 }
               }}
               className="btn btn-primary "
