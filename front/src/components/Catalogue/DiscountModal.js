@@ -53,9 +53,12 @@ const getDiscount = async (
     if (found) {
       alert("Product is already in the cart!");
     } else {
-      product.quantity = discountSelection.OFFERQTY;
+      product.quantity = quantityInputValue[product.PARTNAME];
       console.log(discountSelection, "discountSelection  ");
+      console.log(quantityInputValue, "quantityInputValue debug  ");
       setCartItems([...cartItems, product]);
+      console.log(cartItems, "cartItems debug 1  ");
+
       cartItems.push(product);
       const updatedDataMix = cartItems.map((cartItem) => ({
         ...cartItem,
@@ -63,7 +66,6 @@ const getDiscount = async (
       }));
 
       const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
-      console.log(cartFlatTotalInDiscount, "cartFlatTotalInDiscount test  ");
       // price discount
       if (discountSelection.DEXT_OFFERCODE == "2") {
         const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
@@ -89,6 +91,10 @@ const getDiscount = async (
           [product.PARTNAME]: product.quantity,
         });
 
+        console.log(
+          discountLabel,
+          "discountLabel in discount"
+        );
         setDiscountLabel({
           ...discountLabel,
           [product.PARTNAME]:
@@ -118,10 +124,15 @@ const getDiscount = async (
           [product.PARTNAME]: discountSelection.OFFERDES,
         });
       } else if (discountSelection.DEXT_OFFERCODE == "4") {
-        console.log(highlightStyle, "highlightStyle before chcek  ");
+        
+        setProductQuantity({
+          ...productQuantity,
+          [product.PARTNAME]: product.quantity,
+        });
+
         highlightStyle.push(product.PARTNAME);
         setHighlightStyle(highlightStyle);
-        console.log(highlightStyle, "highlightStyle after chcek  ");
+
         const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
         // const cartDiscountTotalInDiscount = caluclateMixMatch(cartItems);
 
@@ -227,11 +238,12 @@ function ProductDiscountModal(props) {
         return result;
       }, {})
     );
-    console.log(updatedOfferResults, "offerResults in swiper 21");
+    // console.log(updatedOfferResults, "offerResults in swiper 21");
     setMixMatch(updatedOfferResults);
   };
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
+
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
     const productId = item.PARTNAME;
 
@@ -239,69 +251,104 @@ function ProductDiscountModal(props) {
       ...quantityInputValue,
       [productId]: parseInt(event),
     });
-    console.log(productQuantity, "productQuantity quan");
+    
+    // console.log(productQuantity, "productQuantity quan");
+
+    const updatedItems = [...cartItems];
+
+    if (updatedItems.length == 0 ) return;
+    const updatedItemsQuantity = updatedItems.map((item) => ({
+      ...item,
+      quantity: productQuantity[item.PARTNAME] || 1,
+    }));
+    
+    updatedItems[index] = { ...updatedItemsQuantity[index], quantity: event };
+    console.log(updatedItems, "debug updatedItems quan");
+    updatedItemsQuantity[index] = {
+      ...updatedItemsQuantity[index],
+      quantity: event,
+    };
+
+    setCartItems(updatedItemsQuantity);
+
+    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
+    const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
+    const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
+    setDiscountAmount(totalDiscountAmount.totalDiscount);
+
+    setTotal(
+      cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
+    );
+
+    setDiscountLabel({
+      ...discountLabel,
+      [item.PARTNAME]: totalDiscountAmount.discountLabel[item.PARTNAME],
+    });
+    console.log(discountLabel, "debug discountLabel quan");
+    console.log(totalDiscountAmount, "debug totalDiscountAmount quan");
+
   };
 
   const { rowSearch } = popupModalDiscount;
   const productOriginal = { original: rowSearch };
 
-  const addToCart = (
-    product,
-    total,
-    setQuantityInputValue,
-    setProductQuantity,
-    productQuantity
-  ) => {
-    let cartTotalPrice = total;
+  // const addToCart = (
+  //   product,
+  //   total,
+  //   setQuantityInputValue,
+  //   setProductQuantity,
+  //   productQuantity
+  // ) => {
+  //   let cartTotalPrice = total;
 
-    console.log(product, "product.original 2");
+  //   console.log(product, "product.original 2");
 
-    const found = cartItems.find(
-      (element) => element.PARTNAME == product.PARTNAME
-    );
-    if (found) {
-      alert("Product is already in the cart!");
-    } else {
-      if (parseInt(product.DEXT_LOWSTOCKQTY) > 0) {
-        product.quantity = product.DEXT_LOWSTOCKQTY;
-        setQuantityInputValue({
-          ...quantityInputValue,
-          [product.PARTNAME]: product.DEXT_LOWSTOCKQTY,
-        });
-        setProductQuantity({
-          ...quantityInputValue,
-          [product.PARTNAME]: product.DEXT_LOWSTOCKQTY,
-        });
-      } else {
-        product.quantity = 1;
-        setQuantityInputValue({
-          ...quantityInputValue,
-          [product.PARTNAME]: productQuantity[product.PARTNAME],
-        });
-        // productQuantity.length ==   0 ? productQuantity[product.PARTNAME] = 1 : productQuantity
-        if (productQuantity.length == 0) productQuantity[product.PARTNAME] = 1;
-        setProductQuantity({
-          ...quantityInputValue,
-          [product.PARTNAME]: productQuantity[product.PARTNAME],
-        });
-      }
-      setCartItems([...cartItems, product]);
-      const cartFlatTotal = caluclateFlatTotal(cartItems);
-      console.log(cartFlatTotal, "flat 1");
+  //   const found = cartItems.find(
+  //     (element) => element.PARTNAME == product.PARTNAME
+  //   );
+  //   if (found) {
+  //     alert("Product is already in the cart!");
+  //   } else {
+  //     if (parseInt(product.DEXT_LOWSTOCKQTY) > 0) {
+  //       product.quantity = product.DEXT_LOWSTOCKQTY;
+  //       setQuantityInputValue({
+  //         ...quantityInputValue,
+  //         [product.PARTNAME]: product.DEXT_LOWSTOCKQTY,
+  //       });
+  //       setProductQuantity({
+  //         ...quantityInputValue,
+  //         [product.PARTNAME]: product.DEXT_LOWSTOCKQTY,
+  //       });
+  //     } else {
+  //       product.quantity = 1;
+  //       setQuantityInputValue({
+  //         ...quantityInputValue,
+  //         [product.PARTNAME]: productQuantity[product.PARTNAME],
+  //       });
+  //       // productQuantity.length ==   0 ? productQuantity[product.PARTNAME] = 1 : productQuantity
+  //       if (productQuantity.length == 0) productQuantity[product.PARTNAME] = 1;
+  //       setProductQuantity({
+  //         ...quantityInputValue,
+  //         [product.PARTNAME]: productQuantity[product.PARTNAME],
+  //       });
+  //     }
+  //     setCartItems([...cartItems, product]);
+  //     const cartFlatTotal = caluclateFlatTotal(cartItems);
+  //     console.log(cartFlatTotal, "flat 1");
 
-      // useEffect(() => {
-      //   cartItems.forEach((singleCartItem) => {
-      //     if (singleCartItem.DEXT_OFFERCODE == 4)
-      //       console.log(singleCartItem, "singleCartItem is 4");
-      //   });
-      // }, [cartItems]);
+  //     // useEffect(() => {
+  //     //   cartItems.forEach((singleCartItem) => {
+  //     //     if (singleCartItem.DEXT_OFFERCODE == 4)
+  //     //       console.log(singleCartItem, "singleCartItem is 4");
+  //     //   });
+  //     // }, [cartItems]);
 
-      cartTotalPrice +=
-        parseFloat(product.WSPLPRICE) * parseInt(product.quantity);
-      setTotal(cartTotalPrice + cartFlatTotal);
-      setShowCart(true);
-    }
-  };
+  //     cartTotalPrice +=
+  //       parseFloat(product.WSPLPRICE) * parseInt(product.quantity);
+  //     setTotal(cartTotalPrice + cartFlatTotal);
+  //     setShowCart(true);
+  //   }
+  // };
 
   //handle user pressing escape button
   const handleEscape = (event) => {

@@ -293,7 +293,6 @@ const MaterialTable = ({ isVendorName }) => {
   function caluclateFlatTotal(allCartItems) {
     let flatTotal = 0;
     allCartItems.forEach((singleCartItem) => {
-      console.log(singleCartItem, "singleCartItem ali 1");
       flatTotal +=
         parseInt(singleCartItem.quantity) *
         parseFloat(singleCartItem.WSPLPRICE);
@@ -342,16 +341,18 @@ const MaterialTable = ({ isVendorName }) => {
     let freeItems = [];
     let discountLabel = [];
     productsInCart.forEach((singleCartItem) => {
-      let applicableDiscount = null;
+      let applicableDiscount = {OFFERQTY : -1};
       //check if product has discount property
       if (singleCartItem.discounts) {
         singleCartItem.discounts.forEach((discount) => {
           //check if product quantity more than discount quantity
+          console.log(discount, "discount dev 3");
+          console.log(applicableDiscount, "applicableDiscount.quantity dev 3");
           if (
             parseInt(singleCartItem.quantity) >= parseInt(discount.OFFERQTY) &&
-            (!applicableDiscount ||
-              discount.OFFERQTY > applicableDiscount.OFFERQTY)
+            (parseInt(applicableDiscount.OFFERQTY) < parseInt(discount.OFFERQTY) )
           ) {
+            console.log(discount.OFFERQTY, "passed if dev 3");
             applicableDiscount = discount;
           }
         });

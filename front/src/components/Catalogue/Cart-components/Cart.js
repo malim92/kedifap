@@ -117,13 +117,17 @@ const Cart = (props) => {
     setHighlightStyle([]);
   };
 
-  const sendOrder = async (order, isVendorName, freeQuantity, pharmacyValue) => {
+  const sendOrder = async (
+    order,
+    isVendorName,
+    freeQuantity,
+    pharmacyValue
+  ) => {
     let userFullId = localStorage.getItem("userId");
-    let [userId, dCode] = userFullId.split('-');
+    let [userId, dCode] = userFullId.split("-");
     let userDesc = localStorage.getItem("userDesc");
     console.log(isVendorName, "isVendorName in sendOrder.js");
     console.log(order, "order.()");
-    console.log(order.length, "order.length()");
     if (order.length == 0) {
       throw Error("Cant send empty cart");
     }
@@ -142,7 +146,7 @@ const Cart = (props) => {
     let today = moment().format();
 
     const orderObject = {
-      CUSTNAME: isVendorName ? pharmacyValue.Code: userId,
+      CUSTNAME: isVendorName ? pharmacyValue.Code : userId,
       // CDES: userDesc,
       CURDATE: today,
       ...(isVendorName && { DEXT_SUPPNAME: isVendorName }),
@@ -173,6 +177,7 @@ const Cart = (props) => {
       setCartItems([]);
       setTotal(0);
       setProductQuantity({});
+      setHighlightStyle([]);
     } catch (error) {
       alert("There was an issue making your order, please contact support.");
       console.error(error);
@@ -216,9 +221,7 @@ const Cart = (props) => {
     <div>
       <button class="basket" onClick={handleCartClick}>
         <span className="icon">
-          <p>
-            {Object.keys(productQuantity).length}
-          </p>
+          <p>{Object.keys(productQuantity).length}</p>
         </span>
       </button>
       {showCart && (
@@ -338,14 +341,19 @@ const Cart = (props) => {
             </button>
             <button
               onClick={() => {
-                if (
-                  window.confirm("Θέλετε να αποσταλεί η παραγγελία σας;")
-                ) {
-                  sendOrder(cartItems, isVendorName, freeQuantity, pharmacyValue);
+                if (window.confirm("Θέλετε να αποσταλεί η παραγγελία σας;")) {
+                  sendOrder(
+                    cartItems,
+                    isVendorName,
+                    freeQuantity,
+                    pharmacyValue
+                  );
                 }
               }}
               className="btn btn-primary "
-              disabled={orderButtonStatus === "disabled" || cartItems.length == 0}
+              disabled={
+                orderButtonStatus === "disabled" || cartItems.length == 0
+              }
             >
               Send order
             </button>
