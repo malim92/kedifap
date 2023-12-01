@@ -381,7 +381,6 @@ const MaterialTable = ({ isVendorName }) => {
         }
       }
     });
-    console.log(discountLabel, "discountLabel in table 1x");
 
     return {
       totalDiscount: totalDiscount,

@@ -73,6 +73,10 @@ const Cart = (props) => {
       ...discountLabel,
       [item.PARTNAME]: totalDiscountAmount.discountLabel[item.PARTNAME],
     });
+
+    console.log(discountLabel, "cal in discountLabel xx");
+    console.log(totalDiscountAmount, "cal in totalDiscountAmount xx");
+
   };
 
   const removeItem = (product) => {
@@ -115,6 +119,7 @@ const Cart = (props) => {
     setFreeQuantity({});
     setDiscountAmount(0);
     setHighlightStyle([]);
+    setDiscountLabel({})
   };
 
   const sendOrder = async (
@@ -243,7 +248,6 @@ const Cart = (props) => {
                   <p class="cart-item-price">
                     Price: {parseFloat(item.WSPLPRICE)}
                   </p>
-                  {console.log(discountLabel, "discountLabel xxx")}
                   {discountLabel[item.PARTNAME] !== undefined && (
                     <p class="cart-item-discount">
                       Discount: {discountLabel[item.PARTNAME]}
