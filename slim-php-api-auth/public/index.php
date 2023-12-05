@@ -469,8 +469,8 @@ $app->post('/order', function (Request $request, Response $response) { {
         $password = 'api2';
 
         $client = new Client([
-            'base_uri' => 'https://priority.kedifap.local/',
-            // 'base_uri' => 'https://webhook.site/    ',
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => 'https://webhook.site/',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
@@ -479,12 +479,12 @@ $app->post('/order', function (Request $request, Response $response) { {
         $file = './log.txt';
         file_put_contents($file, $order, FILE_APPEND);
 
-        $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
-            'json' => $order,
-        ]);
-        // $response = $client->post('https://webhook.site/1564e48b-1224-48f7-ae98-6c6c15473479', [
+        // $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
         //     'json' => $order,
         // ]);
+        $response = $client->post('/9f333cdc-3432-45d5-a791-1f4e11d83370', [
+            'json' => $order,
+        ]);
         $body = (string) $response->getBody();
 
         // $data = json_decode($body, true);

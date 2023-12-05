@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
+
 import { FetchPharmacies } from "./pharmaciesApi";
 import moment from "moment";
 import "./Cart.css";
@@ -63,20 +64,29 @@ const Cart = (props) => {
     const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
+
+    console.log(updatedItemsQuantity, "discount debubg in cart1");
+
     setDiscountAmount(totalDiscountAmount.totalDiscount);
+    setDiscountAmount(mixMatchDiscount.discountedAmount);
 
     setTotal(
-      cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
+      cartFlatTotal -
+        totalDiscountAmount.totalDiscount -
+        mixMatchDiscount.discountedAmount
     );
 
     setDiscountLabel({
       ...discountLabel,
       [item.PARTNAME]: totalDiscountAmount.discountLabel[item.PARTNAME],
     });
+    setDiscountLabel({
+      ...discountLabel,
+      [item.PARTNAME]: mixMatchDiscount.discountLabel[item.PARTNAME],
+    });
 
     console.log(discountLabel, "cal in discountLabel xx");
     console.log(totalDiscountAmount, "cal in totalDiscountAmount xx");
-
   };
 
   const removeItem = (product) => {
@@ -97,7 +107,9 @@ const Cart = (props) => {
     setDiscountAmount(totalDiscountAmount.totalDiscount);
 
     setTotal(
-      cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
+      cartFlatTotal -
+        totalDiscountAmount.totalDiscount -
+        mixMatchDiscount.discountedAmount
     );
 
     delete freeQuantity[product.PARTNAME];
@@ -109,6 +121,9 @@ const Cart = (props) => {
     );
 
     setHighlightStyle(removedHighlight);
+
+    delete quantityInputValue[product.PARTNAME];
+    setQuantityInputValue(quantityInputValue);
   };
 
   const clearCart = () => {
@@ -119,14 +134,16 @@ const Cart = (props) => {
     setFreeQuantity({});
     setDiscountAmount(0);
     setHighlightStyle([]);
-    setDiscountLabel({})
+    setDiscountLabel({});
+    setCustNote("");
   };
 
   const sendOrder = async (
     order,
     isVendorName,
     freeQuantity,
-    pharmacyValue
+    pharmacyValue,
+    custNote
   ) => {
     let userFullId = localStorage.getItem("userId");
     let [userId, dCode] = userFullId.split("-");
@@ -155,17 +172,16 @@ const Cart = (props) => {
       // CDES: userDesc,
       CURDATE: today,
       ...(isVendorName && { DEXT_SUPPNAME: isVendorName }),
-      ...(isVendorName && { DEXT_SUPPDES: userId }),
+      ...(isVendorName && { DEXT_SUPPDES: userDesc }),
       // DEXT_SUPPNAME: "V1239",
       // DEXT_SUPPDES: "4MORE LTD 2",
       DCODE: dCode,
-      DETAILS: `order from B2B for customer ${userId}`,
+      DETAILS: custNote,
       DEXT_SUBMISSIONDATE: today,
       PAYCODE: "20",
       DEXT_B2CONTACT: 9,
       B2B_ORDERITEMS_SUBFORM: productsinOrder,
     };
-    console.log(JSON.stringify(orderObject), "str orderObject");
 
     setShowCart(false);
 
@@ -183,6 +199,7 @@ const Cart = (props) => {
       setTotal(0);
       setProductQuantity({});
       setHighlightStyle([]);
+      setCustNote("");
     } catch (error) {
       alert("There was an issue making your order, please contact support.");
       console.error(error);
@@ -202,6 +219,11 @@ const Cart = (props) => {
 
   const [orderButtonStatus, setOrderButtonStatus] = useState("enabled");
   const [pharmacyValue, setPharmacyValue] = useState("");
+  const [custNote, setCustNote] = useState("");
+
+  const handleNoteChange = (event) => {
+    setCustNote(event.target.value);
+  };
 
   const handleOrderButton = (event) => {
     console.log(event.target.value, "handleOrderButton");
@@ -299,7 +321,6 @@ const Cart = (props) => {
               </li>
             ))}
           </ul>
-
           <div class="cart-item-details">
             Number of items :{" "}
             {Object.values(productQuantity).reduce(
@@ -310,12 +331,10 @@ const Cart = (props) => {
               <span>+ {parseInt(totalFreeQuantities)} Free items</span>
             )}
           </div>
-
           <div className="total-container">
             <p className="total-text">Discount: {discountAmount.toFixed(2)}</p>
             <p className="total-text">Total: {total.toFixed(2)}</p>
           </div>
-
           {isVendorName !== "" && (
             <Autocomplete
               className="pharmacy-box"
@@ -335,8 +354,17 @@ const Cart = (props) => {
               }}
             />
           )}
-
-          <div className="d-flex justify-content-between">
+          <TextField
+            className="cust-notes"
+            label="Your notes"
+            variant="outlined"
+            multiline
+            fullWidth="true"
+            rows={4}
+            value={custNote}
+            onChange={handleNoteChange}
+          />
+          <div className="d-flex justify-content-between cart-end">
             <button
               onClick={() => clearCart()}
               className="btn btn-danger cart-clear-btn"
@@ -350,7 +378,8 @@ const Cart = (props) => {
                     cartItems,
                     isVendorName,
                     freeQuantity,
-                    pharmacyValue
+                    pharmacyValue,
+                    custNote
                   );
                 }
               }}

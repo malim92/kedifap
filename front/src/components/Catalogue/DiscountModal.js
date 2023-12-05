@@ -132,6 +132,8 @@ const getDiscount = async (
         });
       } else if (discountSelection.DEXT_OFFERCODE == "4") {
         product.quantity = quantityInputValue[product.PARTNAME];
+        console.log(cartItems, "cartItems in add to cart");
+        console.log(product, "product in add to cart");
 
         setCartItems([...cartItems, product]);
 
@@ -150,7 +152,7 @@ const getDiscount = async (
         setHighlightStyle(highlightStyle);
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
-        
+
         const mixMatchDiscount = caluclateMixMatch(updatedDataMix);
 
         console.log(mixMatchDiscount, "cal in mixmatch");
@@ -159,8 +161,11 @@ const getDiscount = async (
           "cartFlatTotalInDiscount in mixmatch"
         );
 
-        setTotal(cartFlatTotalInDiscount - mixMatchDiscount);
-
+        setTotal(cartFlatTotalInDiscount - mixMatchDiscount.discountedAmount);
+        setDiscountLabel({
+          ...discountLabel,
+          [product.PARTNAME]: mixMatchDiscount.discountLabel[product.PARTNAME],
+        });
         // setQuantityInputValue({
         //   ...quantityInputValue,
         //   [product.PARTNAME]: parseInt(product.quantity),
@@ -252,6 +257,14 @@ function ProductDiscountModal(props) {
   };
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
+    console.log(item.PARTNAME, "item.PARTNAME first");
+    console.log(cartItems, "item.cartItems first");
+    let productCode = item.PARTNAME;
+    console.log(productCode, "item.productCode first");
+
+    const isXInArray = cartItems.some((item) => item.PARTNAME === productCode);
+
+    console.log(isXInArray, "isXInArray first");
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
     const productId = item.PARTNAME;
 
@@ -259,12 +272,13 @@ function ProductDiscountModal(props) {
       ...quantityInputValue,
       [productId]: parseInt(event),
     });
+    if (!isXInArray) return;
 
-    // console.log(productQuantity, "productQuantity quan");
+    console.log(productQuantity, "productQuantity quan");
 
     const updatedItems = [...cartItems];
 
-    if (updatedItems.length == 0 ) return;
+    if (updatedItems.length == 0) return;
     const updatedItemsQuantity = updatedItems.map((item) => ({
       ...item,
       quantity: productQuantity[item.PARTNAME] || 1,
@@ -277,20 +291,32 @@ function ProductDiscountModal(props) {
       quantity: event,
     };
 
+    console.log(cartItems, "cartItems test1");
+    console.log(updatedItemsQuantity, "updatedItemsQuantity test1");
     setCartItems(updatedItemsQuantity);
 
     const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
     setDiscountAmount(totalDiscountAmount.totalDiscount);
+    setDiscountAmount(mixMatchDiscount.discountedAmount);
 
+    console.log(mixMatchDiscount, "debug mixMatchDiscount");
+    console.log(cartFlatTotal, "debug cartFlatTotal");
+    console.log(totalDiscountAmount, "debug totalDiscountAmount");
     setTotal(
-      cartFlatTotal - totalDiscountAmount.totalDiscount - mixMatchDiscount
+      cartFlatTotal -
+        totalDiscountAmount.totalDiscount -
+        mixMatchDiscount.discountedAmount
     );
 
     setDiscountLabel({
       ...discountLabel,
       [item.PARTNAME]: totalDiscountAmount.discountLabel[item.PARTNAME],
+    });
+    setDiscountLabel({
+      ...discountLabel,
+      [item.PARTNAME]: mixMatchDiscount.discountLabel[item.PARTNAME],
     });
     console.log(discountLabel, "debug discountLabel quan");
     console.log(totalDiscountAmount, "debug totalDiscountAmount quan");

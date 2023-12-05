@@ -1,3 +1,11 @@
+.cust-notes {
+  /* width: 100%; */
+  padding: 20px;
+}
+
+.cart-end{
+  margin-top: 20px;
+}
 .basket {
   bottom: 0%;
   left: 90%;
@@ -56,6 +64,7 @@
   padding-bottom: 10px;
   margin-bottom: 10px;
 }
+
 .cart-item-discount,
 .cart-item-name,
 .cart-item-price,
@@ -65,7 +74,7 @@
   margin: 0;
 }
 
-.cart-item-discount{
+.cart-item-discount {
   color: #d53232;
 }
 
@@ -212,7 +221,7 @@
 
 .bg-kedifapgreen-200 {
   float: left;
-  
+
 }
 
 .custom-filters {
@@ -232,6 +241,6 @@
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.pharmacy-box{
+.pharmacy-box {
   margin-bottom: 15px;
 }

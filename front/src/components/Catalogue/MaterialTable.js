@@ -160,7 +160,7 @@ const MaterialTable = ({ isVendorName }) => {
       supValue,
       activeIngValue,
       discountedProducts,
-      // quotaProducts,
+      quotaProducts,
       isVendorName
     );
   }, [
@@ -227,7 +227,7 @@ const MaterialTable = ({ isVendorName }) => {
       setShowCart(true);
     }
   };
-  
+
   //custom state
   const [show, setShow] = useState(false);
   const [discountShow, setDiscountShow] = useState(false);
@@ -301,9 +301,8 @@ const MaterialTable = ({ isVendorName }) => {
   }
 
   function caluclateMixMatch(productsInCart) {
-    console.log("productsInCart in mixx", productsInCart);
     let discountedAmount = 0;
-
+    let discountLabel = [];
     const offerIdQuantities = productsInCart.reduce((quantities, item) => {
       const offerId = item.OFFERID;
       const quantity = item.quantity;
@@ -323,8 +322,14 @@ const MaterialTable = ({ isVendorName }) => {
       const offerQty = parseInt(item.OFFERQTY);
 
       if (offerIdQuantities[offerId] >= offerQty) {
+        console.log(item, "debug item ali");
+        console.log(offerIdQuantities, "debug offerIdQuantities ali");
+        discountLabel = {
+          ...discountLabel,
+          [item.PARTNAME]: item.OFFERDES,
+        };
         // item.MIX_MATCH_DISCOUNTED = true;
-        console.log(item, "item that is mixed");
+        // console.log(item, "item that is mixed");
         discountedAmount +=
           (parseFloat(item.DISCOUNT) / 100) *
           parseFloat(item.WSPLPRICE) *
@@ -333,7 +338,11 @@ const MaterialTable = ({ isVendorName }) => {
     });
 
     setDiscountAmount(discountedAmount);
-    return discountedAmount;
+    // return discountedAmount;
+    return {
+      discountedAmount: discountedAmount,
+      discountLabel: discountLabel,
+    };
   }
 
   function caluclateDiscount(productsInCart) {
@@ -341,8 +350,10 @@ const MaterialTable = ({ isVendorName }) => {
     let freeItems = [];
     let discountLabel = [];
     productsInCart.forEach((singleCartItem) => {
-      let applicableDiscount = {OFFERQTY : -1};
+      let applicableDiscount = { OFFERQTY: -1 };
       //check if product has discount property
+      console.log("ran disc discount 1", singleCartItem);
+
       if (singleCartItem.discounts) {
         singleCartItem.discounts.forEach((discount) => {
           //check if product quantity more than discount quantity
@@ -350,7 +361,7 @@ const MaterialTable = ({ isVendorName }) => {
           console.log(applicableDiscount, "applicableDiscount.quantity dev 3");
           if (
             parseInt(singleCartItem.quantity) >= parseInt(discount.OFFERQTY) &&
-            (parseInt(applicableDiscount.OFFERQTY) < parseInt(discount.OFFERQTY) )
+            parseInt(applicableDiscount.OFFERQTY) < parseInt(discount.OFFERQTY)
           ) {
             console.log(discount.OFFERQTY, "passed if dev 3");
             applicableDiscount = discount;
