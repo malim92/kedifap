@@ -8,7 +8,7 @@ import { FaCartArrowDown } from "react-icons/fa";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
-import { FetchOffer } from "./fetchOffer";
+import { FetchOffer } from "./Api/fetchOffer";
 
 import "./DiscountModal.css";
 
@@ -295,7 +295,7 @@ function ProductDiscountModal(props) {
     console.log(updatedItemsQuantity, "updatedItemsQuantity test1");
     setCartItems(updatedItemsQuantity);
 
-    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
+    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity, setDiscountAmount);
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
     setDiscountAmount(totalDiscountAmount.totalDiscount);

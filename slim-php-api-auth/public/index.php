@@ -78,7 +78,6 @@ $app->post('/authenticate', function (Request $request, Response $response) {
     $pass = $params['password'] ?? '';
 
     $sql = "SELECT * FROM customers WHERE DEXT_USERLOGIN = :user_id";
-
     try {
         // Get DB Object
         $db = new db();

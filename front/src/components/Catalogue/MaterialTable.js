@@ -10,9 +10,14 @@ import ImageViewer from "react-simple-image-viewer";
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { COLUMNS } from "./columns-material";
-import { FetchPartsData } from "./partsApi";
+import { FetchPartsData } from "./Api/partsApi";
 import Cart from "./Cart-components/Cart";
 import "./MaterialTable.css";
+import HandleAddToCart from "./Material-items/HandleAddToCart";
+import ProductPopup from "./Material-items/ProductPopup";
+import caluclateFlatTotal from "./Material-functions/caluclateFlatTotal";
+import caluclateDiscount from "./Material-functions/caluclateDiscount";
+import caluclateMixMatch from "./Material-functions/caluclateMixMatch";
 
 import { pink, red } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
@@ -110,41 +115,30 @@ const MaterialTable = ({ isVendorName }) => {
     setActiveIngValue(event.target.value);
   };
 
-  // useEffect(() => {
-  //   const debounceTimeout = setTimeout(() => {
-  //     FetchPartsData(
-  //       sorting,
-  //       globalFilter,
-  //       columnFilters,
-  //       pagination,
-  //       setIconDisplay,
-  //       setData,
-  //       setRowCount,
-  //       setIsError,
-  //       barcodeValue,
-  //       supValue,
-  //       activeIngValue,
-  //       discountedProducts,
-  //       quotaProducts,
-  //       isVendorName
-  //     );
-  //   }, 1000);
+  useEffect(() => {
+    const debounceTimeout = setTimeout(() => {
+      FetchPartsData(
+        sorting,
+        globalFilter,
+        columnFilters,
+        pagination,
+        setIconDisplay,
+        setData,
+        setRowCount,
+        setIsError,
+        barcodeValue,
+        supValue,
+        activeIngValue,
+        discountedProducts,
+        quotaProducts,
+        isVendorName
+      );
+    }, 1000);
 
-  //   return () => {
-  //     clearTimeout(debounceTimeout);
-  //   };
-  // }, [
-  //   columnFilters,
-  //   globalFilter,
-  //   pagination.pageIndex,
-  //   pagination.pageSize,
-  //   sorting,
-  //   barcodeValue,
-  //   supValue,
-  //   activeIngValue,
-  //   discountedProducts,
-  //   quotaProducts,
-  // ]);
+    return () => {
+      clearTimeout(debounceTimeout);
+    };
+  }, [columnFilters, globalFilter]);
 
   useEffect(() => {
     FetchPartsData(
@@ -164,14 +158,9 @@ const MaterialTable = ({ isVendorName }) => {
       isVendorName
     );
   }, [
-    columnFilters,
-    globalFilter,
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
-    // barcodeValue,
-    // supValue,
-    // activeIngValue,
     discountedProducts,
     quotaProducts,
   ]);
@@ -181,52 +170,6 @@ const MaterialTable = ({ isVendorName }) => {
   const [showCart, setShowCart] = useState(false);
 
   const [total, setTotal] = useState(0);
-
-  const handleAddToCart = (
-    product,
-    total,
-    setQuantityInputValue,
-    setProductQuantity,
-    productQuantity
-  ) => {
-    let cartTotalPrice = total;
-    const { PARTNAME, WSPLPRICE } = product.original;
-    console.log(product.original, "product.original 2");
-    if (product.original.stock == 0) {
-      alert("Sorry but the selected product dosn't have available stock!");
-      return;
-    }
-
-    const found = cartItems.find((element) => element.PARTNAME == PARTNAME);
-    if (found) {
-      alert("Product is already in the cart!");
-    } else {
-      if (parseInt(product.original.DEXT_LOWSTOCKQTY) > 0) {
-        product.original.quantity = product.original.DEXT_LOWSTOCKQTY;
-        setQuantityInputValue({
-          ...quantityInputValue,
-          [PARTNAME]: product.original.DEXT_LOWSTOCKQTY,
-        });
-        setProductQuantity({
-          ...quantityInputValue,
-          [PARTNAME]: product.original.DEXT_LOWSTOCKQTY,
-        });
-      } else {
-        product.original.quantity = 1;
-        setQuantityInputValue({ ...quantityInputValue, [PARTNAME]: 1 });
-        setProductQuantity({
-          ...quantityInputValue,
-          [PARTNAME]: 1,
-        });
-      }
-
-      cartTotalPrice +=
-        parseFloat(WSPLPRICE) * parseInt(product.original.quantity);
-      setTotal(cartTotalPrice);
-      setCartItems([...cartItems, product.original]);
-      setShowCart(true);
-    }
-  };
 
   //custom state
   const [show, setShow] = useState(false);
@@ -242,35 +185,6 @@ const MaterialTable = ({ isVendorName }) => {
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
   const handleCartTemplateClose = () => setCartTemplateShow(false);
-
-  const productPopup = (data, id) => {
-    const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
-
-    setShow(!show);
-    setPopupModalData({
-      code: rowSearch.PARTNAME,
-      description: rowSearch.PARTDES,
-      stock: rowSearch.stock,
-      price: rowSearch.WSPLPRICE,
-      priceVat: rowSearch.VATPRICE,
-      vat: rowSearch.VATPRICE,
-      distributer: rowSearch.SUPNAME,
-      barcode: rowSearch.BARCODE,
-      pharmaCode: rowSearch.SPEC14,
-      supplier: rowSearch.DEXT_IMPORTERNAME,
-      ghs: rowSearch.DEXT_GHS,
-      fragile: rowSearch.DEXT_FRAGILE,
-      liquid: rowSearch.DEXT_LIQUID,
-      fridge: rowSearch.DEXT_FRAGILE,
-      policy: rowSearch.DEXT_SUPPOLICYCODE,
-      stock_object: rowSearch.stock_object,
-    });
-  };
-
-  const cartTemplatePopup = (cartTemplate) => {
-    setCartTemplateShow(!cartTemplateShow);
-    setCartPopupModalData(cartTemplate);
-  };
 
   const discountPopup = (data, id) => {
     const rowSearch = data.find((result) => result.PARTNAME == id.PARTNAME);
@@ -290,119 +204,8 @@ const MaterialTable = ({ isVendorName }) => {
     setShowCart(false);
   };
 
-  function caluclateFlatTotal(allCartItems) {
-    let flatTotal = 0;
-    allCartItems.forEach((singleCartItem) => {
-      flatTotal +=
-        parseInt(singleCartItem.quantity) *
-        parseFloat(singleCartItem.WSPLPRICE);
-    });
-    return flatTotal;
-  }
-
-  function caluclateMixMatch(productsInCart) {
-    let discountedAmount = 0;
-    let discountLabel = [];
-    const offerIdQuantities = productsInCart.reduce((quantities, item) => {
-      const offerId = item.OFFERID;
-      const quantity = item.quantity;
-
-      if (!quantities[offerId]) {
-        quantities[offerId] = 0;
-      }
-
-      quantities[offerId] += parseInt(quantity);
-
-      return quantities;
-    }, {});
-
-    //checl if the total quantities accumalted are bigger than the offer quantity
-    productsInCart.forEach((item) => {
-      const offerId = item.OFFERID;
-      const offerQty = parseInt(item.OFFERQTY);
-
-      if (offerIdQuantities[offerId] >= offerQty) {
-        console.log(item, "debug item ali");
-        console.log(offerIdQuantities, "debug offerIdQuantities ali");
-        discountLabel = {
-          ...discountLabel,
-          [item.PARTNAME]: item.OFFERDES,
-        };
-        // item.MIX_MATCH_DISCOUNTED = true;
-        // console.log(item, "item that is mixed");
-        discountedAmount +=
-          (parseFloat(item.DISCOUNT) / 100) *
-          parseFloat(item.WSPLPRICE) *
-          parseInt(item.quantity);
-      }
-    });
-
-    setDiscountAmount(discountedAmount);
-    // return discountedAmount;
-    return {
-      discountedAmount: discountedAmount,
-      discountLabel: discountLabel,
-    };
-  }
-
-  function caluclateDiscount(productsInCart) {
-    let totalDiscount = 0;
-    let freeItems = [];
-    let discountLabel = [];
-    productsInCart.forEach((singleCartItem) => {
-      let applicableDiscount = { OFFERQTY: -1 };
-      //check if product has discount property
-      console.log("ran disc discount 1", singleCartItem);
-
-      if (singleCartItem.discounts) {
-        singleCartItem.discounts.forEach((discount) => {
-          //check if product quantity more than discount quantity
-          console.log(discount, "discount dev 3");
-          console.log(applicableDiscount, "applicableDiscount.quantity dev 3");
-          if (
-            parseInt(singleCartItem.quantity) >= parseInt(discount.OFFERQTY) &&
-            parseInt(applicableDiscount.OFFERQTY) < parseInt(discount.OFFERQTY)
-          ) {
-            console.log(discount.OFFERQTY, "passed if dev 3");
-            applicableDiscount = discount;
-          }
-        });
-        //caluclating discount
-        console.log(applicableDiscount, "applicableDiscount dev 2");
-        if (applicableDiscount !== null) {
-          if (applicableDiscount.FREEQTY > 0) {
-            freeItems = {
-              ...freeItems,
-              [singleCartItem.PARTNAME]: applicableDiscount.FREEQTY,
-            };
-          } else {
-            let addedDiscountedUnit =
-              ((singleCartItem.WSPLPRICE * applicableDiscount.DISCOUNT) / 100) *
-              parseInt(singleCartItem.quantity);
-            //if there's applicable discount apply it
-            console.log(applicableDiscount, "applicableDiscount 1x");
-            totalDiscount += addedDiscountedUnit;
-          }
-          discountLabel = {
-            ...discountLabel,
-            [singleCartItem.PARTNAME]: applicableDiscount.OFFERDES,
-          };
-          console.log(applicableDiscount, "applicableDiscount 2x");
-        } else {
-        }
-      }
-    });
-
-    return {
-      totalDiscount: totalDiscount,
-      discountLabel: discountLabel,
-      freeItems: freeItems,
-    };
-  }
-
   return (
     <>
-      {console.log("test repeate")}
       <div class="custom-filters">
         <FormControlLabel
           control={
@@ -542,12 +345,16 @@ const MaterialTable = ({ isVendorName }) => {
               <button
                 className="bg-kedifapgreen-200 hover:bg-kedifapred-700 text-white p-3 rounded-3xl shadow-lg"
                 onClick={() => {
-                  handleAddToCart(
+                  HandleAddToCart(
                     row,
                     total,
+                    quantityInputValue,
                     setQuantityInputValue,
                     setProductQuantity,
-                    productQuantity
+                    cartItems,
+                    setTotal,
+                    setCartItems,
+                    setShowCart
                   );
                 }}
                 style={{
@@ -584,7 +391,13 @@ const MaterialTable = ({ isVendorName }) => {
                 fontSize: "35px",
               }}
               onClick={() => {
-                productPopup(data, row.original);
+                ProductPopup(
+                  data,
+                  row.original,
+                  show,
+                  setShow,
+                  setPopupModalData
+                );
               }}
             ></Info>
             {/* {row.original.IMGFILENAME !== null && (
@@ -633,7 +446,7 @@ const MaterialTable = ({ isVendorName }) => {
         total={total}
         setTotal={setTotal}
         setShowCart={setShowCart}
-        handleAddToCart={handleAddToCart}
+        handleAddToCart={HandleAddToCart}
         quantityInputValue={quantityInputValue}
         setQuantityInputValue={setQuantityInputValue}
         caluclateFlatTotal={caluclateFlatTotal}

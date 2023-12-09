@@ -4,7 +4,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 
 import { ORDERS_COLUMNS } from "./columns-orders";
-import { FetchOrdersData } from "./getOrderApi";
+import { FetchOrdersData } from "./Api/getOrderApi";
 import axios from "axios";
 import OrderProductsModal from './ProductsModal';
 import { pink, red } from "@mui/material/colors";

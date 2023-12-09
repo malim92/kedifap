@@ -3,7 +3,7 @@ import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 
-import { FetchPharmacies } from "./pharmaciesApi";
+import { FetchPharmacies } from "../Api/pharmaciesApi";
 import moment from "moment";
 import "./Cart.css";
 
@@ -61,7 +61,7 @@ const Cart = (props) => {
 
     setCartItems(updatedItemsQuantity);
 
-    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity);
+    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity, setDiscountAmount);
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
 

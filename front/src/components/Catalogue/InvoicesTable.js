@@ -3,7 +3,7 @@ import axios from "axios";
 import MaterialReactTable from "material-react-table";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { INVOICE_COLUMNS } from "./columns-invoice";
-import { FetchInvoiceData } from "./invoiceApi";
+import { FetchInvoiceData } from "./Api/invoiceApi";
 import { pink, red } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";

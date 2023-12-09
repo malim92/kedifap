@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
 import { STATEMENTS_COLUMNS } from "./columns-statements";
-import { FetchStatementsData } from "./statementApi";
+import { FetchStatementsData } from "./Api/statementApi";
 
 
 const StatementsTable = () => {

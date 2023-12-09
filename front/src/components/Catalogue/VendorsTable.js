@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MaterialReactTable from "material-react-table";
 import { VENDORS_COLUMNS } from "./columns-vendors";
-import { fetchVendors } from "./vendorsApi";
+import { fetchVendors } from "./Api/vendorsApi";
 
 const VendorsTable = () => {
   //data and fetching state
