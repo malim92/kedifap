@@ -16,12 +16,12 @@ export const VENDORS_COLUMNS = [
         enableColumnFilter: false,
         enableSorting: false,
     },
-    {
-        header: "Country",
-        accessorKey: 'COUNTRYNAME',
-        enableColumnFilter: false,
-        enableSorting: false,
-    },
+    // {
+    //     header: "Country",
+    //     accessorKey: 'COUNTRYNAME',
+    //     enableColumnFilter: false,
+    //     enableSorting: false,
+    // },
     {
         header: "Phone",
         accessorKey: 'PHONE',

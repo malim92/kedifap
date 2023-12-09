@@ -587,7 +587,7 @@ const MaterialTable = ({ isVendorName }) => {
                 productPopup(data, row.original);
               }}
             ></Info>
-            {row.original.IMGFILENAME !== null && (
+            {/* {row.original.IMGFILENAME !== null && (
               <>
                 <div class={"thumbnail"}>
                   <img
@@ -604,7 +604,7 @@ const MaterialTable = ({ isVendorName }) => {
                   />
                 </div>
               </>
-            )}
+            )} */}
           </div>
         )}
       />

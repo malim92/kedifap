@@ -85,7 +85,7 @@ function ReturnPolicy() {
           <Col>
             <form name="barcode" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="idInput">Barcode:</label>
+                <label htmlFor="idInput">Barcode Συσκευασίας:</label>
                 <input
                   type="text"
                   className="form-control"
@@ -110,7 +110,7 @@ function ReturnPolicy() {
           <Col>
             <form name="kdcode" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="kdInput">KDPart Code:</label>
+                <label htmlFor="kdInput">Barcode KEDIFAP:</label>
                 <input
                   type="text"
                   className="form-control"

@@ -193,6 +193,8 @@ const InvoicesTable = () => {
               }}
               style={{
                 fontSize: "15px",
+                border: 'none',
+                backgroundColor: row.original.IVNUM.includes('IN') ? '#0d6efd' : row.original.IVNUM.includes('CR') ? 'red' : row.original.IVNUM.includes('IK') ? 'red' : row.original.IVNUM.includes('SI') ? 'green' : ''
               }}
             >
               Request Invoice

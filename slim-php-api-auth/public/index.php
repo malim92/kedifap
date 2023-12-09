@@ -613,7 +613,7 @@ $app->get('/invoices', function (Request $request, Response $response, array $ar
             'verify' => false
         ]);
 
-        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_main_id . '\'' . ' and DCODE eq \'' . $customer_login_id . '\' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
+        $sub_url = '/odata/Priority/tabula.ini/efk/AINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_main_id . '\'' . ' and DCODE eq \'' . $customer_login_id . '\'   and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
         // return $sub_url;
 
         $response = $client->get($sub_url);
@@ -689,7 +689,7 @@ $app->get('/invoices-c', function (Request $request, Response $response, array $
             'verify' => false
         ]);
 
-        $sub_url = '/odata/Priority/tabula.ini/efk/CINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_main_id . '\'' . 'and DCODE eq \'' . $customer_login_id . '\' and STATDES eq \'Final\' and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
+        $sub_url = '/odata/Priority/tabula.ini/efk/CINVOICES?$filter=CUSTNAME eq ' . '\'' . $customer_main_id . '\'' . 'and DCODE eq \'' . $customer_login_id . '\'  and IVDATE ' . $ge  . $selectedDate  . $filterQuery;
         // return $sub_url;
 
         $response = $client->get($sub_url);
@@ -868,9 +868,11 @@ $app->get('/return-policy', function (Request $request, Response $response, arra
 
 $app->get('/fetch-orders', function (Request $request, Response $response, array $args) {
     $date = date('Y-m-d', strtotime(date("Y-m-d", strtotime("-5 day"))));
+    $customer_login_id = '';
     $customer_id = $request->getQueryParams('customer_id')['customer_id'];
-
-    list($customer_main_id, $customer_login_id) = explode('-', $customer_id);
+    if (str_contains($customer_id, '-'))
+        list($customer_main_id, $customer_login_id) = explode('-', $customer_id);
+    else $customer_main_id = $customer_id;
 
     $columnFilter = $request->getQueryParams('filters')['filters'];
     // $sorting = $request->getQueryParams('sorting')['sorting'];
@@ -878,13 +880,13 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
     $filterQuery = '';
     $ge = 'ge ';
     $ls = '';
-    
+    $nextDay = '';
+
     if (!empty(json_decode($columnFilter)) && !empty($columnFilter)) {
         $columnFilterArray = json_decode($columnFilter);
         $columnId = $columnFilterArray[0]->id;
         $filterValue = $columnFilterArray[0]->value;
         $filterQuery = " and $columnId eq '$filterValue'";
-        $nextDay = '';
         if ($columnId == 'DEXT_SUBMISSIONDATE') {
             // $ge = 'eq ';
             $ls = ' and DEXT_SUBMISSIONDATE le ';
@@ -893,23 +895,25 @@ $app->get('/fetch-orders', function (Request $request, Response $response, array
             // return $nextDay;
             $filterQuery = '';
         }
-        
     }
-    
+
+
+    $customer_id[0] == 'V' ? $userCol = 'DEXT_SUPPNAME' : $userCol = 'CUSTNAME';
+
+
     $username = 'api2';
     $password = 'api2';
     $url = 'https://dl.portal.kedifap.com/';
     try {
         $client = new Client([
-            'base_uri' => 'https://priority.kedifap.local/',
-            // 'base_uri' => $url,
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => $url,
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
             'verify' => false
         ]);
-        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=CUSTNAME eq \'' . $customer_main_id . '\' and DCODE eq \'' . $customer_login_id . '\' and DEXT_SUBMISSIONDATE ' . $ge . $date .$ls . $nextDay .$filterQuery;
-        // return($sub_url);die;
+        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_ORDERS?$filter=' . $userCol . ' eq \'' . $customer_main_id . '\' and DCODE eq \'' . $customer_login_id . '\' and DEXT_SUBMISSIONDATE ' . $ge . $date . $ls . $nextDay . $filterQuery;        // return($sub_url);die;
         $response = $client->get($sub_url);
 
         return $response;

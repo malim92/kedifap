@@ -35,9 +35,12 @@ function ProductModal(props) {
           popupModalData.stock_object.length > 0 && (
             <>
               <p>Διαθέσιμες ημερομήνιες λήξεις:</p>
-
-              {popupModalData.stock_object.map((productItem, index) => (
-                <p>{moment(productItem.EXPIRYDATE).format("DD-MM-YYYY")}</p>
+              {[
+                ...new Set(
+                  popupModalData.stock_object.map((item) => item.EXPIRYDATE)
+                ),
+              ].map((uniqueDate, index) => (
+                <p key={index}>{moment(uniqueDate).format("DD-MM-YYYY")}</p>
               ))}
             </>
           )}
