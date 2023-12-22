@@ -29,7 +29,7 @@ export default function Navbar({ setIsAuthenticated, isVendorName }) {
               <li className="nav-link-txt">
                 <Link to="/app/orders">Παραγγελίες</Link>
               </li>
-              {isVendorName =='' && (
+              {isVendorName == "" && (
                 <>
                   <li className="nav-link-txt">
                     <Link to="/app/invoices">Τιμολόγια</Link>
@@ -48,6 +48,13 @@ export default function Navbar({ setIsAuthenticated, isVendorName }) {
                   {/* <li className="nav-link-txt">
                     <Link to="/app/profile">Το προφίλ μου</Link>
                   </li> */}
+                </>
+              )}
+              {isVendorName !== "" && (
+                <>
+                  <li className="nav-link-txt">
+                    <Link to="/app/reports">Reports</Link>
+                  </li>
                 </>
               )}
               <li className="nav-link-txt">
@@ -71,9 +78,7 @@ export default function Navbar({ setIsAuthenticated, isVendorName }) {
         </div>
       </nav>
       <div className="w-4/5 mx-auto px-4">
-      {isVendorName == '' && (
-      <Banners />
-      )}
+        {isVendorName == "" && <Banners />}
         <main>
           <Outlet />
         </main>

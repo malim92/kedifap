@@ -23,12 +23,9 @@ img.w-full.rounded._3xuz3 {
 }
 
 .thumbnail {
-    width: 100px;
-    height: 100px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  color: #1f79d5;
+  cursor: "pointer";
+  font-size: "35px";
   }
   
   .thumbnail img {

@@ -4,7 +4,7 @@ import {
   Route,
   RouterProvider,
   useNavigate,
-  Navigate
+  Navigate,
 } from "react-router-dom";
 import axios from "axios";
 import { useState, useEffect } from "react";
@@ -20,17 +20,16 @@ import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Vendors from "./pages/Vendors";
+import Reports from "./pages/Reports";
 import Backorders from "./pages/Backorders";
 import ReturnPolicy from "./pages/ReturnPolicy";
 //import router from "./Routes/routes";
-
-
 
 function App() {
   const [isVendorName, setIsVendorName] = useState("");
   const token = localStorage.getItem("kedTokAuth");
   const [isAuthenticated, setIsAuthenticated] = useState(token ? true : false);
-  
+
   console.log(isAuthenticated, "isAuthenticated tesst");
 
   useEffect(() => {
@@ -49,22 +48,22 @@ function App() {
         if (response.status === 200) {
           // Token is valid
           console.log("token validated", token);
-          if (response.data.role == "vendor") setIsVendorName(response.data.userId);
+          if (response.data.role == "vendor")
+            setIsVendorName(response.data.userId);
           setIsAuthenticated(true);
           console.log(isVendorName, "isVendorName tesst");
-
 
           // return navigate({
           //   pathname: "/app",
           //   //search: `?userId=${username}`,
           // });
-        }else {
+        } else {
           // Other error occurred
           throw new Error("Failed to authenticate token.");
         }
       } catch (error) {
         setIsAuthenticated(false);
-        localStorage.removeItem('kedTokAuth');
+        localStorage.removeItem("kedTokAuth");
         console.error(error);
         // Handle the error, e.g., show an error message or redirect to an error page
       }
@@ -76,21 +75,16 @@ function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
-        {!isAuthenticated ?
+        {!isAuthenticated ? (
           <>
             <Route
               path="/"
-              element={
-                <Login
-                  // setIsVendorName={setIsVendorName}
-                  setIsAuthenticated={setIsAuthenticated}
-                />
-              }
+              element={<Login setIsAuthenticated={setIsAuthenticated} />}
             />
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
-        :
+        ) : (
           <Route
             element={
               <Navbar
@@ -110,13 +104,14 @@ function App() {
             <Route path="/app/general-information" element={<Information />} />
             <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/vendors" element={<Vendors />} />
+            <Route path="/app/reports" element={<Reports />} />
             <Route path="/app/backorders" element={<Backorders />} />
             <Route path="/app/return-policy" element={<ReturnPolicy />} />
             <Route path="/app/profile" element={<Profile />} />
             <Route path="/app/contact" element={<Contact />} />
             <Route path="*" element={<Navigate to="/app" />} />
           </Route>
-        }
+        )}
       </>
     )
   );

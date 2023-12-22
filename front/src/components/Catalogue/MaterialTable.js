@@ -5,6 +5,7 @@ import PopupModal from "./Modal";
 import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown } from "react-icons/fa";
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import ImageViewer from "react-simple-image-viewer";
 
 import Switch from "@mui/material/Switch";
@@ -400,11 +401,10 @@ const MaterialTable = ({ isVendorName }) => {
                 );
               }}
             ></Info>
-            {/* {row.original.IMGFILENAME !== null && (
+            {row.original.IMGFILENAME !== null && (
               <>
                 <div class={"thumbnail"}>
-                  <img
-                    src={row.original.IMGFILENAME}
+                  <ImageSearchIcon
                     onClick={() =>
                       openImageViewer(
                         row.original.PARTNAME,
@@ -413,11 +413,15 @@ const MaterialTable = ({ isVendorName }) => {
                     }
                     className="w-full rounded"
                     key={row.original.PARTNAME}
-                    style={{ maxWidth: "100%", maxHeight: "100%" }}
+                    style={{
+                      color: "#1f79d5",
+                      cursor: "pointer",
+                      fontSize: "35px",
+                    }}
                   />
                 </div>
               </>
-            )} */}
+            )}
           </div>
         )}
       />

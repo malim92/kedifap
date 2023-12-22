@@ -1087,5 +1087,11 @@ $app->get('/stock-detailed', function (Request $request, Response $response, arr
     }
 });
 
+$app->post('/report', function (Request $request, Response $response) { {
+    $jsonPayload = $request->getBody()->getContents();
+    $data = json_decode($jsonPayload);
+    return $jsonPayload;
 
+}
+});
 $app->run();
