@@ -1088,10 +1088,26 @@ $app->get('/stock-detailed', function (Request $request, Response $response, arr
 });
 
 $app->post('/report', function (Request $request, Response $response) { {
-    $jsonPayload = $request->getBody()->getContents();
-    $data = json_decode($jsonPayload);
-    return $jsonPayload;
+        $jsonPayload = $request->getBody()->getContents();
 
-}
+        $sql = "SELECT * FROM `dim_part`";
+
+        try {
+
+            $db = new db();
+            $db = $db->connectKedi();
+
+            $stmt = $db->prepare($sql);
+
+            // $stmt->debugDumpParams();
+            // die;
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // print_r($result );die;
+            return $response->withStatus(200)->withJson($result);
+        } catch (PDOException $e) {
+            echo '{"error": {"text": ' . $e->getMessage() . '}';
+        }
+    }
 });
 $app->run();

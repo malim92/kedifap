@@ -54,7 +54,8 @@ const VendorsReports = () => {
   return (
     <>
       <Container maxWidth="sm">
-        <Stack spacing={2}>
+      <Box sx={{ width: '100%' }}>
+        <Stack spacing={4}>
           <Typography variant="h4" align="center" gutterBottom>
             Report Generator
           </Typography>
@@ -77,17 +78,17 @@ const VendorsReports = () => {
                 <MenuItem value="SalesByBrand">Sales by Brand</MenuItem>
               </Select>
             </Item>
-          </FormControl>
+            </FormControl>
           <Item>
             <Typography
-              variant="body1"
+              variant="standard"
               sx={{ fontWeight: "bold", fontStyle: "italic" }}
             >
               From Date
             </Typography>
             <TextField
               fullWidth
-              // label="Start Date"
+              variant="standard"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
@@ -96,12 +97,12 @@ const VendorsReports = () => {
           </Item>
           <Item>
             <Typography
-              variant="body1"
               sx={{ fontWeight: "bold", fontStyle: "italic" }}
             >
               To Date
             </Typography>
             <TextField
+            variant="standard"
               fullWidth
               type="date"
               value={endDate}
@@ -110,7 +111,7 @@ const VendorsReports = () => {
             />
           </Item>
           <Item>
-            <Box textAlign="center">
+            {/* <Box textAlign="center"> */}
               <Button
                 variant="contained"
                 onClick={handleGenerateReport}
@@ -118,9 +119,11 @@ const VendorsReports = () => {
               >
                 Generate Report
               </Button>
-            </Box>
+            {/* </Box> */}
           </Item>
+          
         </Stack>
+        </Box>
       </Container>
     </>
   );

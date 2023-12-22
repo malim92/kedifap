@@ -1,13 +1,15 @@
 {
     "require": {
+        "php": "^7.3|^8.0",
         "slim/slim": "^3.0",
         "firebase/php-jwt": "^5.0",
-        "tuupola/slim-basic-auth": "^2.3",
-        "tuupola/slim-jwt-auth": "^2.3",
-        "tuupola/cors-middleware": "^0.6.0",
+        "tuupola/slim-basic-auth": "^3.2",
+        "tuupola/slim-jwt-auth": "^3.1",
+        "tuupola/cors-middleware": "^1.0",
         "vlucas/phpdotenv": "^5.5",
         "slim/flash": "^0.4.0",
         "slim/psr7": "^1.6",
-        "guzzlehttp/guzzle": "^7.6"
+        "guzzlehttp/guzzle": "^7.6",
+        "phpoffice/phpspreadsheet": "^1.29"
     }
 }
