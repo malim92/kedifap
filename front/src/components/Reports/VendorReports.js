@@ -29,8 +29,11 @@ const VendorsReports = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  let userFullId = localStorage.getItem("userId");
+
   const handleGenerateReport = async () => {
     const formData = {
+      userFullId,
       selectedOption,
       startDate,
       endDate,
@@ -38,15 +41,27 @@ const VendorsReports = () => {
     console.log(
       `Generating ${selectedOption} report from ${startDate} to ${endDate}`
     );
-    const url = new URL(`${process.env.REACT_APP_API_URL}/report`);
+    const url = new URL(`${process.env.REACT_APP_API_URL}/report?id=${userFullId}`);
+    url.searchParams.set("opt", selectedOption);
+    url.searchParams.set("str", startDate);
+    url.searchParams.set("end", endDate);
 
     try {
-      const response = await axios.post(url, formData);
-      console.log(response, "response");
-      alert(response);
+      const response = await axios.get(url, formData, {
+        headers: {
+          'Content-Type': 'application/json', 
+        },
+        responseType: 'blob',
+      });
+      console.log(response, 'response.data');
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = userFullId + '_sales_Invoice_test.xlsx';
+      link.click();
     } catch (error) {
-      alert("There was an issue making your order, please contact support.");
+      alert("There was an issue creating your excel file.");
       console.error(error);
     }
   };
