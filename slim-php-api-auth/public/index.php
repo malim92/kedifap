@@ -1088,18 +1088,20 @@ $app->get('/stock-detailed', function (Request $request, Response $response, arr
     }
 });
 
-$app->post('/get-report', function (Request $request, Response $response) { {
-        $jsonPayload = $request->getParsedBody();
+$app->get('/get-report', function (Request $request, Response $response) { {
+
+        $userFullId = $request->getQueryParams('id')['id'];
+        $startDate = $request->getQueryParams('str')['str'];
+        $endDate = $request->getQueryParams('end')['end'];
+        $selectedOption = $request->getQueryParams('opt')['opt'];
 
         // return $response->withStatus(200)->withJson($jsonPayload['userFullId']);
-        $userFullId = $jsonPayload['userFullId'];
-        $selectedOption = $jsonPayload['selectedOption'];
-        $endDate = $jsonPayload['endDate'];
-        $startDate = DateTime::createFromFormat('Y-m-d', $jsonPayload['startDate']);
+        $startDate = DateTime::createFromFormat('Y-m-d', $startDate);
         $formattedStartDate = $startDate->format('Ymd');
-        $endDate = DateTime::createFromFormat('Y-m-d', $jsonPayload['endDate']);
+        $endDate = DateTime::createFromFormat('Y-m-d', $endDate);
         $formattedEndDate = $endDate->format('Ymd');
         $sqlSupplier = "SELECT SUP FROM dim_suppliers WHERE SUPNAME = '$userFullId' ";
+        // return $response->withStatus(200)->withJson('$result');
         try {
 
             $db = new db();
@@ -1111,7 +1113,19 @@ $app->post('/get-report', function (Request $request, Response $response) { {
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $supNum = $result[0]['SUP'];
 
-            $sqlInvoices = "SELECT VENDOR_ID,sum(QTY) as QTY,sum(NET_VALUE) as NET_VALUE , sum(LINE_DISC) as LINE_DISC, CUSTDES, (TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.CUSTDES";
+            if ($selectedOption == 'SalesByPharmacy') {
+
+                $sqlInvoices = "SELECT CUSTDES, sum(QTY) as QTY,sum(NET_VALUE) as NET_VALUE , sum(LINE_DISC) as LINE_DISC,  (TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.CUSTDES";
+            }
+            else if ($selectedOption == 'SalesByBrand') {
+                $sqlInvoices = "SELECT parts.DEXT_BRAND as BRAND, sum(QTY) as QTY,sum(NET_VALUE) as NET_VALUE , sum(LINE_DISC) as LINE_DISC, (TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART inner join parts on parts.PARTNAME = dim_part.PARTNAME where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  parts.DEXT_BRAND";
+            }
+            else if ($selectedOption == 'SalesByTown') {
+                $sqlInvoices = "SELECT dim_customers.STATEA as CITY, sum(QTY) as QTY,sum(NET_VALUE) as NET_VALUE , sum(LINE_DISC) as LINE_DISC, (TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.STATEA";
+            }
+            else if ($selectedOption == 'SalesByProduct') {
+                $sqlInvoices = "SELECT dim_part.PARTDES as PARTNAME, sum(QTY) as QTY,sum(NET_VALUE) as NET_VALUE , sum(LINE_DISC) as LINE_DISC, (TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_part.PARTDES";
+            }
             // return $response->withStatus(200)->withJson($sqlInvoices);
 
             $stmt = $db->prepare($sqlInvoices);
@@ -1119,38 +1133,7 @@ $app->post('/get-report', function (Request $request, Response $response) { {
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // return $response->withStatus(200)->withJson($result);
-
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-
-            $row = 1;
-            $sheet->setCellValue('A' . $row, 'CUSTDES');
-            $sheet->setCellValue('B' . $row, 'QTY');
-            $sheet->setCellValue('C' . $row, 'NET_VALUE');
-            $sheet->setCellValue('D' . $row, 'LINE_DISC');
-            $sheet->setCellValue('E' . $row, 'VAT');
-            $sheet->setCellValue('F' . $row, 'TOTAL_VALUE_INCL_VAT');
-
-            foreach ($result as $item) {
-                $row++;
-                $sheet->setCellValue('A' . $row, $item['CUSTDES']);
-                $sheet->setCellValue('B' . $row, $item['QTY']);
-                $sheet->setCellValue('C' . $row, $item['NET_VALUE']);
-                $sheet->setCellValue('D' . $row, $item['LINE_DISC']);
-                $sheet->setCellValue('E' . $row, $item['VAT']);
-                $sheet->setCellValue('F' . $row, $item['TOTAL_VALUE_INCL_VAT']);
-            }
-
-            $filename = $userFullId . "_sales_Invoice.xlsx";
-
-            $writer = new Xlsx($spreadsheet);
-            $writer->save('php://output');
-
-            return $response
-                ->withHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-                ->withHeader('Content-Disposition', 'attachment;filename="' . $filename . '"')
-                ->withHeader('Cache-Control', 'max-age=0');
+            return $response->withStatus(200)->withJson($result);
         } catch (PDOException $e) {
             echo '{"error": {"text": ' . $e->getMessage() . '}';
         }
