@@ -41,24 +41,18 @@ const VendorsReports = () => {
     console.log(
       `Generating ${selectedOption} report from ${startDate} to ${endDate}`
     );
-    const url = new URL(`${process.env.REACT_APP_API_URL}/report?id=${userFullId}`);
-    url.searchParams.set("opt", selectedOption);
-    url.searchParams.set("str", startDate);
-    url.searchParams.set("end", endDate);
+    const url = new URL(`${process.env.REACT_APP_API_URL}/get-report`);
 
     try {
-      const response = await axios.get(url, formData, {
-        headers: {
-          'Content-Type': 'application/json', 
-        },
-        responseType: 'blob',
-      });
-      console.log(response, 'response.data');
-      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      
-      const link = document.createElement('a');
+      // console.log(url, "url report");
+      // console.log(formData, "formData report");
+      const response = await axios.post(url, formData);
+      // console.log(response, "response report");
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+
+      const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = userFullId + '_sales_Invoice_test.xlsx';
+      link.download = userFullId + "_sales_Invoice.xlsx";
       link.click();
     } catch (error) {
       alert("There was an issue creating your excel file.");
@@ -69,64 +63,62 @@ const VendorsReports = () => {
   return (
     <>
       <Container maxWidth="sm">
-      <Box sx={{ width: '100%' }}>
-        <Stack spacing={4}>
-          <Typography variant="h4" align="center" gutterBottom>
-            Report Generator
-          </Typography>
+        <Box sx={{ width: "100%" }}>
+          <Stack spacing={4}>
+            <Typography variant="h4" align="center" gutterBottom>
+              Report Generator
+            </Typography>
 
-          <FormControl variant="standard" fullWidth sx={{ marginBottom: 2 }}>
-            <Item>
-              <InputLabel id="report-option-label">
-                Select Report Option
-              </InputLabel>
-              <Select
-                fullWidth
-                labelId="report-option-label"
-                id="report-option"
-                value={selectedOption}
-                label="Select Report Option"
-                onChange={(e) => setSelectedOption(e.target.value)}
-              >
-                <MenuItem value="SalesByTown">Sales by Town</MenuItem>
-                <MenuItem value="SalesByPharmacy">Sales by Pharmacy</MenuItem>
-                <MenuItem value="SalesByBrand">Sales by Brand</MenuItem>
-              </Select>
-            </Item>
+            <FormControl variant="standard" fullWidth sx={{ marginBottom: 2 }}>
+              <Item>
+                <InputLabel id="report-option-label">
+                  Select Report Option
+                </InputLabel>
+                <Select
+                  fullWidth
+                  labelId="report-option-label"
+                  id="report-option"
+                  value={selectedOption}
+                  label="Select Report Option"
+                  onChange={(e) => setSelectedOption(e.target.value)}
+                >
+                  <MenuItem value="SalesByTown">Sales by Town</MenuItem>
+                  <MenuItem value="SalesByPharmacy">Sales by Pharmacy</MenuItem>
+                  <MenuItem value="SalesByBrand">Sales by Brand</MenuItem>
+                </Select>
+              </Item>
             </FormControl>
-          <Item>
-            <Typography
-              variant="standard"
-              sx={{ fontWeight: "bold", fontStyle: "italic" }}
-            >
-              From Date
-            </Typography>
-            <TextField
-              fullWidth
-              variant="standard"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              sx={{ marginBottom: 2 }}
-            />
-          </Item>
-          <Item>
-            <Typography
-              sx={{ fontWeight: "bold", fontStyle: "italic" }}
-            >
-              To Date
-            </Typography>
-            <TextField
-            variant="standard"
-              fullWidth
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              sx={{ marginBottom: 2 }}
-            />
-          </Item>
-          <Item>
-            {/* <Box textAlign="center"> */}
+            <Item>
+              <Typography
+                variant="standard"
+                sx={{ fontWeight: "bold", fontStyle: "italic" }}
+              >
+                From Date
+              </Typography>
+              <TextField
+                fullWidth
+                variant="standard"
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                sx={{ marginBottom: 2 }}
+              />
+            </Item>
+            <Item>
+              <Typography sx={{ fontWeight: "bold", fontStyle: "italic" }}>
+                To Date
+              </Typography>
+              <TextField
+                variant="standard"
+                fullWidth
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                sx={{ marginBottom: 2 }}
+              />
+            </Item>
+            <Item>
+              {/* <Box textAlign="center"> */}
               <Button
                 variant="contained"
                 onClick={handleGenerateReport}
@@ -134,10 +126,9 @@ const VendorsReports = () => {
               >
                 Generate Report
               </Button>
-            {/* </Box> */}
-          </Item>
-          
-        </Stack>
+              {/* </Box> */}
+            </Item>
+          </Stack>
         </Box>
       </Container>
     </>

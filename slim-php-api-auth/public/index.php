@@ -469,8 +469,8 @@ $app->post('/order', function (Request $request, Response $response) { {
         $password = 'api2';
 
         $client = new Client([
-            'base_uri' => 'https://priority.kedifap.local/',
-            // 'base_uri' => 'https://webhook.site/',
+            // 'base_uri' => 'https://priority.kedifap.local/',
+            'base_uri' => 'https://webhook.site/',
             'headers' => [
                 'Authorization' => 'Basic ' . base64_encode("$username:$password"),
             ],
@@ -479,12 +479,12 @@ $app->post('/order', function (Request $request, Response $response) { {
         $file = './log.txt';
         file_put_contents($file, $order, FILE_APPEND);
 
-        $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
-            'json' => $order,
-        ]);
-        // $response = $client->post('/9f333cdc-3432-45d5-a791-1f4e11d83370', [
+        // $response = $client->post('/odata/Priority/tabula.ini/efk/B2B_ORDERS', [
         //     'json' => $order,
         // ]);
+        $response = $client->post('/9f333cdc-3432-45d5-a791-1f4e11d83370', [
+            'json' => $order,
+        ]);
         $body = (string) $response->getBody();
 
         // $data = json_decode($body, true);
@@ -1088,21 +1088,18 @@ $app->get('/stock-detailed', function (Request $request, Response $response, arr
     }
 });
 
-$app->get('/report', function (Request $request, Response $response) { {
-        $userFullId = $request->getQueryParams('id')['id'];
-        $selectedOption = $request->getQueryParams('opt')['opt'];
-        $startDate = $request->getQueryParams('str')['str'];
-        $endDate = $request->getQueryParams('end')['end'];
-        // $jsonPayload = $request->getParsedBody();
+$app->post('/get-report', function (Request $request, Response $response) { {
+        $jsonPayload = $request->getParsedBody();
 
         // return $response->withStatus(200)->withJson($jsonPayload['userFullId']);
-        $startDate = DateTime::createFromFormat('Y-m-d', $request->getQueryParams('str')['str']);
+        $userFullId = $jsonPayload['userFullId'];
+        $selectedOption = $jsonPayload['selectedOption'];
+        $endDate = $jsonPayload['endDate'];
+        $startDate = DateTime::createFromFormat('Y-m-d', $jsonPayload['startDate']);
         $formattedStartDate = $startDate->format('Ymd');
-        $endDate = DateTime::createFromFormat('Y-m-d', $request->getQueryParams('end')['end']);
+        $endDate = DateTime::createFromFormat('Y-m-d', $jsonPayload['endDate']);
         $formattedEndDate = $endDate->format('Ymd');
         $sqlSupplier = "SELECT SUP FROM dim_suppliers WHERE SUPNAME = '$userFullId' ";
-        // return $response->withStatus(200)->withJson($sqlSupplier);
-
         try {
 
             $db = new db();
@@ -1114,15 +1111,11 @@ $app->get('/report', function (Request $request, Response $response) { {
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $supNum = $result[0]['SUP'];
 
-            $sqlInvoices = "SELECT VENDOR_ID,sum(QTY) as QTY,sum(NET_VALUE) as NET_VALUE , sum(LINE_DISC) as LINE_DISC, CUSTDES, sum(TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.CUSTDES";
-            // return $response->withStatus(200)->withJson($sqlInvoices);
-            //SELECT VENDOR_ID,sum(QTY),sum(NET_VALUE) , sum(LINE_DISC) as LINE_DISC, CUSTDES, sum(TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between 20240500 AND  20250000 and VENDOR_ID=63 group by  dim_customers.CUSTDES
+            $sqlInvoices = "SELECT VENDOR_ID,sum(QTY) as QTY,sum(NET_VALUE) as NET_VALUE , sum(LINE_DISC) as LINE_DISC, CUSTDES, (TOTAL_VALUE_INCL_VAT - TOTAL_VALUE) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.CUSTDES";
             // return $response->withStatus(200)->withJson($sqlInvoices);
 
             $stmt = $db->prepare($sqlInvoices);
 
-            // $stmt->debugDumpParams();
-            // die;
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -1131,24 +1124,22 @@ $app->get('/report', function (Request $request, Response $response) { {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
-            // Add data to the spreadsheet (you need to customize this based on your data structure)
             $row = 1;
-            $sheet->setCellValue('A' . $row, 'VENDOR_ID');
+            $sheet->setCellValue('A' . $row, 'CUSTDES');
             $sheet->setCellValue('B' . $row, 'QTY');
             $sheet->setCellValue('C' . $row, 'NET_VALUE');
             $sheet->setCellValue('D' . $row, 'LINE_DISC');
             $sheet->setCellValue('E' . $row, 'VAT');
             $sheet->setCellValue('F' . $row, 'TOTAL_VALUE_INCL_VAT');
-            
+
             foreach ($result as $item) {
                 $row++;
-                $sheet->setCellValue('A' . $row, $item['VENDOR_ID']);
+                $sheet->setCellValue('A' . $row, $item['CUSTDES']);
                 $sheet->setCellValue('B' . $row, $item['QTY']);
                 $sheet->setCellValue('C' . $row, $item['NET_VALUE']);
                 $sheet->setCellValue('D' . $row, $item['LINE_DISC']);
                 $sheet->setCellValue('E' . $row, $item['VAT']);
                 $sheet->setCellValue('F' . $row, $item['TOTAL_VALUE_INCL_VAT']);
-                
             }
 
             $filename = $userFullId . "_sales_Invoice.xlsx";
@@ -1156,11 +1147,10 @@ $app->get('/report', function (Request $request, Response $response) { {
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
 
-            $response = $response
+            return $response
                 ->withHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 ->withHeader('Content-Disposition', 'attachment;filename="' . $filename . '"')
                 ->withHeader('Cache-Control', 'max-age=0');
-            return $response->withStatus(200);
         } catch (PDOException $e) {
             echo '{"error": {"text": ' . $e->getMessage() . '}';
         }
