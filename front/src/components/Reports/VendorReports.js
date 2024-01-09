@@ -16,6 +16,7 @@ import Stack from "@mui/material/Stack";
 import ArticleIcon from "@mui/icons-material/Article";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
+import { toast, Toaster } from 'react-hot-toast';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -27,66 +28,75 @@ const Item = styled(Paper)(({ theme }) => ({
 
 let userFullId = localStorage.getItem("userId");
 
-const handleGenerateReport = async (
-  userFullId,
-  selectedOption,
-  startDate,
-  endDate
-) => {
-  
-  console.log(
-    `Generating ${selectedOption} report from ${startDate} to ${endDate}...`
-  );
-  const url = new URL(`${process.env.REACT_APP_API_URL}/get-report`);
 
-  url.searchParams.set("id", userFullId);
-  url.searchParams.set("str", startDate);
-  url.searchParams.set("end", endDate);
-  url.searchParams.set("opt", selectedOption);
-
-
-  try {
-    const response = await axios.get(url, {
-      timeout: 300000,
-    });    
-    console.log(response.data, "response report");
-
-    if (response.data.length === 0) {
-      return;
-    }
-
-    const dataArray = response.data;
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet 1");
-
-    const headerArray = Object.keys(dataArray[0]);
-    worksheet.addRow(headerArray);
-    dataArray.forEach((data) => {
-      const valuesArray = Object.values(data);
-      worksheet.addRow(valuesArray);
-    });
-
-    // dataArray.forEach((data) => {
-    //   const valuesArray = columnOrder.map((column) => data[column]);
-    //   worksheet.addRow(valuesArray);
-    // });
-    const blob = await workbook.xlsx.writeBuffer();
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([blob]));
-    link.download = `${userFullId}_invoice_${selectedOption}.xlsx`;
-    link.click();
-  } catch (error) {
-    alert("There was an issue creating your excel file.");
-    console.error(error);
-  }
-};
 
 const VendorsReports = () => {
   const [selectedOption, setSelectedOption] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  const handleGenerateReport = async (
+    userFullId,
+    selectedOption,
+    startDate,
+    endDate
+  ) => {
+    
+    console.log(
+      `Generating ${selectedOption} report from ${startDate} to ${endDate}...`
+    );
+    const url = new URL(`${process.env.REACT_APP_API_URL}/get-report`);
+  
+    url.searchParams.set("id", userFullId);
+    url.searchParams.set("str", startDate);
+    url.searchParams.set("end", endDate);
+    url.searchParams.set("opt", selectedOption);
+  
+  
+    try {
+      const loadingToast = toast.loading('Generating report...');
+
+      const response = await axios.get(url, {
+        timeout: 300000,
+      });
+      
+      toast.dismiss(loadingToast);
+      toast.success('Successfully generated!');
+
+      console.log(response.data, "response report");
+  
+      if (response.data.length === 0) {
+        return;
+      }
+
+      const dataArray = response.data;
+  
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Sheet 1");
+  
+      const headerArray = Object.keys(dataArray[0]);
+      worksheet.addRow(headerArray);
+      dataArray.forEach((data) => {
+        const valuesArray = Object.values(data);
+        worksheet.addRow(valuesArray);
+      });
+  
+      // dataArray.forEach((data) => {
+      //   const valuesArray = columnOrder.map((column) => data[column]);
+      //   worksheet.addRow(valuesArray);
+      // });
+      const blob = await workbook.xlsx.writeBuffer();
+  
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([blob]));
+      link.download = `${userFullId}_invoice_${selectedOption}.xlsx`;
+      link.click();
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Error: ', error);
+      console.error(error);
+    }
+  };
 
   return (
     <>
@@ -161,7 +171,7 @@ const VendorsReports = () => {
               >
                 Generate Report
               </Button>
-              {/* </Box> */}
+              <Toaster />
             </Item>
           </Stack>
         </Box>
