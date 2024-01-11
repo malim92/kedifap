@@ -1115,16 +1115,73 @@ $app->get('/get-report', function (Request $request, Response $response) { {
 
             if ($selectedOption == 'SalesByPharmacy') {
 
-                $sqlInvoices = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount,  ROUND(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE, 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.CUSTDES";
-            }
+                $sqlInvoices = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.CUSTDES";
+            } 
             else if ($selectedOption == 'SalesByBrand') {
-                $sqlInvoices = "SELECT parts.DEXT_BRAND as BRAND, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE, 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART inner join parts on parts.PARTNAME = dim_part.PARTNAME where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  parts.DEXT_BRAND";
-            }
+                $sqlInvoices = "SELECT parts.DEXT_BRAND as BRAND, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART inner join parts on parts.PARTNAME = dim_part.PARTNAME where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  parts.DEXT_BRAND";
+            } 
             else if ($selectedOption == 'SalesByTown') {
-                $sqlInvoices = "SELECT dim_customers.STATEA as CITY, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE, 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.STATEA";
-            }
+                $sqlInvoices = "SELECT dim_customers.STATEA as CITY, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.STATEA";
+            } 
             else if ($selectedOption == 'SalesByProduct') {
-                $sqlInvoices = "SELECT dim_part.PARTDES as PARTNAME, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE, 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_part.PARTDES";
+                $sqlInvoices = "SELECT dim_part.PARTDES as PARTNAME, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_part.PARTDES";
+            } 
+            else if ($selectedOption == 'SalesByCPPB') {
+                $sqlInvoices = "SELECT CUSTDES, dim_customers.STATEA as CITY, parts.DEXT_BRAND as BRAND, dim_part.PARTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST inner join dim_part ON dim_part.PART = fact_invoiceitems.PART
+                inner join parts on parts.PARTNAME = dim_part.PARTNAME 
+                 where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by dim_customers.CUSTDES, dim_customers.STATEA, dim_part.PARTDES";
+            } 
+            else if ($selectedOption == 'SalesByCP') {
+                //nicosia
+                $sqlInvoicesNicosia = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΛΕΥΚΩΣΙΑ' group by  dim_customers.CUSTDES";
+
+                $stmt = $db->prepare($sqlInvoicesNicosia);
+
+                $stmt->execute();
+                $resultNicosia = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                //limassol
+                $sqlInvoicesLimassol = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΛΕΜΕΣΟΣ' group by  dim_customers.CUSTDES";
+
+                $stmt = $db->prepare($sqlInvoicesLimassol);
+
+                $stmt->execute();
+                $resultLimassol = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                //Famagusta
+                $sqlInvoicesFamagusta = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΑΜΜΟΧΩΣΤΟΣ' group by  dim_customers.CUSTDES";
+
+                $stmt = $db->prepare($sqlInvoicesFamagusta);
+
+                $stmt->execute();
+                $resultFamagusta = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                //Paphos
+                $sqlInvoicesPaphos = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΠΑΦΟΣ' group by  dim_customers.CUSTDES";
+
+                $stmt = $db->prepare($sqlInvoicesPaphos);
+
+                $stmt->execute();
+                $resultPaphos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                //Larnaca
+                $sqlInvoicesLarnaca = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΛΑΡΝΑΚΑ' group by  dim_customers.CUSTDES";
+
+                $stmt = $db->prepare($sqlInvoicesLarnaca);
+
+                $stmt->execute();
+                $resultLarnaca = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $listOfCities = array(
+                    "Nicosia" => $resultNicosia,
+                    "Limassol" => $resultLimassol,
+                    "Larnaca" => $resultLarnaca,
+                    "Paphos" => $resultPaphos,
+                    "Famagusta" => $resultFamagusta,
+                );
+
+                // array_push($listOfCities, $resultNicosia);
+                // array_push($listOfCities, $resultLimassol);
+                // array_push($listOfCities, $resultPaphos);
+                // array_push($listOfCities, $resultFamagusta);
+                // array_push($listOfCities, $resultLarnaca);
+
+                return $response->withStatus(200)->withJson($listOfCities);
             }
             // return $response->withStatus(200)->withJson($sqlInvoices);
 
