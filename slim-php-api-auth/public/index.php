@@ -4,8 +4,6 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use \Firebase\JWT\JWT;
 use GuzzleHttp\Client;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 
 require '../vendor/autoload.php';
@@ -181,7 +179,7 @@ $app->post('/authenticate', function (Request $request, Response $response) {
             ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT))
             ->withHeader('Access-Control-Allow-Origin', 'https://app.portal.kedifap.com');
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 });
 
@@ -455,7 +453,7 @@ $app->get('/parts/', function (Request $request, Response $response, array $args
         $partsObject = ["totalRows" => $totalRows, "data" => $parts];
         return $response->withStatus(200)->withJson($partsObject);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 
     return $response;
@@ -545,7 +543,7 @@ $app->get('/vendors', function (Request $request, Response $response, array $arg
         // print_r($result );die;
         return $response->withStatus(200)->withJson($result);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 });
 
@@ -817,7 +815,7 @@ $app->get('/backorders', function (Request $request, Response $response, array $
         $backOrder = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $response->withStatus(200)->withJson($backOrder);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 });
 
@@ -939,7 +937,7 @@ $app->get('/discount', function (Request $request, Response $response, array $ar
         $discounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $response->withStatus(200)->withJson($discounts);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 });
 
@@ -958,7 +956,7 @@ $app->get('/pharmacies', function (Request $request, Response $response, array $
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $response->withStatus(200)->withJson($users);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
     // print_r($response);die;
 });
@@ -1002,7 +1000,7 @@ $app->get('/fetch-offer', function (Request $request, Response $response, array 
         // print_r($result );die;
         return $response->withStatus(200)->withJson($result);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 
 
@@ -1061,7 +1059,7 @@ $app->get('/stock', function (Request $request, Response $response, array $args)
         // print_r($result );die;
         return $response->withStatus(200)->withJson($result);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 });
 
@@ -1084,16 +1082,78 @@ $app->get('/stock-detailed', function (Request $request, Response $response, arr
         // print_r($result );die;
         return $response->withStatus(200)->withJson($result);
     } catch (PDOException $e) {
-        echo '{"error": {"text": ' . $e->getMessage() . '}';
+        return $response->withStatus(200)->withJson($e->getMessage());
     }
 });
 
 $app->get('/get-report', function (Request $request, Response $response) { {
 
         $userFullId = $request->getQueryParams('id')['id'];
+        $selectedOption = $request->getQueryParams('opt')['opt'];
+
+        if ($selectedOption == 'productsCsv') {
+            try {
+                $sqlParts = "SELECT parts.PARTNAME as 'KEDIFAP CODE', parts.PARTDES as 'DESCRIPTION', parts.SPEC19 as 'CATEGORY', parts.DEXT_NARCOTIC as 'NARCOTIC', parts.DEXT_GHS as 'GHS', parts.DEXT_LIQUID as 'LIQUID', parts.DEXT_FRAGILE as 'FRAGILE', parts.DEXT_FRIDGE as 'FRIDGE', parts.DEXT_BRAND as 'BRAND', parts.BARCODE, parts.VATPRICE as RETAIL, parts.WSPLPRICE as 'WHOLESALE', DEXT_LOWSTOCKQTY as 'QUOTA QTY', stock.TBALANCE as 'AVAILABLE STOCK', stock.QTYTORECEIVE as 'RECEIVING QTY' FROM parts INNER JOIN stock ON stock.PARTNAME = parts.PARTNAME AND parts.SUPNAME LIKE '$userFullId'";
+
+                $db = new db();
+                // Connect
+                $db = $db->connect();
+
+                $stmt = $db->prepare($sqlParts);
+
+                $stmt->execute();
+
+                $resultParts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                return $response->withStatus(200)->withJson($resultParts);
+            } catch (PDOException $e) {
+                return $response->withStatus(200)->withJson($e->getMessage());
+            }
+        }
+
+        if ($selectedOption == 'productsExpired') {
+            try {
+                $sqlParts = "SELECT parts.PARTNAME as 'KEDIFAP CODE', parts.PARTDES as 'DESCRIPTION', parts.SPEC19 as 'CATEGORY', parts.DEXT_NARCOTIC as 'NARCOTIC', parts.DEXT_GHS as 'GHS', parts.DEXT_LIQUID as 'LIQUID', parts.DEXT_FRAGILE as 'FRAGILE', parts.DEXT_FRIDGE as 'FRIDGE', parts.DEXT_BRAND as 'BRAND', parts.BARCODE, parts.VATPRICE as RETAIL, parts.WSPLPRICE as 'WHOLESALE', DEXT_LOWSTOCKQTY as 'QUOTA QTY', stock_detailed.EXPIRYDATE as 'EXPIRY DATE', stock_detailed.TBALANCE as 'STOCK QTY'
+                FROM parts INNER JOIN stock_detailed ON stock_detailed.PARTNAME = parts.PARTNAME
+                WHERE EXPIRYDATE >= CURDATE() AND EXPIRYDATE <= DATE_ADD(CURDATE(), INTERVAL 6 MONTH) AND parts.SUPNAME LIKE '$userFullId'";
+
+                $db = new db();
+                // Connect
+                $db = $db->connect();
+
+                $stmt = $db->prepare($sqlParts);
+
+                $stmt->execute();
+
+                $resultParts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                return $response->withStatus(200)->withJson($resultParts);
+            } catch (PDOException $e) {
+                return $response->withStatus(200)->withJson($e->getMessage());
+            }
+        }
+
+        if ($selectedOption == 'catalogueNoStock') {
+            try {
+                $sqlParts = "SELECT parts.PARTNAME as 'KEDIFAP CODE', parts.PARTDES as 'DESCRIPTION', parts.SPEC19 as 'CATEGORY', parts.DEXT_NARCOTIC as 'NARCOTIC', parts.DEXT_GHS as 'GHS', parts.DEXT_LIQUID as 'LIQUID', parts.DEXT_FRAGILE as 'FRAGILE', parts.DEXT_FRIDGE as 'FRIDGE', parts.DEXT_BRAND as 'BRAND', parts.BARCODE, parts.VATPRICE as RETAIL, parts.WSPLPRICE as 'WHOLESALE', DEXT_LOWSTOCKQTY as 'QUOTA QTY' FROM parts WHERE parts.SUPNAME LIKE '$userFullId'";
+                $db = new db();
+                // Connect
+                $db = $db->connect();
+
+                $stmt = $db->prepare($sqlParts);
+
+                $stmt->execute();
+
+                $resultParts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                return $response->withStatus(200)->withJson($resultParts);
+            } catch (PDOException $e) {
+                return $response->withStatus(200)->withJson($e->getMessage());
+            }
+        }
+
         $startDate = $request->getQueryParams('str')['str'];
         $endDate = $request->getQueryParams('end')['end'];
-        $selectedOption = $request->getQueryParams('opt')['opt'];
 
         // return $response->withStatus(200)->withJson($jsonPayload['userFullId']);
         $startDate = DateTime::createFromFormat('Y-m-d', $startDate);
@@ -1113,25 +1173,20 @@ $app->get('/get-report', function (Request $request, Response $response) { {
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $supNum = $result[0]['SUP'];
 
-            if ($selectedOption == 'SalesByPharmacy') {
 
+            if ($selectedOption == 'SalesByPharmacy') {
                 $sqlInvoices = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.CUSTDES";
-            } 
-            else if ($selectedOption == 'SalesByBrand') {
+            } else if ($selectedOption == 'SalesByBrand') {
                 $sqlInvoices = "SELECT parts.DEXT_BRAND as BRAND, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART inner join parts on parts.PARTNAME = dim_part.PARTNAME where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  parts.DEXT_BRAND";
-            } 
-            else if ($selectedOption == 'SalesByTown') {
+            } else if ($selectedOption == 'SalesByTown') {
                 $sqlInvoices = "SELECT dim_customers.STATEA as CITY, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_customers.STATEA";
-            } 
-            else if ($selectedOption == 'SalesByProduct') {
+            } else if ($selectedOption == 'SalesByProduct') {
                 $sqlInvoices = "SELECT dim_part.PARTDES as PARTNAME, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_part ON dim_part.PART = fact_invoiceitems.PART where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by  dim_part.PARTDES";
-            } 
-            else if ($selectedOption == 'SalesByCPPB') {
+            } else if ($selectedOption == 'SalesByCPPB') {
                 $sqlInvoices = "SELECT CUSTDES, dim_customers.STATEA as CITY, parts.DEXT_BRAND as BRAND, dim_part.PARTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST inner join dim_part ON dim_part.PART = fact_invoiceitems.PART
                 inner join parts on parts.PARTNAME = dim_part.PARTNAME 
                  where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by dim_customers.CUSTDES, dim_customers.STATEA, dim_part.PARTDES";
-            } 
-            else if ($selectedOption == 'SalesByCP') {
+            } else if ($selectedOption == 'SalesByCP') {
                 //nicosia
                 $sqlInvoicesNicosia = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΛΕΥΚΩΣΙΑ' group by  dim_customers.CUSTDES";
 
@@ -1192,7 +1247,7 @@ $app->get('/get-report', function (Request $request, Response $response) { {
 
             return $response->withStatus(200)->withJson($result);
         } catch (PDOException $e) {
-            echo '{"error": {"text": ' . $e->getMessage() . '}';
+            return $response->withStatus(200)->withJson($e->getMessage());
         }
     }
 });

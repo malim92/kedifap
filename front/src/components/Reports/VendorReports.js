@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ExcelJS from "exceljs";
+
 import {
   Box,
   Button,
@@ -45,9 +46,15 @@ const VendorsReports = () => {
     const url = new URL(`${process.env.REACT_APP_API_URL}/get-report`);
 
     url.searchParams.set("id", userFullId);
-    url.searchParams.set("str", startDate);
-    url.searchParams.set("end", endDate);
     url.searchParams.set("opt", selectedOption);
+    if (
+      selectedOption !== "productsCsv" &&
+      selectedOption !== "catalogueNoStock" &&
+      selectedOption !== "productsExpired"
+    ) {
+      url.searchParams.set("str", startDate);
+      url.searchParams.set("end", endDate);
+    }
 
     try {
       const loadingToast = toast.loading("Generating report...");
@@ -57,13 +64,14 @@ const VendorsReports = () => {
       });
 
       toast.dismiss(loadingToast);
-      toast.success("Successfully generated!");
 
       console.log(response.data, "response report");
 
       if (response.data.length === 0) {
+        toast.error("No results for this date and report option");
         return;
       }
+      toast.success("Successfully generated!");
 
       const workbook = new ExcelJS.Workbook();
       const dataArray = response.data;
@@ -94,6 +102,16 @@ const VendorsReports = () => {
             console.log(record, "record 2");
             worksheet.addRow(Object.values(record));
           });
+
+          headerRow.forEach((columnName, index) => {
+            const column = worksheet.getColumn(index + 1);
+
+            if (columnName != "CUSTDES") {
+              column.numFmt = "#,##0.00";
+            } else {
+              column.numFmt = "General";
+            }
+          });
         });
       } else {
         const worksheet = workbook.addWorksheet("Sheet 1");
@@ -103,6 +121,28 @@ const VendorsReports = () => {
         dataArray.forEach((data) => {
           const valuesArray = Object.values(data);
           worksheet.addRow(valuesArray);
+        });
+
+        headerArray.forEach((columnName, index) => {
+          const column = worksheet.getColumn(index + 1);
+
+          if (columnName == "EXPIRY DATE") {
+            column.numFmt = 'm/d/yyyy';
+          }
+          else if (
+            columnName != "PARTNAME" &&
+            columnName != "KEDIFAP CODE" &&
+            columnName != "DESCRIPTION" &&
+            columnName != "CATEGORY" &&
+            columnName != "CUSTDES" &&
+            columnName != "BRAND" &&
+            columnName != "CITY" &&
+            columnName != "BRAND"
+          ) {
+            column.numFmt = "#,##0.00";
+          } else {
+            column.numFmt = "general";
+          }
         });
       }
 
@@ -150,6 +190,13 @@ const VendorsReports = () => {
                   </MenuItem>
                   <MenuItem value="SalesByCPPB">
                     Sales by city & pharmacy & product & brand
+                  </MenuItem>
+                  <MenuItem value="productsCsv">Available Stock</MenuItem>
+                  <MenuItem value="productsExpired">
+                    Products Expiring in 6 Months
+                  </MenuItem>
+                  <MenuItem value="catalogueNoStock">
+                    Active Parts Catalogue
                   </MenuItem>
                 </Select>
               </Item>
