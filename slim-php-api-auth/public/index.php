@@ -1188,37 +1188,74 @@ $app->get('/get-report', function (Request $request, Response $response) { {
                  where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum group by dim_customers.CUSTDES, dim_customers.STATEA, dim_part.PARTDES";
             } else if ($selectedOption == 'SalesByCP') {
                 //nicosia
-                $sqlInvoicesNicosia = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΛΕΥΚΩΣΙΑ' group by  dim_customers.CUSTDES";
-
+                $statea = 'ΛΕΥΚΩΣΙΑ';
+                $sqlInvoicesNicosia = "SELECT CUSTDES, sum(QTY) as QTY, ROUND(sum(NET_VALUE), 2) as NET_VALUE, sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT FROM bi.fact_invoiceitems INNER JOIN dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST WHERE fact_invoiceitems.IVDATE BETWEEN :startDate AND :endDate AND VENDOR_ID = :supNum AND dim_customers.STATEA = :statea GROUP BY dim_customers.CUSTDES";
+                // return $response->withStatus(200)->withJson($formattedEndDate);
                 $stmt = $db->prepare($sqlInvoicesNicosia);
+                $stmt->bindParam(':startDate', $formattedStartDate, PDO::PARAM_STR);
+                $stmt->bindParam(':endDate', $formattedEndDate, PDO::PARAM_STR);
+                $stmt->bindParam(':supNum', $supNum, PDO::PARAM_STR);
+                $stmt->bindParam(':statea', $statea, PDO::PARAM_STR);
 
                 $stmt->execute();
                 $resultNicosia = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 //limassol
-                $sqlInvoicesLimassol = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΛΕΜΕΣΟΣ' group by  dim_customers.CUSTDES";
+                $statea = 'ΛΕΜΕΣΟΣ';
+                $sqlInvoicesLimassol = "SELECT CUSTDES, sum(QTY) as QTY, ROUND(sum(NET_VALUE), 2) as NET_VALUE, sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT FROM bi.fact_invoiceitems INNER JOIN dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST WHERE fact_invoiceitems.IVDATE BETWEEN :startDate AND :endDate AND VENDOR_ID = :supNum AND dim_customers.STATEA = :statea GROUP BY dim_customers.CUSTDES";
 
                 $stmt = $db->prepare($sqlInvoicesLimassol);
 
+                $stmt->bindParam(':startDate', $formattedStartDate, PDO::PARAM_STR);
+                $stmt->bindParam(':endDate', $formattedEndDate, PDO::PARAM_STR);
+                $stmt->bindParam(':supNum', $supNum, PDO::PARAM_STR);
+                $stmt->bindParam(':statea', $statea, PDO::PARAM_STR);
+
+                // return $response->withStatus(200)->withJson($stmt);
+
                 $stmt->execute();
                 $resultLimassol = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
                 //Famagusta
-                $sqlInvoicesFamagusta = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΑΜΜΟΧΩΣΤΟΣ' group by  dim_customers.CUSTDES";
+                $statea = 'ΑΜΜΟΧΩΣΤΟΣ';
+                $sqlInvoicesFamagusta = "SELECT CUSTDES, sum(QTY) as QTY, ROUND(sum(NET_VALUE), 2) as NET_VALUE, sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT FROM bi.fact_invoiceitems INNER JOIN dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST WHERE fact_invoiceitems.IVDATE BETWEEN :startDate AND :endDate AND VENDOR_ID = :supNum AND dim_customers.STATEA = :statea GROUP BY dim_customers.CUSTDES";
 
                 $stmt = $db->prepare($sqlInvoicesFamagusta);
+
+                $stmt->bindParam(':startDate', $formattedStartDate, PDO::PARAM_STR);
+                $stmt->bindParam(':endDate', $formattedEndDate, PDO::PARAM_STR);
+                $stmt->bindParam(':supNum', $supNum, PDO::PARAM_STR);
+                $stmt->bindParam(':statea', $statea, PDO::PARAM_STR);
+
 
                 $stmt->execute();
                 $resultFamagusta = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 //Paphos
-                $sqlInvoicesPaphos = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΠΑΦΟΣ' group by  dim_customers.CUSTDES";
+                
+                $statea = 'ΠΑΦΟΣ';
+                $sqlInvoicesPaphos = "SELECT CUSTDES, sum(QTY) as QTY, ROUND(sum(NET_VALUE), 2) as NET_VALUE, sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems INNER JOIN dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST WHERE fact_invoiceitems.IVDATE BETWEEN :startDate AND :endDate AND VENDOR_ID = :supNum AND dim_customers.STATEA = :statea GROUP BY dim_customers.CUSTDES";
 
                 $stmt = $db->prepare($sqlInvoicesPaphos);
 
+                $stmt->bindParam(':startDate', $formattedStartDate, PDO::PARAM_STR);
+                $stmt->bindParam(':endDate', $formattedEndDate, PDO::PARAM_STR);
+                $stmt->bindParam(':supNum', $supNum, PDO::PARAM_STR);
+                $stmt->bindParam(':statea', $statea, PDO::PARAM_STR);
+
+
                 $stmt->execute();
                 $resultPaphos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
                 //Larnaca
-                $sqlInvoicesLarnaca = "SELECT CUSTDES, sum(QTY) as QTY,ROUND(sum(NET_VALUE), 2) as NET_VALUE , sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems inner join dim_customers on dim_customers.CUST = fact_invoiceitems.CUST where fact_invoiceitems.IVDATE between $formattedStartDate AND $formattedEndDate and VENDOR_ID=$supNum and dim_customers.STATEA='ΛΑΡΝΑΚΑ' group by  dim_customers.CUSTDES";
+                $statea = 'ΛΑΡΝΑΚΑ';
+                $sqlInvoicesLarnaca = "SELECT CUSTDES, sum(QTY) as QTY, ROUND(sum(NET_VALUE), 2) as NET_VALUE, sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems INNER JOIN dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST WHERE fact_invoiceitems.IVDATE BETWEEN :startDate AND :endDate AND VENDOR_ID = :supNum AND dim_customers.STATEA = :statea GROUP BY dim_customers.CUSTDES";
 
                 $stmt = $db->prepare($sqlInvoicesLarnaca);
+
+                $stmt->bindParam(':startDate', $formattedStartDate, PDO::PARAM_STR);
+                $stmt->bindParam(':endDate', $formattedEndDate, PDO::PARAM_STR);
+                $stmt->bindParam(':supNum', $supNum, PDO::PARAM_STR);
+                $stmt->bindParam(':statea', $statea, PDO::PARAM_STR);
+
 
                 $stmt->execute();
                 $resultLarnaca = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1229,12 +1266,6 @@ $app->get('/get-report', function (Request $request, Response $response) { {
                     "Paphos" => $resultPaphos,
                     "Famagusta" => $resultFamagusta,
                 );
-
-                // array_push($listOfCities, $resultNicosia);
-                // array_push($listOfCities, $resultLimassol);
-                // array_push($listOfCities, $resultPaphos);
-                // array_push($listOfCities, $resultFamagusta);
-                // array_push($listOfCities, $resultLarnaca);
 
                 return $response->withStatus(200)->withJson($listOfCities);
             }

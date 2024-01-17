@@ -60,7 +60,7 @@ const VendorsReports = () => {
       const loadingToast = toast.loading("Generating report...");
 
       const response = await axios.get(url, {
-        timeout: 300000,
+        timeout: 600000,
       });
 
       toast.dismiss(loadingToast);
@@ -81,11 +81,6 @@ const VendorsReports = () => {
           const worksheet = workbook.addWorksheet(city);
 
           const cityData = dataArray[city];
-          // cityData.forEach((record, index) => {
-          //   console.log(record, "record 1");
-
-          //   worksheet.addRow({ ...record });
-          // });
 
           const headerRow = [
             "CUSTDES",
@@ -98,9 +93,32 @@ const VendorsReports = () => {
           ];
           worksheet.addRow(headerRow);
 
+          const keyDataTypes = {
+            CUSTDES: ExcelJS.ValueType.String,
+            Discount: ExcelJS.ValueType.Number,
+            NET_VALUE: ExcelJS.ValueType.Number,
+            QTY: ExcelJS.ValueType.Number,
+            TOTAL_VALUE_INCL_VAT: ExcelJS.ValueType.Number,
+            VAT: ExcelJS.ValueType.Number,
+            over_all_discount: ExcelJS.ValueType.Number,
+          };
+
           cityData.forEach((record) => {
             console.log(record, "record 2");
-            worksheet.addRow(Object.values(record));
+            const headerArray = Object.keys(record);
+            console.log(Object.values(record), "Object.values(record) 2");
+            console.log(Object.keys(record), "Object.values(record) 2");
+
+            const valuesArray = headerArray.map((key) => {
+              const dataType = keyDataTypes[key] || ExcelJS.ValueType.String;
+
+              if (dataType === ExcelJS.ValueType.Number) {
+                return parseFloat(record[key]);
+              } else {
+                return record[key];
+              }
+            });
+            worksheet.addRow(Object.values(valuesArray));
           });
 
           headerRow.forEach((columnName, index) => {
@@ -118,8 +136,43 @@ const VendorsReports = () => {
 
         const headerArray = Object.keys(dataArray[0]);
         worksheet.addRow(headerArray);
+
+        const keyDataTypes = {
+          "KEDIFAP CODE": ExcelJS.ValueType.String,
+          DESCRIPTION: ExcelJS.ValueType.String,
+          CATEGORY: ExcelJS.ValueType.String,
+          NARCOTIC: ExcelJS.ValueType.Number,
+          GHS: ExcelJS.ValueType.Number,
+          LIQUID: ExcelJS.ValueType.Number,
+          FRAGILE: ExcelJS.ValueType.Number,
+          FRIDGE: ExcelJS.ValueType.Number,
+          BRAND: ExcelJS.ValueType.String,
+          BARCODE: ExcelJS.ValueType.String,
+          RETAIL: ExcelJS.ValueType.Number,
+          WHOLESALE: ExcelJS.ValueType.Number,
+          "QUOTA QTY": ExcelJS.ValueType.Number,
+          "AVAILABLE STOCK": ExcelJS.ValueType.Number,
+          "RECEIVING QTY": ExcelJS.ValueType.Number,
+          CUSTDES: ExcelJS.ValueType.String,
+          Discount: ExcelJS.ValueType.Number,
+          NET_VALUE: ExcelJS.ValueType.Number,
+          QTY: ExcelJS.ValueType.Number,
+          TOTAL_VALUE_INCL_VAT: ExcelJS.ValueType.Number,
+          VAT: ExcelJS.ValueType.Number,
+          over_all_discount: ExcelJS.ValueType.Number,
+        };
+
         dataArray.forEach((data) => {
-          const valuesArray = Object.values(data);
+          const valuesArray = headerArray.map((key) => {
+            const dataType = keyDataTypes[key] || ExcelJS.ValueType.String;
+
+            if (dataType === ExcelJS.ValueType.Number) {
+              return parseFloat(data[key]);
+            } else {
+              return data[key];
+            }
+          });
+
           worksheet.addRow(valuesArray);
         });
 
@@ -127,9 +180,8 @@ const VendorsReports = () => {
           const column = worksheet.getColumn(index + 1);
 
           if (columnName == "EXPIRY DATE") {
-            column.numFmt = 'm/d/yyyy';
-          }
-          else if (
+            column.numFmt = "m/d/yyyy";
+          } else if (
             columnName != "PARTNAME" &&
             columnName != "KEDIFAP CODE" &&
             columnName != "DESCRIPTION" &&
