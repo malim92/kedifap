@@ -2,6 +2,8 @@
 function caluclateMixMatch(productsInCart, setDiscountAmount) {
     let discountedAmount = 0;
     let discountLabel = [];
+    console.log(productsInCart, "debug productsInCart ali");
+
     const offerIdQuantities = productsInCart.reduce((quantities, item) => {
       const offerId = item.OFFERID;
       const quantity = item.quantity;
@@ -20,8 +22,8 @@ function caluclateMixMatch(productsInCart, setDiscountAmount) {
       const offerId = item.OFFERID;
       const offerQty = parseInt(item.OFFERQTY);
 
-      if (offerIdQuantities[offerId] >= offerQty) {
-        console.log(item, "debug item ali");
+      if (item.DEXT_OFFERCODE == '4' && offerIdQuantities[offerId] >= offerQty) {
+        
         console.log(offerIdQuantities, "debug offerIdQuantities ali");
         discountLabel = {
           ...discountLabel,

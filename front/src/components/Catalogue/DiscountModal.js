@@ -9,6 +9,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import { FetchOffer } from "./Api/fetchOffer";
+import { toast, Toaster } from "react-hot-toast";
 
 import "./DiscountModal.css";
 
@@ -34,10 +35,6 @@ const getDiscount = async (
   highlightStyle,
   setHighlightStyle
 ) => {
-  if (product.TBALANCE == 0) {
-    alert("Sorry but the selected product dosn't have available stock!");
-    return;
-  }
   setShowCart(true);
   console.log(product, "product chcek  ");
 
@@ -51,7 +48,7 @@ const getDiscount = async (
     );
   } else {
     if (found) {
-      alert("Product is already in the cart!");
+      toast.error("Product is already in the cart!");
     } else {
       // price discount
       if (discountSelection.DEXT_OFFERCODE == "2") {
@@ -60,24 +57,46 @@ const getDiscount = async (
         setCartItems([...cartItems, product]);
 
         cartItems.push(product);
-        const updatedDataMix = cartItems.map((cartItem) => ({
-          ...cartItem,
-          quantity: quantityInputValue[cartItem.PARTNAME] || 1,
-        }));
+        console.log(cartItems, "cartItems Y in discount");
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
         const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
 
+        console.log(product, "product in discount");
+
+        const updatedDataMix = cartItems.map((cartItem) => ({
+          ...cartItem,
+          quantity: product.quantity || 1,
+        }));
+
+        const mixMatchDiscount = caluclateMixMatch(
+          updatedDataMix,
+          setDiscountAmount
+        );
+
+        console.log(updatedDataMix, "updatedDataMix.discountedAmount Y in discount");
+        console.log(setDiscountAmount, "setDiscountAmount.discountedAmount Y in discount");
+
+
+        setDiscountAmount(
+          cartDiscountTotalInDiscount.totalDiscount +
+            mixMatchDiscount.discountedAmount
+        );
+
+        console.log(
+          cartFlatTotalInDiscount,
+          "cartFlatTotalInDiscount in discount"
+        );
         console.log(
           cartDiscountTotalInDiscount,
           "cartDiscountTotalInDiscount in discount"
         );
 
-        setDiscountAmount(cartDiscountTotalInDiscount.totalDiscount);
-
         setTotal(
           cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
         );
+
+        console.log(quantityInputValue, "quantityInputValue in discount");
 
         setQuantityInputValue({
           ...quantityInputValue,
@@ -89,7 +108,6 @@ const getDiscount = async (
           [product.PARTNAME]: product.quantity,
         });
 
-        console.log(discountLabel, "discountLabel in discount");
         setDiscountLabel({
           ...discountLabel,
           [product.PARTNAME]:
@@ -102,10 +120,6 @@ const getDiscount = async (
         setCartItems([...cartItems, product]);
 
         cartItems.push(product);
-        const updatedDataMix = cartItems.map((cartItem) => ({
-          ...cartItem,
-          quantity: quantityInputValue[cartItem.PARTNAME] || 1,
-        }));
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
 
@@ -132,8 +146,11 @@ const getDiscount = async (
         });
       } else if (discountSelection.DEXT_OFFERCODE == "4") {
         product.quantity = quantityInputValue[product.PARTNAME];
-        console.log(cartItems, "cartItems in add to cart");
-        console.log(product, "product in add to cart");
+
+        quantityInputValue
+          ? (product.quantity = quantityInputValue[product.PARTNAME])
+          : (product.quantity = 1);
+
 
         setCartItems([...cartItems, product]);
 
@@ -145,40 +162,26 @@ const getDiscount = async (
 
         setProductQuantity({
           ...productQuantity,
-          [product.PARTNAME]: product.quantity,
+          [product.PARTNAME]: productQuantity[product.PARTNAME],
         });
 
         highlightStyle.push(product.PARTNAME);
         setHighlightStyle(highlightStyle);
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
-
-        const mixMatchDiscount = caluclateMixMatch(updatedDataMix);
-
-        console.log(mixMatchDiscount, "cal in mixmatch");
-        console.log(
-          cartFlatTotalInDiscount,
-          "cartFlatTotalInDiscount in mixmatch"
+        console.log(updatedDataMix, "updatedDataMix in mixmatch");
+        const mixMatchDiscount = caluclateMixMatch(
+          updatedDataMix,
+          setDiscountAmount
         );
+
+        console.log(cartItems, "cartItems in mixmatch");
 
         setTotal(cartFlatTotalInDiscount - mixMatchDiscount.discountedAmount);
         setDiscountLabel({
           ...discountLabel,
           [product.PARTNAME]: mixMatchDiscount.discountLabel[product.PARTNAME],
         });
-        // setQuantityInputValue({
-        //   ...quantityInputValue,
-        //   [product.PARTNAME]: parseInt(product.quantity),
-        // });
-
-        // setProductQuantity({
-        //   ...productQuantity,
-        //   [product.PARTNAME]: product.quantity,
-        // });
-
-        // setTotal(
-        //   cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
-        // );
       }
     }
   }
@@ -295,7 +298,10 @@ function ProductDiscountModal(props) {
     console.log(updatedItemsQuantity, "updatedItemsQuantity test1");
     setCartItems(updatedItemsQuantity);
 
-    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity, setDiscountAmount);
+    const mixMatchDiscount = caluclateMixMatch(
+      updatedItemsQuantity,
+      setDiscountAmount
+    );
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
     setDiscountAmount(totalDiscountAmount.totalDiscount);
@@ -324,64 +330,6 @@ function ProductDiscountModal(props) {
 
   const { rowSearch } = popupModalDiscount;
   const productOriginal = { original: rowSearch };
-
-  // const addToCart = (
-  //   product,
-  //   total,
-  //   setQuantityInputValue,
-  //   setProductQuantity,
-  //   productQuantity
-  // ) => {
-  //   let cartTotalPrice = total;
-
-  //   console.log(product, "product.original 2");
-
-  //   const found = cartItems.find(
-  //     (element) => element.PARTNAME == product.PARTNAME
-  //   );
-  //   if (found) {
-  //     alert("Product is already in the cart!");
-  //   } else {
-  //     if (parseInt(product.DEXT_LOWSTOCKQTY) > 0) {
-  //       product.quantity = product.DEXT_LOWSTOCKQTY;
-  //       setQuantityInputValue({
-  //         ...quantityInputValue,
-  //         [product.PARTNAME]: product.DEXT_LOWSTOCKQTY,
-  //       });
-  //       setProductQuantity({
-  //         ...quantityInputValue,
-  //         [product.PARTNAME]: product.DEXT_LOWSTOCKQTY,
-  //       });
-  //     } else {
-  //       product.quantity = 1;
-  //       setQuantityInputValue({
-  //         ...quantityInputValue,
-  //         [product.PARTNAME]: productQuantity[product.PARTNAME],
-  //       });
-  //       // productQuantity.length ==   0 ? productQuantity[product.PARTNAME] = 1 : productQuantity
-  //       if (productQuantity.length == 0) productQuantity[product.PARTNAME] = 1;
-  //       setProductQuantity({
-  //         ...quantityInputValue,
-  //         [product.PARTNAME]: productQuantity[product.PARTNAME],
-  //       });
-  //     }
-  //     setCartItems([...cartItems, product]);
-  //     const cartFlatTotal = caluclateFlatTotal(cartItems);
-  //     console.log(cartFlatTotal, "flat 1");
-
-  //     // useEffect(() => {
-  //     //   cartItems.forEach((singleCartItem) => {
-  //     //     if (singleCartItem.DEXT_OFFERCODE == 4)
-  //     //       console.log(singleCartItem, "singleCartItem is 4");
-  //     //   });
-  //     // }, [cartItems]);
-
-  //     cartTotalPrice +=
-  //       parseFloat(product.WSPLPRICE) * parseInt(product.quantity);
-  //     setTotal(cartTotalPrice + cartFlatTotal);
-  //     setShowCart(true);
-  //   }
-  // };
 
   //handle user pressing escape button
   const handleEscape = (event) => {
@@ -479,7 +427,8 @@ function ProductDiscountModal(props) {
                                         discountLabel,
                                         setDiscountLabel,
                                         freeQuantity,
-                                        setFreeQuantity
+                                        setFreeQuantity,
+                                        caluclateMixMatch
                                       )
                                     }
                                     style={{
@@ -515,8 +464,13 @@ function ProductDiscountModal(props) {
                           handleAddToCart(
                             productOriginal,
                             total,
+                            quantityInputValue,
                             setQuantityInputValue,
-                            setProductQuantity
+                            setProductQuantity,
+                            cartItems,
+                            setTotal,
+                            setCartItems,
+                            setShowCart
                           );
                         }}
                         style={{
@@ -718,6 +672,7 @@ function ProductDiscountModal(props) {
             </Button>
           </Modal.Footer>
         </div>
+        <Toaster />
       </Modal>
     );
   }

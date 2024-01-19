@@ -81,8 +81,7 @@ const StatementsTable = () => {
         enableRowActions
         renderRowActions={({ row }) => (
           <div style={{ display: "flex", alignItems: "center" }}>
-            {row.original.STPRINTED == 'Y' && (
-              <button
+            <button
                 className="btn btn-primary"
                 onClick={() => {
                   fetchStatement(row);
@@ -93,7 +92,9 @@ const StatementsTable = () => {
               >
                 Request Statement
               </button>
-            )}
+            {/* {row.original.STPRINTED == 'Y' && (
+              
+            )} */}
           </div>
         )}
       />

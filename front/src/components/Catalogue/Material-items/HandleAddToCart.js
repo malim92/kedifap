@@ -1,3 +1,4 @@
+import { toast } from "react-hot-toast";
 
 const HandleAddToCart = (
   product,
@@ -12,15 +13,15 @@ const HandleAddToCart = (
 ) => {
   let cartTotalPrice = total;
   const { PARTNAME, WSPLPRICE } = product.original;
-  console.log(product.original, "product.original 2");
-  if (product.original.stock == 0) {
-    alert("Sorry but the selected product dosn't have available stock!");
-    return;
-  }
+  console.log(cartItems, "product.cartItems 2");
+  // if (product.original.stock == 0) {
+  //   alert("Sorry but the selected product dosn't have available stock!");
+  //   return;
+  // }
 
   const found = cartItems.find((element) => element.PARTNAME == PARTNAME);
   if (found) {
-    alert("Product is already in the cart!");
+    toast.error("Product is already in the cart!");
   } else {
     if (parseInt(product.original.DEXT_LOWSTOCKQTY) > 0) {
       product.original.quantity = product.original.DEXT_LOWSTOCKQTY;

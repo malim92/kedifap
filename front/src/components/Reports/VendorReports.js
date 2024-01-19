@@ -76,7 +76,8 @@ const VendorsReports = () => {
       const workbook = new ExcelJS.Workbook();
       const dataArray = response.data;
 
-      if (selectedOption == "SalesByCP") {
+      //not used
+      if (selectedOption == "SalesByCPX") {
         Object.keys(dataArray).forEach((city) => {
           const worksheet = workbook.addWorksheet(city);
 

@@ -70,6 +70,10 @@ const Cart = (props) => {
     setDiscountAmount(totalDiscountAmount.totalDiscount);
     setDiscountAmount(mixMatchDiscount.discountedAmount);
 
+    console.log(updatedItemsQuantity, "updatedItemsQuantity debubg in cart1");
+    console.log(totalDiscountAmount, "totalDiscountAmount.totalDiscount debubg in cart1");
+    console.log(mixMatchDiscount.discountedAmount, "mixMatchDiscount.discountedAmount debubg in cart1");
+
     setTotal(
       cartFlatTotal -
         totalDiscountAmount.totalDiscount -
@@ -102,9 +106,12 @@ const Cart = (props) => {
 
     const cartFlatTotal = caluclateFlatTotal(updatedCart);
     const totalDiscountAmount = caluclateDiscount(updatedCart);
-    const mixMatchDiscount = caluclateMixMatch(updatedCart);
+    const mixMatchDiscount = caluclateMixMatch(updatedCart, setDiscountAmount);
 
-    setDiscountAmount(totalDiscountAmount.totalDiscount);
+    console.log("totalDiscountAmount.totalDiscount in remove", totalDiscountAmount.totalDiscount);
+    console.log("mixMatchDiscount in remove", mixMatchDiscount);
+
+    setDiscountAmount(totalDiscountAmount.totalDiscount + mixMatchDiscount.discountedAmount);
 
     setTotal(
       cartFlatTotal -
@@ -323,6 +330,8 @@ const Cart = (props) => {
           </ul>
           <div class="cart-item-details">
             Number of items :{" "}
+            {        console.log(productQuantity, "productQuantity in cart")
+}
             {Object.values(productQuantity).reduce(
               (total, value) => total + parseInt(value),
               0
