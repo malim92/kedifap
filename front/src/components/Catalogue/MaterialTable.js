@@ -132,7 +132,8 @@ const MaterialTable = ({ isVendorName }) => {
         activeIngValue,
         discountedProducts,
         quotaProducts,
-        isVendorName
+        isVendorName,
+        setIsLoading
       );
     }, 1000);
 
@@ -156,7 +157,8 @@ const MaterialTable = ({ isVendorName }) => {
       activeIngValue,
       discountedProducts,
       quotaProducts,
-      isVendorName
+      isVendorName,
+      setIsLoading
     );
   }, [
     pagination.pageIndex,
@@ -182,6 +184,8 @@ const MaterialTable = ({ isVendorName }) => {
   const [discountLabel, setDiscountLabel] = useState({});
   const [freeQuantity, setFreeQuantity] = useState({});
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [mixProgress, setMixProgress] = useState(0);
+  const [selectedOffer, setSelectedOffer] = useState([]);
 
   const handleClose = () => setShow(false);
   const handleDiscountClose = () => setDiscountShow(false);
@@ -207,6 +211,7 @@ const MaterialTable = ({ isVendorName }) => {
 
   return (
     <>
+    {console.log(isLoading,'isLoading')}
       <div class="custom-filters">
         <FormControlLabel
           control={
@@ -465,6 +470,10 @@ const MaterialTable = ({ isVendorName }) => {
         caluclateMixMatch={caluclateMixMatch}
         highlightStyle={highlightStyle}
         setHighlightStyle={setHighlightStyle}
+        mixProgress={mixProgress}
+        setMixProgress={setMixProgress}
+        selectedOffer={selectedOffer}
+        setSelectedOffer={setSelectedOffer}
       />
       <Cart
         showCart={showCart}
@@ -493,6 +502,9 @@ const MaterialTable = ({ isVendorName }) => {
         discountAmount={discountAmount}
         highlightStyle={highlightStyle}
         setHighlightStyle={setHighlightStyle}
+        mixProgress={mixProgress}
+        setMixProgress={setMixProgress}
+        setSelectedOffer={setSelectedOffer}
       />
     </>
   );

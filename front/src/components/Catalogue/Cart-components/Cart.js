@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
+import CalculateMixTotal from "../Material-functions/calculateMixProgress";
 
 import { FetchPharmacies } from "../Api/pharmaciesApi";
 import moment from "moment";
@@ -35,6 +36,9 @@ const Cart = (props) => {
     discountAmount,
     highlightStyle,
     setHighlightStyle,
+    mixProgress,
+    setMixProgress,
+    setSelectedOffer
   } = props;
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
@@ -45,6 +49,11 @@ const Cart = (props) => {
       ...quantityInputValue,
       [productId]: parseInt(event),
     });
+
+    if (item.DEXT_OFFERCODE == "4" && item.OFFERQTY) {
+      item.quantity = parseInt(event);
+      CalculateMixTotal(mixProgress, setMixProgress, cartItems, item);
+    }
 
     const updatedItems = [...cartItems];
 
@@ -84,6 +93,7 @@ const Cart = (props) => {
       ...discountLabel,
       [item.PARTNAME]: totalDiscountAmount.discountLabel[item.PARTNAME],
     });
+
     setDiscountLabel({
       ...discountLabel,
       [item.PARTNAME]: mixMatchDiscount.discountLabel[item.PARTNAME],
@@ -143,6 +153,8 @@ const Cart = (props) => {
     setHighlightStyle([]);
     setDiscountLabel({});
     setCustNote("");
+    setMixProgress(0);
+    setSelectedOffer([]);
   };
 
   const sendOrder = async (
@@ -282,15 +294,9 @@ const Cart = (props) => {
                       Discount: {discountLabel[item.PARTNAME]}
                     </p>
                   )}
-                  {/* <p class="cart-item-quantity">Quantity: {item.quantity}</p> */}
                 </div>
                 <div class="cart-item-controls">
-                  {/* <button
-                      class="cart-item-control-btn"
-                      onClick={() => decrementQuantity(item)}
-                    >
-                      -
-                    </button> */}
+                  
                   <input
                     type="number"
                     value={quantityInputValue[item.PARTNAME] || 1}
@@ -330,8 +336,6 @@ const Cart = (props) => {
           </ul>
           <div class="cart-item-details">
             Number of items :{" "}
-            {        console.log(productQuantity, "productQuantity in cart")
-}
             {Object.values(productQuantity).reduce(
               (total, value) => total + parseInt(value),
               0

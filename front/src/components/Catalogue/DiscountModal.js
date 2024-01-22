@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
+import CustomizedProgressBars from "./Cart-components/ShippingProgress";
+import CalculateMixTotal from "./Material-functions/calculateMixProgress";
 
 // import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -33,7 +35,11 @@ const getDiscount = async (
   setFreeQuantity,
   caluclateMixMatch,
   highlightStyle,
-  setHighlightStyle
+  setHighlightStyle,
+  mixProgress,
+  setMixProgress,
+  selectedOffer,
+  setSelectedOffer
 ) => {
   setShowCart(true);
   console.log(product, "product chcek  ");
@@ -74,9 +80,14 @@ const getDiscount = async (
           setDiscountAmount
         );
 
-        console.log(updatedDataMix, "updatedDataMix.discountedAmount Y in discount");
-        console.log(setDiscountAmount, "setDiscountAmount.discountedAmount Y in discount");
-
+        console.log(
+          updatedDataMix,
+          "updatedDataMix.discountedAmount Y in discount"
+        );
+        console.log(
+          setDiscountAmount,
+          "setDiscountAmount.discountedAmount Y in discount"
+        );
 
         setDiscountAmount(
           cartDiscountTotalInDiscount.totalDiscount +
@@ -145,12 +156,16 @@ const getDiscount = async (
           [product.PARTNAME]: discountSelection.OFFERDES,
         });
       } else if (discountSelection.DEXT_OFFERCODE == "4") {
+    console.log(selectedOffer, "selectedOffer in before");
+
+        setSelectedOffer([...selectedOffer , discountSelection.OFFERID]);
+        console.log(selectedOffer, "mixProgress in after");
+
         product.quantity = quantityInputValue[product.PARTNAME];
 
         quantityInputValue
           ? (product.quantity = quantityInputValue[product.PARTNAME])
           : (product.quantity = 1);
-
 
         setCartItems([...cartItems, product]);
 
@@ -160,22 +175,21 @@ const getDiscount = async (
           quantity: quantityInputValue[cartItem.PARTNAME] || 1,
         }));
 
+        CalculateMixTotal(mixProgress, setMixProgress, cartItems, product);
         setProductQuantity({
           ...productQuantity,
-          [product.PARTNAME]: productQuantity[product.PARTNAME],
+          [product.PARTNAME]: productQuantity[product.PARTNAME] || 1,
         });
 
         highlightStyle.push(product.PARTNAME);
         setHighlightStyle(highlightStyle);
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
-        console.log(updatedDataMix, "updatedDataMix in mixmatch");
+
         const mixMatchDiscount = caluclateMixMatch(
           updatedDataMix,
           setDiscountAmount
         );
-
-        console.log(cartItems, "cartItems in mixmatch");
 
         setTotal(cartFlatTotalInDiscount - mixMatchDiscount.discountedAmount);
         setDiscountLabel({
@@ -212,14 +226,14 @@ function ProductDiscountModal(props) {
     caluclateMixMatch,
     highlightStyle,
     setHighlightStyle,
+    mixProgress,
+    setMixProgress,
+    selectedOffer,
+    setSelectedOffer,
   } = props;
 
-  const [open, setOpen] = useState(false);
   const [currentBody, setCurrentBody] = useState(1);
   const [mixMatch, setMixMatch] = useState([]);
-  const [discountQuantityInputValue, setDiscountQuantityInputValue] = useState(
-    {}
-  );
   const modalRef = useRef();
 
   const handleCloseModal = () => {
@@ -263,11 +277,15 @@ function ProductDiscountModal(props) {
     console.log(item.PARTNAME, "item.PARTNAME first");
     console.log(cartItems, "item.cartItems first");
     let productCode = item.PARTNAME;
-    console.log(productCode, "item.productCode first");
 
     const isXInArray = cartItems.some((item) => item.PARTNAME === productCode);
 
-    console.log(isXInArray, "isXInArray first");
+    console.log(item, "item totalDiscountAmount quan");
+    if (item.DEXT_OFFERCODE == "4" && item.OFFERQTY) {
+      item.quantity = parseInt(event);
+      CalculateMixTotal(mixProgress, setMixProgress, cartItems, item);
+    }
+
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
     const productId = item.PARTNAME;
 
@@ -324,8 +342,6 @@ function ProductDiscountModal(props) {
       ...discountLabel,
       [item.PARTNAME]: mixMatchDiscount.discountLabel[item.PARTNAME],
     });
-    console.log(discountLabel, "debug discountLabel quan");
-    console.log(totalDiscountAmount, "debug totalDiscountAmount quan");
   };
 
   const { rowSearch } = popupModalDiscount;
@@ -428,7 +444,9 @@ function ProductDiscountModal(props) {
                                         setDiscountLabel,
                                         freeQuantity,
                                         setFreeQuantity,
-                                        caluclateMixMatch
+                                        caluclateMixMatch,
+                                        mixProgress,
+                                        setMixProgress
                                       )
                                     }
                                     style={{
@@ -498,9 +516,6 @@ function ProductDiscountModal(props) {
                   Number of items for this discount : {mixMatch[0].OFFERQTY}
                 </p>
                 <Table striped bordered hover>
-                  {/* <thead>
-                  
-                </thead> */}
                   <thead>
                     <tr>
                       <th style={{ textAlign: "center" }} colspan="6">
@@ -580,7 +595,11 @@ function ProductDiscountModal(props) {
                                   setFreeQuantity,
                                   caluclateMixMatch,
                                   highlightStyle,
-                                  setHighlightStyle
+                                  setHighlightStyle,
+                                  mixProgress,
+                                  setMixProgress,
+                                  selectedOffer,
+                                  setSelectedOffer
                                 )
                               }
                               style={{
@@ -633,6 +652,23 @@ function ProductDiscountModal(props) {
                     ))}
                   </tbody>
                 </Table>
+                {console.log(selectedOffer, "selectedOffer here")}
+                {console.log(mixMatch, "mixMatch here")}
+
+                {Array.isArray(selectedOffer) &&
+                  selectedOffer.length > 0 &&
+                  selectedOffer.map((selectedOfferId) =>
+                    mixMatch.some(
+                      (item) => item.OFFERID == selectedOfferId
+                    ) ? (
+                      <CustomizedProgressBars
+                        key={selectedOfferId}
+                        mixProgress={mixProgress}
+                        highlightStyle={highlightStyle}
+                        mixMatch={mixMatch}
+                      />
+                    ) : null
+                  )}
               </>
             )}
             {currentBody === 2 && mixMatch.length == 0 && (

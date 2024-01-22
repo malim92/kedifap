@@ -15,10 +15,12 @@ export const FetchPartsData = async (
   activeIngValue,
   discountedProducts,
   quotaProducts,
-  isVendorName
+  isVendorName,
+  setIsLoading
 ) => {
 
   try {
+    setIsLoading(true);
     //const url = new URL("/parts/", "http://localhost:8000");
     const url = new URL("/parts/", `${process.env.REACT_APP_API_URL}`);
     url.searchParams.set("page", `${pagination.pageIndex}`);
@@ -273,8 +275,10 @@ export const FetchPartsData = async (
     console.log(returnPolicyArray, "json pro final");
     setData(returnPolicyArray);
     setRowCount(json.totalRows);
+    setIsLoading(false);
   } catch (error) {
     setIsError(true);
+    setIsLoading(false);
     console.error(error);
     return;
   }
