@@ -1,18 +1,41 @@
-function CalculateMixTotal(mixProgress, setMixProgress, cartItem, product) {
-  console.log(cartItem, "cartItem in CalculateMixTotal");
-  console.log(product, "product in CalculateMixTotal");
+function CalculateMixTotal(mixProgress, setMixProgress, product, updatedItems) {
+  console.log(updatedItems, "updatedItems in CalculateMixTotal");
+  console.log(mixProgress, "mixProgress in CalculateMixTotal");
 
   if (product.DEXT_OFFERCODE !== "4") return;
 
-  if (mixProgress > 100) {
+  if (mixProgress[product.OFFERID] && mixProgress[product.OFFERID]['progress'] > 100) {
     console.log(mixProgress, "mixProgress > 100 ");
-    setMixProgress(100);
+    setMixProgress({ ...mixProgress,[product.OFFERID]: {progress: 100} });
   } else {
     console.log(mixProgress, "mixProgress in else ");
-    product.quantity
-      ? setMixProgress((parseInt(product.quantity) * 100) / product.OFFERQTY)
-      : setMixProgress(100 / product.OFFERQTY);
+    const quantity = parseInt(product.quantity) || 0;
+
+    // setMixProgress(prevMixProgress => ({
+    //   ...prevMixProgress,
+    //   [product.OFFERID]: (prevMixProgress[product.OFFERID] || 0) + (quantity * 100 / product.OFFERQTY),
+    // }));
+
+    setMixProgress(prevMixProgress => {
+      const currentProgress = prevMixProgress[product.OFFERID]?.progress || 0;
+      const currentQuantuity = prevMixProgress[product.OFFERID]?.quantity || 0;
+      console.log(currentQuantuity, "currentProgress in else ");
+    
+      return {
+        ...prevMixProgress,
+        [product.OFFERID]: {
+          progress: currentProgress + (parseInt(quantity) * 100 / product.OFFERQTY),
+          quantity: currentQuantuity !== undefined ? currentQuantuity + parseInt(quantity) : parseInt(quantity),
+        },
+      };
+    });
+    
+
+    
+
   }
+  console.log(mixProgress, "mixProgress in final ");
+
 }
 
 export default CalculateMixTotal;

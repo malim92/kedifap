@@ -3,10 +3,23 @@ import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CalculateMixTotal from "../Material-functions/calculateMixProgress";
+import { toast, Toaster } from "react-hot-toast";
+import Grid from "@mui/material/Grid";
+import { styled } from "@mui/material/styles";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 
 import { FetchPharmacies } from "../Api/pharmaciesApi";
 import moment from "moment";
 import "./Cart.css";
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+}));
 
 const Cart = (props) => {
   const {
@@ -38,7 +51,7 @@ const Cart = (props) => {
     setHighlightStyle,
     mixProgress,
     setMixProgress,
-    setSelectedOffer
+    setSelectedOffer,
   } = props;
 
   const handleQuantityChange = (event, item, index, setQuantityInputValue) => {
@@ -70,7 +83,10 @@ const Cart = (props) => {
 
     setCartItems(updatedItemsQuantity);
 
-    const mixMatchDiscount = caluclateMixMatch(updatedItemsQuantity, setDiscountAmount);
+    const mixMatchDiscount = caluclateMixMatch(
+      updatedItemsQuantity,
+      setDiscountAmount
+    );
     const cartFlatTotal = caluclateFlatTotal(updatedItemsQuantity);
     const totalDiscountAmount = caluclateDiscount(updatedItemsQuantity);
 
@@ -80,8 +96,14 @@ const Cart = (props) => {
     setDiscountAmount(mixMatchDiscount.discountedAmount);
 
     console.log(updatedItemsQuantity, "updatedItemsQuantity debubg in cart1");
-    console.log(totalDiscountAmount, "totalDiscountAmount.totalDiscount debubg in cart1");
-    console.log(mixMatchDiscount.discountedAmount, "mixMatchDiscount.discountedAmount debubg in cart1");
+    console.log(
+      totalDiscountAmount,
+      "totalDiscountAmount.totalDiscount debubg in cart1"
+    );
+    console.log(
+      mixMatchDiscount.discountedAmount,
+      "mixMatchDiscount.discountedAmount debubg in cart1"
+    );
 
     setTotal(
       cartFlatTotal -
@@ -118,10 +140,15 @@ const Cart = (props) => {
     const totalDiscountAmount = caluclateDiscount(updatedCart);
     const mixMatchDiscount = caluclateMixMatch(updatedCart, setDiscountAmount);
 
-    console.log("totalDiscountAmount.totalDiscount in remove", totalDiscountAmount.totalDiscount);
+    console.log(
+      "totalDiscountAmount.totalDiscount in remove",
+      totalDiscountAmount.totalDiscount
+    );
     console.log("mixMatchDiscount in remove", mixMatchDiscount);
 
-    setDiscountAmount(totalDiscountAmount.totalDiscount + mixMatchDiscount.discountedAmount);
+    setDiscountAmount(
+      totalDiscountAmount.totalDiscount + mixMatchDiscount.discountedAmount
+    );
 
     setTotal(
       cartFlatTotal -
@@ -153,7 +180,7 @@ const Cart = (props) => {
     setHighlightStyle([]);
     setDiscountLabel({});
     setCustNote("");
-    setMixProgress(0);
+    setMixProgress([]);
     setSelectedOffer([]);
   };
 
@@ -164,13 +191,15 @@ const Cart = (props) => {
     pharmacyValue,
     custNote
   ) => {
+    const loadingToast = toast.loading("Sending order...");
+
     let userFullId = localStorage.getItem("userId");
     let [userId, dCode] = userFullId.split("-");
     let userDesc = localStorage.getItem("userDesc");
     console.log(isVendorName, "isVendorName in sendOrder.js");
     console.log(order, "order.()");
     if (order.length == 0) {
-      throw Error("Cant send empty cart");
+      toast.error("Cant send empty cart");
     }
     const productsinOrder = order.map((obj, index) => ({
       PARTNAME: obj.PARTNAME,
@@ -209,18 +238,21 @@ const Cart = (props) => {
     //const url = "http://localhost:8000/order";
     //const url = "https://kedifap-portal.com2go.co/order";
     const url = new URL(`${process.env.REACT_APP_API_URL}/order`);
+    toast.dismiss(loadingToast);
 
     try {
       const response = await axios.post(url, orderObject);
       console.log(response, "response");
-      alert("Order Sent Successfully, Thank you!!");
+      toast.success("Order Sent Successfully, Thank you!!");
       setCartItems([]);
       setTotal(0);
       setProductQuantity({});
       setHighlightStyle([]);
       setCustNote("");
     } catch (error) {
-      alert("There was an issue making your order, please contact support.");
+      toast.error(
+        "There was an issue making your order, please contact support."
+      );
       console.error(error);
     }
   };
@@ -296,7 +328,6 @@ const Cart = (props) => {
                   )}
                 </div>
                 <div class="cart-item-controls">
-                  
                   <input
                     type="number"
                     value={quantityInputValue[item.PARTNAME] || 1}
@@ -386,15 +417,42 @@ const Cart = (props) => {
             </button>
             <button
               onClick={() => {
-                if (window.confirm("Θέλετε να αποσταλεί η παραγγελία σας;")) {
-                  sendOrder(
-                    cartItems,
-                    isVendorName,
-                    freeQuantity,
-                    pharmacyValue,
-                    custNote
-                  );
-                }
+                toast((t) => (
+                  <span>
+                    Θέλετε να αποσταλεί η παραγγελία σας;
+                    <br></br>
+                    <Box sx={{ flexGrow: 1, padding: "10px" }}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Item>
+                            <button
+                              onClick={() => {
+                                sendOrder(
+                                  cartItems,
+                                  isVendorName,
+                                  freeQuantity,
+                                  pharmacyValue,
+                                  custNote
+                                );
+                                toast.dismiss(t.id);
+                              }}
+                            >
+                              Send order
+                            </button>
+                          </Item>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Item>
+                            {" "}
+                            <button onClick={() => toast.dismiss(t.id)}>
+                              Cancel
+                            </button>
+                          </Item>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </span>
+                ));
               }}
               className="btn btn-primary "
               disabled={

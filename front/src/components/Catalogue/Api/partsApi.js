@@ -21,6 +21,7 @@ export const FetchPartsData = async (
 
   try {
     setIsLoading(true);
+    
     //const url = new URL("/parts/", "http://localhost:8000");
     const url = new URL("/parts/", `${process.env.REACT_APP_API_URL}`);
     url.searchParams.set("page", `${pagination.pageIndex}`);
@@ -79,6 +80,7 @@ export const FetchPartsData = async (
 
     console.log(url, "url");
     const response = await fetch(url.href);
+
     const json = await response.json();
 
     console.log(json.data, "json pro");
@@ -276,6 +278,7 @@ export const FetchPartsData = async (
     setData(returnPolicyArray);
     setRowCount(json.totalRows);
     setIsLoading(false);
+    
   } catch (error) {
     setIsError(true);
     setIsLoading(false);

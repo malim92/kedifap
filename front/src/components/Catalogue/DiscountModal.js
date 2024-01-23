@@ -54,7 +54,20 @@ const getDiscount = async (
     );
   } else {
     if (found) {
-      toast.error("Product is already in the cart!");
+      console.log(productQuantity, "productQuantity chcek  ");
+      setQuantityInputValue({
+        ...quantityInputValue,
+        [product.PARTNAME]: parseInt(productQuantity[product.PARTNAME]),
+      });
+
+      setProductQuantity({
+        ...productQuantity,
+        [product.PARTNAME]: productQuantity[product.PARTNAME],
+      });
+      product.quantity = productQuantity[product.PARTNAME];
+      CalculateMixTotal(mixProgress, setMixProgress, product);
+
+      // toast.error("Product is already in the cart!");
     } else {
       // price discount
       if (discountSelection.DEXT_OFFERCODE == "2") {
@@ -156,10 +169,13 @@ const getDiscount = async (
           [product.PARTNAME]: discountSelection.OFFERDES,
         });
       } else if (discountSelection.DEXT_OFFERCODE == "4") {
-    console.log(selectedOffer, "selectedOffer in before");
-
-        setSelectedOffer([...selectedOffer , discountSelection.OFFERID]);
-        console.log(selectedOffer, "mixProgress in after");
+        //if offer exist dont duplicate it
+        setSelectedOffer((prevSelectedOffer) => {
+          if (!prevSelectedOffer.includes(discountSelection.OFFERID)) {
+            return [...prevSelectedOffer, discountSelection.OFFERID];
+          }
+          return prevSelectedOffer;
+        });
 
         product.quantity = quantityInputValue[product.PARTNAME];
 
@@ -175,7 +191,8 @@ const getDiscount = async (
           quantity: quantityInputValue[cartItem.PARTNAME] || 1,
         }));
 
-        CalculateMixTotal(mixProgress, setMixProgress, cartItems, product);
+        CalculateMixTotal(mixProgress, setMixProgress, product);
+
         setProductQuantity({
           ...productQuantity,
           [product.PARTNAME]: productQuantity[product.PARTNAME] || 1,
@@ -281,10 +298,11 @@ function ProductDiscountModal(props) {
     const isXInArray = cartItems.some((item) => item.PARTNAME === productCode);
 
     console.log(item, "item totalDiscountAmount quan");
-    if (item.DEXT_OFFERCODE == "4" && item.OFFERQTY) {
-      item.quantity = parseInt(event);
-      CalculateMixTotal(mixProgress, setMixProgress, cartItems, item);
-    }
+
+    // if (item.DEXT_OFFERCODE == "4" && item.OFFERQTY) {
+    //   item.quantity = parseInt(event);
+    //   CalculateMixTotal(mixProgress, setMixProgress, item );
+    // }
 
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
     const productId = item.PARTNAME;
@@ -314,6 +332,7 @@ function ProductDiscountModal(props) {
 
     console.log(cartItems, "cartItems test1");
     console.log(updatedItemsQuantity, "updatedItemsQuantity test1");
+
     setCartItems(updatedItemsQuantity);
 
     const mixMatchDiscount = caluclateMixMatch(
@@ -325,9 +344,6 @@ function ProductDiscountModal(props) {
     setDiscountAmount(totalDiscountAmount.totalDiscount);
     setDiscountAmount(mixMatchDiscount.discountedAmount);
 
-    console.log(mixMatchDiscount, "debug mixMatchDiscount");
-    console.log(cartFlatTotal, "debug cartFlatTotal");
-    console.log(totalDiscountAmount, "debug totalDiscountAmount");
     setTotal(
       cartFlatTotal -
         totalDiscountAmount.totalDiscount -
@@ -658,13 +674,10 @@ function ProductDiscountModal(props) {
                 {Array.isArray(selectedOffer) &&
                   selectedOffer.length > 0 &&
                   selectedOffer.map((selectedOfferId) =>
-                    mixMatch.some(
-                      (item) => item.OFFERID == selectedOfferId
-                    ) ? (
+                    mixMatch.some((item) => item.OFFERID == selectedOfferId) ? (
                       <CustomizedProgressBars
-                        key={selectedOfferId}
+                        selectedOfferId={selectedOfferId}
                         mixProgress={mixProgress}
-                        highlightStyle={highlightStyle}
                         mixMatch={mixMatch}
                       />
                     ) : null

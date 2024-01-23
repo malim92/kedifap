@@ -5,8 +5,9 @@ import PopupModal from "./Modal";
 import CartPopupModal from "./CartPopupModal";
 import DiscountModal from "./DiscountModal";
 import { FaCartArrowDown } from "react-icons/fa";
-import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+import ImageSearchIcon from "@mui/icons-material/ImageSearch";
 import ImageViewer from "react-simple-image-viewer";
+import { Toaster } from "react-hot-toast";
 
 import Switch from "@mui/material/Switch";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -184,7 +185,9 @@ const MaterialTable = ({ isVendorName }) => {
   const [discountLabel, setDiscountLabel] = useState({});
   const [freeQuantity, setFreeQuantity] = useState({});
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [mixProgress, setMixProgress] = useState(0);
+  const [mixProgress, setMixProgress] = useState({
+    0: { progress: 0, quantity: 0 },
+  });
   const [selectedOffer, setSelectedOffer] = useState([]);
 
   const handleClose = () => setShow(false);
@@ -211,7 +214,6 @@ const MaterialTable = ({ isVendorName }) => {
 
   return (
     <>
-    {console.log(isLoading,'isLoading')}
       <div class="custom-filters">
         <FormControlLabel
           control={
@@ -506,6 +508,7 @@ const MaterialTable = ({ isVendorName }) => {
         setMixProgress={setMixProgress}
         setSelectedOffer={setSelectedOffer}
       />
+      <Toaster />
     </>
   );
 };

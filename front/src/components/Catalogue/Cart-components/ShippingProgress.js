@@ -16,14 +16,15 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
 }));
 
 export default function CustomizedProgressBars(props) {
-    const {mixProgress, highlightStyle, mixMatch} = props;
+    const {selectedOfferId, mixProgress, mixMatch} = props;
     console.log(mixProgress, "mixProgress in progress");
     console.log(mixMatch, "mixMatch in progress");
+    console.log(selectedOfferId, "selectedOfferId in progress");
 
   return (
     <Box sx={{ flexGrow: 1 }}>
         <p style={{ textAlign: "center" }}>Mix & Match Discount Progress</p>
-      <BorderLinearProgress variant="determinate" value={mixProgress < 100 ? mixProgress : 100} />
+      <BorderLinearProgress variant="determinate" value={mixProgress[selectedOfferId]['progress'] < 100 ? mixProgress[selectedOfferId]['progress'] : 100} />
     </Box>
   );
 }
