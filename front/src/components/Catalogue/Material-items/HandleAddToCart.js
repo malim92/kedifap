@@ -1,4 +1,5 @@
 import { toast } from "react-hot-toast";
+import cartSession from "../Cart-components/cartSession";
 
 const HandleAddToCart = (
   product,
@@ -47,6 +48,16 @@ const HandleAddToCart = (
     setTotal(cartTotalPrice);
     setCartItems([...cartItems, product.original]);
     setShowCart(true);
+
+    const sessionCart = cartSession.getItems();
+
+    console.log(sessionCart, "sessionCart sessions xxx");
+
+    const updatedCart = [...sessionCart, product.original];
+
+    cartSession.setItems(updatedCart);
+
+    cartSession.setTotal(product);
   }
 };
 

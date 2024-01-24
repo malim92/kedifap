@@ -3,6 +3,7 @@ import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import CustomizedProgressBars from "./Cart-components/ShippingProgress";
 import CalculateMixTotal from "./Material-functions/calculateMixProgress";
+import cartSession from "./Cart-components/cartSession";
 
 // import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
@@ -11,7 +12,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import { FetchOffer } from "./Api/fetchOffer";
-import { toast, Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 import "./DiscountModal.css";
 
@@ -44,7 +45,9 @@ const getDiscount = async (
   setShowCart(true);
   console.log(product, "product chcek  ");
 
-  const found = cartItems.find(
+  const sessionItems = cartSession.getItems();
+
+  const found = sessionItems.find(
     (element) => element.PARTNAME == product.PARTNAME
   );
   console.log(discountSelection, "discountSelection chcek  ");
@@ -76,12 +79,11 @@ const getDiscount = async (
         setCartItems([...cartItems, product]);
 
         cartItems.push(product);
-        console.log(cartItems, "cartItems Y in discount");
+        cartSession.setItems(cartItems);
+        cartSession.setTotal();
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
         const cartDiscountTotalInDiscount = caluclateDiscount(cartItems);
-
-        console.log(product, "product in discount");
 
         const updatedDataMix = cartItems.map((cartItem) => ({
           ...cartItem,
@@ -97,15 +99,13 @@ const getDiscount = async (
           updatedDataMix,
           "updatedDataMix.discountedAmount Y in discount"
         );
-        console.log(
-          setDiscountAmount,
-          "setDiscountAmount.discountedAmount Y in discount"
-        );
 
-        setDiscountAmount(
+        let totalDiscount =
           cartDiscountTotalInDiscount.totalDiscount +
-            mixMatchDiscount.discountedAmount
-        );
+          mixMatchDiscount.discountedAmount;
+
+        setDiscountAmount(totalDiscount);
+        cartSession.setSessionDiscount(totalDiscount);
 
         console.log(
           cartFlatTotalInDiscount,
@@ -130,6 +130,9 @@ const getDiscount = async (
         setProductQuantity({
           ...productQuantity,
           [product.PARTNAME]: product.quantity,
+        });
+
+        cartSession.setSessionQuantity({[product.PARTNAME]: product.quantity
         });
 
         setDiscountLabel({

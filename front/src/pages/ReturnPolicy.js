@@ -36,7 +36,7 @@ function ReturnPolicy() {
       let returnPolicyArray = "";
       let productDesciptionArray = "";
       response.data.value[0]
-        ? (returnPolicyArray = response.data.value[0].DEXT_SUPPOLICYCODE) &&
+        ? (returnPolicyArray = response.data.value[0].DEXT_CSPOLICYCODE) &&
           (productDesciptionArray = response.data.value[0].PARTDES)
         : setReturnPolicy("No product found!!") && setProductDesciption("");
 

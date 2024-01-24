@@ -3,11 +3,13 @@ import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CalculateMixTotal from "../Material-functions/calculateMixProgress";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import Grid from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
+import CartItem from "./CartItems";
+import cartSession from "./cartSession";
 
 import { FetchPharmacies } from "../Api/pharmaciesApi";
 import moment from "moment";
@@ -69,13 +71,20 @@ const Cart = (props) => {
     }
 
     const updatedItems = [...cartItems];
+    const sessionCart = localStorage.getItem("kediCart")
+      ? JSON.parse(localStorage.getItem("kediCart"))
+      : [];
 
-    const updatedItemsQuantity = updatedItems.map((item) => ({
+    const updatedItemsQuantity = sessionCart.map((item) => ({
       ...item,
       quantity: productQuantity[item.PARTNAME] || 1,
     }));
 
     updatedItems[index] = { ...updatedItemsQuantity[index], quantity: event };
+    sessionCart[index] = { ...updatedItemsQuantity[index], quantity: event };
+
+    localStorage.setItem("kediCart", JSON.stringify(sessionCart));
+
     updatedItemsQuantity[index] = {
       ...updatedItemsQuantity[index],
       quantity: event,
@@ -131,6 +140,12 @@ const Cart = (props) => {
     );
 
     setCartItems(updatedCart);
+    localStorage.setItem("kediCart", JSON.stringify(updatedCart));
+    const sessionCartTotal = localStorage.getItem("kediCartTotal")
+      ? JSON.parse(localStorage.getItem("kediCartTotal"))
+      : [];
+    sessionCartTotal.pop();
+    localStorage.setItem("kediCartTotal", JSON.stringify(sessionCartTotal));
 
     delete productQuantity[product.PARTNAME];
 
@@ -182,6 +197,10 @@ const Cart = (props) => {
     setCustNote("");
     setMixProgress([]);
     setSelectedOffer([]);
+    localStorage.setItem("kediCart", []);
+    localStorage.setItem("kediCartTotal", []);
+    localStorage.setItem("kediCartDiscount", 0);
+    cartSession.setSessionQuantity([]);
   };
 
   const sendOrder = async (
@@ -295,11 +314,42 @@ const Cart = (props) => {
     fetchData();
   }, []);
 
+  const renderCartItem = (item, index) => (
+    <CartItem
+      discountLabel={discountLabel}
+      quantityInputValue={quantityInputValue}
+      handleQuantityChange={handleQuantityChange}
+      setQuantityInputValue={setQuantityInputValue}
+      removeItem={removeItem}
+      item={item}
+      index={index}
+    />
+  );
+
+  const calculateSessionCartTotal = () => {
+    let sessionCartTotal = 0;
+    const sessionCart = cartSession.getItems();
+
+    sessionCart.forEach((item) => {
+      sessionCartTotal += parseInt(item.quantity) * parseFloat(item.WSPLPRICE);
+    });
+
+    return sessionCartTotal;
+  };
+
+  const calculateSessionCartDiscount = () => {
+    return cartSession.getSessionDiscount();
+  };
+
   return (
     <div>
       <button class="basket" onClick={handleCartClick}>
         <span className="icon">
-          <p>{Object.keys(productQuantity).length}</p>
+          <p>
+            {localStorage.getItem("kediCartTotal")
+              ? JSON.parse(localStorage.getItem("kediCartTotal")).length
+              : 0}
+          </p>
         </span>
       </button>
       {showCart && (
@@ -312,59 +362,14 @@ const Cart = (props) => {
               <button class="close-icon" onClick={handleCartClose}></button>
             </div>
           </div>
-          <ul class="cart-list">
-            {cartItems.map((item, index) => (
-              <li class="cart-item" key={index}>
-                <div class="cart-item-details">
-                  <p class="cart-item-name">{item.PARTDES}</p>
-                  <p class="cart-item-name">Code: {item.PARTNAME}</p>
-                  <p class="cart-item-price">
-                    Price: {parseFloat(item.WSPLPRICE)}
-                  </p>
-                  {discountLabel[item.PARTNAME] !== undefined && (
-                    <p class="cart-item-discount">
-                      Discount: {discountLabel[item.PARTNAME]}
-                    </p>
-                  )}
-                </div>
-                <div class="cart-item-controls">
-                  <input
-                    type="number"
-                    value={quantityInputValue[item.PARTNAME] || 1}
-                    min={
-                      parseInt(item.DEXT_LOWSTOCKQTY) > 0
-                        ? item.DEXT_LOWSTOCKQTY
-                        : 1
-                    }
-                    max={item.stock}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        e.target.value,
-                        item,
-                        index,
-                        setQuantityInputValue
-                      )
-                    }
-                    style={{
-                      width: "50px",
-                      marginRight: "10px",
-                      borderRadius: "5px",
-                      border: "1px solid #ccc",
-                      padding: "5px",
-                      fontSize: "1rem",
-                      textAlign: "center",
-                    }}
-                  />
-                  <button
-                    class="cart-item-remove-btn"
-                    onClick={() => removeItem(item)}
-                  >
-                    &times;
-                  </button>
-                </div>
-              </li>
-            ))}
+          <ul className="cart-list">
+            {localStorage.getItem("kediCart") &&
+              JSON.parse(localStorage.getItem("kediCart")).length > 0 &&
+              JSON.parse(localStorage.getItem("kediCart")).map((item, index) =>
+                renderCartItem(item, index)
+              )}
           </ul>
+
           <div class="cart-item-details">
             Number of items :{" "}
             {Object.values(productQuantity).reduce(
@@ -376,8 +381,18 @@ const Cart = (props) => {
             )}
           </div>
           <div className="total-container">
-            <p className="total-text">Discount: {discountAmount.toFixed(2)}</p>
-            <p className="total-text">Total: {total.toFixed(2)}</p>
+            <p className="total-text">
+              Discount:{" "}
+              {discountAmount !== 0
+                ? discountAmount.toFixed(2)
+                : calculateSessionCartDiscount().toFixed(2)}
+            </p>{" "}
+            <p className="total-text">
+              Total:{" "}
+              {total !== 0
+                ? total.toFixed(2)
+                : calculateSessionCartTotal().toFixed(2)}
+            </p>
           </div>
           {isVendorName !== "" && (
             <Autocomplete
