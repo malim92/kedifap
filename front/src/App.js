@@ -3,7 +3,6 @@ import {
   createRoutesFromElements,
   Route,
   RouterProvider,
-  useNavigate,
   Navigate,
 } from "react-router-dom";
 import axios from "axios";
@@ -23,6 +22,7 @@ import Vendors from "./pages/Vendors";
 import Reports from "./pages/Reports";
 import Backorders from "./pages/Backorders";
 import ReturnPolicy from "./pages/ReturnPolicy";
+
 //import router from "./Routes/routes";
 
 function App() {
@@ -30,6 +30,7 @@ function App() {
   const token = localStorage.getItem("kedTokAuth");
   const [isAuthenticated, setIsAuthenticated] = useState(token ? true : false);
 
+  // cartSession.init();
   console.log(isAuthenticated, "isAuthenticated tesst");
 
   useEffect(() => {
@@ -53,10 +54,6 @@ function App() {
           setIsAuthenticated(true);
           console.log(isVendorName, "isVendorName tesst");
 
-          // return navigate({
-          //   pathname: "/app",
-          //   //search: `?userId=${username}`,
-          // });
         } else {
           // Other error occurred
           throw new Error("Failed to authenticate token.");

@@ -80,7 +80,8 @@ const InvoicesTable = () => {
       setData,
       setRowCount,
       setIsError,
-      monthFilter
+      monthFilter,
+      setIsLoading
     );
   }, [
     columnFilters,

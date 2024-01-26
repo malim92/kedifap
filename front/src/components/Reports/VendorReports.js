@@ -86,7 +86,7 @@ const VendorsReports = () => {
           const headerRow = [
             "CUSTDES",
             "QTY",
-            "NET_VALUE",
+            "Gross_value",
             "Discount",
             "over_all_discount",
             "VAT",
@@ -97,7 +97,7 @@ const VendorsReports = () => {
           const keyDataTypes = {
             CUSTDES: ExcelJS.ValueType.String,
             Discount: ExcelJS.ValueType.Number,
-            NET_VALUE: ExcelJS.ValueType.Number,
+            Gross_value: ExcelJS.ValueType.Number,
             QTY: ExcelJS.ValueType.Number,
             TOTAL_VALUE_INCL_VAT: ExcelJS.ValueType.Number,
             VAT: ExcelJS.ValueType.Number,
@@ -156,7 +156,7 @@ const VendorsReports = () => {
           "RECEIVING QTY": ExcelJS.ValueType.Number,
           CUSTDES: ExcelJS.ValueType.String,
           Discount: ExcelJS.ValueType.Number,
-          NET_VALUE: ExcelJS.ValueType.Number,
+          Gross_value: ExcelJS.ValueType.Number,
           QTY: ExcelJS.ValueType.Number,
           TOTAL_VALUE_INCL_VAT: ExcelJS.ValueType.Number,
           VAT: ExcelJS.ValueType.Number,

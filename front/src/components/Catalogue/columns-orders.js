@@ -5,6 +5,12 @@ export const ORDERS_COLUMNS = [
         enableSorting: true,
         enableColumnFilter: true
     },
+    {
+        header: 'Customer Name',
+        accessorKey: 'CDES',
+        enableSorting: true,
+        enableColumnFilter: true
+    },
     
     {
         header: "Order Status",

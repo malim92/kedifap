@@ -9,8 +9,10 @@ export const FetchInvoiceData = async (
   setData,
   setRowCount,
   setIsError,
-  monthFilter
+  monthFilter,
+  setIsLoading
 ) => {
+  setIsLoading(true);
   let userId = localStorage.getItem("userId");
   const url = new URL(
     `${process.env.REACT_APP_API_URL}/invoices?customer_id=${userId}`
@@ -81,4 +83,5 @@ export const FetchInvoiceData = async (
   console.log(totalInvoices, "url sortedTotalInvoices");
   setData(totalInvoices);
   setRowCount(InvoiceData.length);
+  setIsLoading(false);
 };

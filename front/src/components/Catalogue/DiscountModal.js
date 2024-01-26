@@ -51,11 +51,11 @@ const getDiscount = async (
     (element) => element.PARTNAME == product.PARTNAME
   );
   console.log(discountSelection, "discountSelection chcek  ");
-  if (product.stock < discountSelection.OFFERQTY) {
-    alert(
-      `Sorry for inconvience but the selected product has only ${product.stock} in stock`
-    );
-  } else {
+  // if (product.stock < discountSelection.OFFERQTY) {
+  //   alert(
+  //     `Sorry for inconvience but the selected product has only ${product.stock} in stock`
+  //   );
+  // } else {
     if (found) {
       console.log(productQuantity, "productQuantity chcek  ");
       setQuantityInputValue({
@@ -79,7 +79,9 @@ const getDiscount = async (
         setCartItems([...cartItems, product]);
 
         cartItems.push(product);
-        cartSession.setItems(cartItems);
+        const sessionCartItems = cartSession.getItems();
+        sessionCartItems.push(product);
+        cartSession.setItems(sessionCartItems);
         cartSession.setTotal();
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
@@ -90,37 +92,35 @@ const getDiscount = async (
           quantity: product.quantity || 1,
         }));
 
-        const mixMatchDiscount = caluclateMixMatch(
-          updatedDataMix,
-          setDiscountAmount
-        );
+        // const mixMatchDiscount = caluclateMixMatch(
+        //   updatedDataMix,
+        //   setDiscountAmount
+        // );
 
-        console.log(
-          updatedDataMix,
-          "updatedDataMix.discountedAmount Y in discount"
-        );
-
-        let totalDiscount =
-          cartDiscountTotalInDiscount.totalDiscount +
-          mixMatchDiscount.discountedAmount;
-
+        
+        //let totalDiscount = cartDiscountTotalInDiscount.totalDiscount + mixMatchDiscount.discountedAmount;
+        let totalDiscount = cartDiscountTotalInDiscount.totalDiscount;
+        
         setDiscountAmount(totalDiscount);
-        cartSession.setSessionDiscount(totalDiscount);
+        const sessionDiscount = cartSession.getSessionDiscount();
 
         console.log(
-          cartFlatTotalInDiscount,
-          "cartFlatTotalInDiscount in discount"
+          sessionDiscount,
+          "sessionDiscount in discount"
         );
+        
+        const allDiscount = totalDiscount + sessionDiscount;
         console.log(
-          cartDiscountTotalInDiscount,
-          "cartDiscountTotalInDiscount in discount"
+          allDiscount,
+          "allDiscount in discount"
         );
+        cartSession.setSessionDiscount(allDiscount);
+
+        
 
         setTotal(
           cartFlatTotalInDiscount - cartDiscountTotalInDiscount.totalDiscount
         );
-
-        console.log(quantityInputValue, "quantityInputValue in discount");
 
         setQuantityInputValue({
           ...quantityInputValue,
@@ -131,9 +131,9 @@ const getDiscount = async (
           ...productQuantity,
           [product.PARTNAME]: product.quantity,
         });
-
-        cartSession.setSessionQuantity({[product.PARTNAME]: product.quantity
-        });
+        
+        cartSession.setSessionQuantity(product.PARTNAME, product.quantity);
+        cartSession.setSessionDiscountLabel(product.PARTNAME, cartDiscountTotalInDiscount);
 
         setDiscountLabel({
           ...discountLabel,
@@ -147,6 +147,11 @@ const getDiscount = async (
         setCartItems([...cartItems, product]);
 
         cartItems.push(product);
+        
+        const sessionCartItems = cartSession.getItems();
+        sessionCartItems.push(product);
+        cartSession.setItems(sessionCartItems);
+        cartSession.setTotal();
 
         const cartFlatTotalInDiscount = caluclateFlatTotal(cartItems);
 
@@ -171,6 +176,10 @@ const getDiscount = async (
           ...discountLabel,
           [product.PARTNAME]: discountSelection.OFFERDES,
         });
+
+        cartSession.setSessionQuantity(product.PARTNAME, product.quantity);
+        cartSession.setSessionFreeQuantity(product.PARTNAME, parseInt(discountSelection.FREEQTY));
+        
       } else if (discountSelection.DEXT_OFFERCODE == "4") {
         //if offer exist dont duplicate it
         setSelectedOffer((prevSelectedOffer) => {
@@ -189,6 +198,12 @@ const getDiscount = async (
         setCartItems([...cartItems, product]);
 
         cartItems.push(product);
+        
+        const sessionCartItems = cartSession.getItems();
+        sessionCartItems.push(product);
+        cartSession.setItems(sessionCartItems);
+        cartSession.setTotal();
+
         const updatedDataMix = cartItems.map((cartItem) => ({
           ...cartItem,
           quantity: quantityInputValue[cartItem.PARTNAME] || 1,
@@ -203,22 +218,30 @@ const getDiscount = async (
 
         highlightStyle.push(product.PARTNAME);
         setHighlightStyle(highlightStyle);
-
+        cartSession.setSessionHighlight(highlightStyle);
         const cartFlatTotalInDiscount = caluclateFlatTotal(updatedDataMix);
 
         const mixMatchDiscount = caluclateMixMatch(
           updatedDataMix,
           setDiscountAmount
         );
+        console.log(
+          mixMatchDiscount,
+          "mixMatchDiscount in discount"
+        );
+        const sessionDiscount = cartSession.getSessionDiscount();
+        cartSession.setSessionDiscount(mixMatchDiscount.discountedAmount + sessionDiscount);
 
         setTotal(cartFlatTotalInDiscount - mixMatchDiscount.discountedAmount);
         setDiscountLabel({
           ...discountLabel,
           [product.PARTNAME]: mixMatchDiscount.discountLabel[product.PARTNAME],
         });
+        cartSession.setSessionQuantity(product.PARTNAME, product.quantity);
+        cartSession.setSessionDiscountLabel(product.PARTNAME, mixMatchDiscount);
       }
     }
-  }
+  // }
 };
 
 function ProductDiscountModal(props) {
@@ -309,7 +332,7 @@ function ProductDiscountModal(props) {
 
     setProductQuantity({ ...productQuantity, [item.PARTNAME]: event });
     const productId = item.PARTNAME;
-
+    cartSession.setSessionQuantity(item.PARTNAME, event);
     setQuantityInputValue({
       ...quantityInputValue,
       [productId]: parseInt(event),
@@ -334,10 +357,9 @@ function ProductDiscountModal(props) {
     };
 
     console.log(cartItems, "cartItems test1");
-    console.log(updatedItemsQuantity, "updatedItemsQuantity test1");
 
     setCartItems(updatedItemsQuantity);
-
+    cartSession.setItems(updatedItemsQuantity);
     const mixMatchDiscount = caluclateMixMatch(
       updatedItemsQuantity,
       setDiscountAmount
@@ -347,6 +369,9 @@ function ProductDiscountModal(props) {
     setDiscountAmount(totalDiscountAmount.totalDiscount);
     setDiscountAmount(mixMatchDiscount.discountedAmount);
 
+    console.log(totalDiscountAmount, "totalDiscountAmount test1");
+    console.log(mixMatchDiscount, "mixMatchDiscount test1");
+    cartSession.setSessionDiscount(mixMatchDiscount.discountedAmount);
     setTotal(
       cartFlatTotal -
         totalDiscountAmount.totalDiscount -
@@ -554,7 +579,7 @@ function ProductDiscountModal(props) {
                       <tr key={index}>
                         <td
                           style={
-                            highlightStyle.includes(item.PARTNAME)
+                            cartSession.getSessionHighlight().includes(item.PARTNAME)
                               ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
@@ -563,7 +588,7 @@ function ProductDiscountModal(props) {
                         </td>
                         <td
                           style={
-                            highlightStyle.includes(item.PARTNAME)
+                            cartSession.getSessionHighlight().includes(item.PARTNAME)
                               ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
@@ -572,7 +597,7 @@ function ProductDiscountModal(props) {
                         </td>
                         <td
                           style={
-                            highlightStyle.includes(item.PARTNAME)
+                            cartSession.getSessionHighlight().includes(item.PARTNAME)
                               ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
@@ -581,7 +606,7 @@ function ProductDiscountModal(props) {
                         </td>
                         <td
                           style={
-                            highlightStyle.includes(item.PARTNAME)
+                            cartSession.getSessionHighlight().includes(item.PARTNAME)
                               ? { color: "#0d6efd", fontWeight: "700" }
                               : null
                           }
@@ -640,7 +665,7 @@ function ProductDiscountModal(props) {
 
                             <input
                               type="number"
-                              value={quantityInputValue[item.PARTNAME] || 1}
+                              value={cartSession.getSessionQuantity()[item.PARTNAME] || 1}
                               min={
                                 parseInt(item.DEXT_LOWSTOCKQTY) > 0
                                   ? item.DEXT_LOWSTOCKQTY
@@ -671,9 +696,6 @@ function ProductDiscountModal(props) {
                     ))}
                   </tbody>
                 </Table>
-                {console.log(selectedOffer, "selectedOffer here")}
-                {console.log(mixMatch, "mixMatch here")}
-
                 {Array.isArray(selectedOffer) &&
                   selectedOffer.length > 0 &&
                   selectedOffer.map((selectedOfferId) =>

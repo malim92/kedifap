@@ -46,7 +46,7 @@ export default ({ setIsAuthenticated }) => {
                 <SwiperSlide>
                   <img
                     className="w-full img-slider"
-                    src={slider1}
+                    src='https://app.portal.kedifap.com/public/assets/1.jpg'
                     style={{
                       objectFit: "cover",
                       width: "960px",
@@ -57,7 +57,7 @@ export default ({ setIsAuthenticated }) => {
                 <SwiperSlide>
                   <img
                     className="w-full img-slider"
-                    src={slider2}
+                    src='https://app.portal.kedifap.com/public/assets/2.jpg'
                     style={{
                       objectFit: "cover",
                       width: "960px",
@@ -68,7 +68,7 @@ export default ({ setIsAuthenticated }) => {
                 <SwiperSlide>
                   <img
                     className="w-full img-slider"
-                    src={slider3}
+                    src='https://app.portal.kedifap.com/public/assets/3.jpg'
                     style={{
                       objectFit: "cover",
                       width: "960px",
@@ -79,7 +79,7 @@ export default ({ setIsAuthenticated }) => {
                 <SwiperSlide>
                   <img
                     className="w-full img-slider"
-                    src={slider4}
+                    src='https://app.portal.kedifap.com/public/assets/4.jpg'
                     style={{
                       objectFit: "cover",
                       width: "960px",

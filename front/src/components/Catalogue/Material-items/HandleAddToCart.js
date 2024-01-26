@@ -58,6 +58,8 @@ const HandleAddToCart = (
     cartSession.setItems(updatedCart);
 
     cartSession.setTotal(product);
+    cartSession.setSessionQuantity(PARTNAME, product.original.quantity);
+
   }
 };
 

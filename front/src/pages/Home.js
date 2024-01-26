@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 
-import announcements from "../components/Announcements/announcements.json";
 import { GoPrimitiveSquare } from "react-icons/go";
 
 function Home({ isVendorName }) {
   const [welcomeUser, setWelcomeUser] = useState("");
+  const [announcements, setAnnouncements] = useState([]);
 
   let userDesc = localStorage.getItem("userDesc");
 
@@ -12,8 +12,22 @@ function Home({ isVendorName }) {
     setWelcomeUser(userDesc);
   }, [welcomeUser]);
 
-  const renderedAnnoucements = announcements.map((announce) => (
-    <div className="flex items-center py-3">
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("https://app.portal.kedifap.com/public/announcements.json");
+        const data = await response.json();
+        setAnnouncements(data);
+      } catch (error) {
+        console.error("Error fetching announcements:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const renderedAnnoucements = announcements.map((announce, index) => (
+    <div className="flex items-center py-3" key={index}>
       <GoPrimitiveSquare className="bg-kedifapgreen-300 text-kedifapgreen-300 mr-4 shadow-top rounded" />
       {announce.title}
     </div>

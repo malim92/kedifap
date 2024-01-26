@@ -2,7 +2,7 @@
 function caluclateMixMatch(productsInCart, setDiscountAmount) {
     let discountedAmount = 0;
     let discountLabel = [];
-    console.log(productsInCart, "debug productsInCart ali");
+    console.log(productsInCart, "debug productsInCart ");
 
     const offerIdQuantities = productsInCart.reduce((quantities, item) => {
       const offerId = item.OFFERID;
@@ -17,14 +17,15 @@ function caluclateMixMatch(productsInCart, setDiscountAmount) {
       return quantities;
     }, {});
 
-    //checl if the total quantities accumalted are bigger than the offer quantity
+    //check if the total quantities accumalted are bigger than the offer quantity
     productsInCart.forEach((item) => {
       const offerId = item.OFFERID;
       const offerQty = parseInt(item.OFFERQTY);
 
+      console.log(offerQty, "debug offerQty 1");
+      console.log(offerIdQuantities, "debug offerIdQuantities 1");
       if (item.DEXT_OFFERCODE == '4' && offerIdQuantities[offerId] >= offerQty) {
         
-        console.log(offerIdQuantities, "debug offerIdQuantities ali");
         discountLabel = {
           ...discountLabel,
           [item.PARTNAME]: item.OFFERDES,
