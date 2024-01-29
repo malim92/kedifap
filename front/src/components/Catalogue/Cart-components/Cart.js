@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import CalculateMixTotal from "../Material-functions/calculateMixProgress";
-import { toast } from "react-hot-toast";
 import Grid from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
@@ -16,9 +14,9 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Divider from "@mui/material/Divider";
 
+import VendorOffers from "./VendorOffers";
 import handleCartSortBy from "./cartSort";
 import { FetchPharmacies } from "../Api/pharmaciesApi";
-import moment from "moment";
 import "./Cart.css";
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -211,85 +209,13 @@ const Cart = (props) => {
     localStorage.setItem("kediCartHighlight", []);
   };
 
-  const sendOrder = async (
-    order,
-    isVendorName,
-    freeQuantity,
-    pharmacyValue,
-    custNote
-  ) => {
-    const loadingToast = toast.loading("Sending order...");
+  const handleOfferPopupClose = () => setShowOfferPopup(false);
 
-    let userFullId = localStorage.getItem("userId");
-    let [userId, dCode] = userFullId.split("-");
-    let userDesc = localStorage.getItem("userDesc");
-    console.log(isVendorName, "isVendorName in sendOrder.js");
-    console.log(order, "order.()");
-    if (order.length == 0) {
-      toast.error("Cant send empty cart");
-    }
-    const productsinOrder = order.map((obj, index) => ({
-      PARTNAME: obj.PARTNAME,
-      // PDES: obj.PARTDES,
-      TQUANT: parseInt(obj.quantity),
-      DEXT_REQUESTEDQTY: parseInt(obj.quantity),
-      DEXT_FREEQTY:
-        freeQuantity[obj.PARTNAME] > 0 ? freeQuantity[obj.PARTNAME] : 0,
-      PERCENT: 0,
-      DEXT_CONFIRMORDER: index == order.length - 1 ? "Y" : "",
-    }));
-
-    console.log(pharmacyValue, "pharmacyValue");
-    let today = moment().format();
-
-    const orderObject = {
-      CUSTNAME: isVendorName ? pharmacyValue.Code : userId,
-      // CDES: userDesc,
-      CURDATE: today,
-      ...(isVendorName && { DEXT_SUPPNAME: isVendorName }),
-      ...(isVendorName && { DEXT_SUPPDES: userDesc }),
-      // DEXT_SUPPNAME: "V1239",
-      // DEXT_SUPPDES: "4MORE LTD 2",
-      DCODE: dCode,
-      DEXT_CUSTOMERREMARKS: !isVendorName ? custNote : "",
-      DEXT_VENTORREMARKS: isVendorName ? custNote : "",
-      DEXT_SUBMISSIONDATE: today,
-      PAYCODE: "20",
-      DEXT_B2CONTACT: 9,
-      B2B_ORDERITEMS_SUBFORM: productsinOrder,
-    };
-
-    setShowCart(false);
-
-    //send order
-
-    //const url = "http://localhost:8000/order";
-    //const url = "https://kedifap-portal.com2go.co/order";
-    const url = new URL(`${process.env.REACT_APP_API_URL}/order`);
-    toast.dismiss(loadingToast);
-
-    try {
-      const response = await axios.post(url, orderObject);
-      console.log(response, "response");
-      toast.success("Order Sent Successfully, Thank you!!");
-      setCartItems([]);
-      setTotal(0);
-      setProductQuantity({});
-      setHighlightStyle([]);
-      setCustNote("");
-      localStorage.setItem("kediCart", []);
-      localStorage.setItem("kediCartTotal", []);
-      localStorage.setItem("kediCartDiscount", 0);
-      localStorage.setItem("kediCartQuantity", 0);
-      localStorage.setItem("kediCartFreeQuantity", []);
-      localStorage.setItem("kediCartHighlight", []);
-    } catch (error) {
-      toast.error(
-        "There was an issue making your order, please contact support."
-      );
-      console.error(error);
-    }
+  const makeOffer = () => {
+    setShowOfferPopup(true);
   };
+
+
 
   const saveCart = async (cartItems) => {
     setCartTemplate(cartItems);
@@ -304,6 +230,7 @@ const Cart = (props) => {
   const [orderButtonStatus, setOrderButtonStatus] = useState("enabled");
   const [pharmacyValue, setPharmacyValue] = useState("");
   const [custNote, setCustNote] = useState("");
+  const [showOfferPopup, setShowOfferPopup] = useState(false);
 
   const handleNoteChange = (event) => {
     setCustNote(event.target.value);
@@ -386,9 +313,9 @@ const Cart = (props) => {
                   value={sortBy}
                   label="Age"
                   onChange={(event) => handleCartSortBy(event, setSortBy)}
-                  >
+                >
                   <MenuItem value="byDesc">Part Description</MenuItem>
-                  <MenuItem value="byRecent">Most Recent Part Added</MenuItem>
+                  {/* <MenuItem value="byRecent">Most Recent Part Added</MenuItem> */}
                   <MenuItem value="byValue">Total Value</MenuItem>
                 </Select>
               </FormControl>
@@ -459,42 +386,7 @@ const Cart = (props) => {
             </button>
             <button
               onClick={() => {
-                toast((t) => (
-                  <span>
-                    Θέλετε να αποσταλεί η παραγγελία σας;
-                    <br></br>
-                    <Box sx={{ flexGrow: 1, padding: "10px" }}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={6}>
-                          <Item>
-                            <button
-                              onClick={() => {
-                                sendOrder(
-                                  cartItems,
-                                  isVendorName,
-                                  freeQuantity,
-                                  pharmacyValue,
-                                  custNote
-                                );
-                                toast.dismiss(t.id);
-                              }}
-                            >
-                              Send order
-                            </button>
-                          </Item>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Item>
-                            {" "}
-                            <button onClick={() => toast.dismiss(t.id)}>
-                              Cancel
-                            </button>
-                          </Item>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </span>
-                ));
+                makeOffer();
               }}
               className="btn btn-primary "
               disabled={
@@ -514,6 +406,22 @@ const Cart = (props) => {
           </div> */}
         </div>
       )}
+      <VendorOffers
+        showOfferPopup={showOfferPopup}
+        setShowOfferPopup={setShowOfferPopup}
+        handleOfferPopupClose={handleOfferPopupClose}
+        cartItems={cartItems}
+        isVendorName={isVendorName}
+        freeQuantity={freeQuantity}
+        pharmacyValue={pharmacyValue}
+        custNote={custNote}
+        setShowCart={setShowCart}
+        setCartItems={setCartItems}
+        setTotal={setTotal}
+        setProductQuantity={setProductQuantity}
+        setHighlightStyle={setHighlightStyle}
+        setCustNote={setCustNote}
+      />
     </div>
   );
 };

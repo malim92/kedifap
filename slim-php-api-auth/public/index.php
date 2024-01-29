@@ -105,12 +105,39 @@ $app->post('/authenticate', function (Request $request, Response $response) {
                 $now = new DateTime();
                 $future = new DateTime("now +24 hours");
                 $server = $request->getParams();
+
+                $url = 'https://dl.portal.kedifap.com/';
+                $vendorResponse = $can_offer = $pay_word = '';
+                if ($userRole === 'vendor') {
+                    try {
+                        $client = new Client([
+                            // 'base_uri' => 'https://priority.kedifap.local/',
+                            'base_uri' => $url,
+                            'headers' => [
+                                'Authorization' => 'Basic ' . base64_encode("api2:api2"),
+                            ],
+                            'verify' => false
+                        ]);
+                        $sub_url = 'odata/Priority/tabula.ini/efk/B2B_SUPPLIERS?$filter=STATDES eq \'Active\' and SUPNAME eq \'' . $name . '\'';
+                        // return($sub_url);die;
+                        $vendorResponse = $client->get($sub_url)->getBody()->getContents();
+                        $vendorResponse = json_decode($vendorResponse);
+                        // return  gettype($vendorResponse) ;
+                        $can_offer = $vendorResponse->value[0]->DEXT_CANOFFER;
+                        $pay_word = $vendorResponse->value[0]->DEXT_PAYWORD;
+                        // return $response->withStatus(200)->withJson($can_offer);
+                    } catch (\Throwable $th) {
+                        return $response->withStatus(404)->withJson($th);
+                    }
+                }
+                $additionalProperty = ($userRole !== 'vendor') ? [] : ["DEXT_CANOFFER" => $can_offer, "DEXT_PAYWORD" => $pay_word ];
                 $payload = [
                     "iat" => $now->getTimeStamp(),
                     "exp" => $future->getTimeStamp(),
                     "sub" => $server,
-                    "role" => $userRole
-                ];
+                    "role" => $userRole,
+                    ] + $additionalProperty;
+                    // return $response->withStatus(200)->withJson($payload);
 
                 $secret = $dotenv_vars['SECRET'];
 
@@ -691,10 +718,6 @@ $app->get('/invoices-c', function (Request $request, Response $response, array $
         // return $sub_url;
 
         $response = $client->get($sub_url);
-
-        // $body = (string) $response->getBody();
-        // return $data;
-
         return $response;
     } catch (\Throwable $th) {
         return $response->withStatus(401)->withJson(['error' => $th]);
@@ -714,7 +737,7 @@ $app->get('/invoice-pdf', function (Request $request, Response $response, array 
         'verify' => false
     ]);
 
-    substr($invoiceId, 0, 1) == 'C' ? $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APIMEMOS') : $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APINVOS');
+    substr($invoiceId, 0, 1) == 'C' || substr($invoiceId, 0, 1) == 'S'  ? $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APIMEMOS') : $response = $client->post('odata/Priority/tabula.ini/efk/DEXT_APINVOS');
 
     $body = (string) $response->getBody();
 
@@ -1242,7 +1265,7 @@ $app->get('/get-report', function (Request $request, Response $response) { {
                 // $stmt->execute();
                 // $resultFamagusta = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 // //Paphos
-                
+
                 // $statea = 'ΠΑΦΟΣ';
                 // $sqlInvoicesPaphos = "SELECT CUSTDES, sum(QTY) as QTY, ROUND(sum(NET_VALUE), 2) as NET_VALUE, sum(LINE_DISC) as Discount, sum(OVERALL_DISC) as over_all_discount, ROUND(sum(TOTAL_VALUE_INCL_VAT + LINE_DISC + OVERALL_DISC - NET_VALUE), 2) as VAT, sum(TOTAL_VALUE_INCL_VAT) as TOTAL_VALUE_INCL_VAT  FROM bi.fact_invoiceitems INNER JOIN dim_customers ON dim_customers.CUST = fact_invoiceitems.CUST WHERE fact_invoiceitems.IVDATE BETWEEN :startDate AND :endDate AND VENDOR_ID = :supNum AND dim_customers.STATEA = :statea GROUP BY dim_customers.CUSTDES";
 
